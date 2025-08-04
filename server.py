@@ -21,3 +21,4 @@ while True:
     print(obj.data)
     response = pickle.dumps(obj)
     server_socket.sendto(response, addr)
+# server UDP socket
