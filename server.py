@@ -1,7 +1,8 @@
 import socket
 import pickle
+from mySignal import *
 
-HOST = '127.0.0.1'  
+HOST = '192.168.1.28'  
 PORT = 5555    
 
 server_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -16,10 +17,7 @@ while True:
     print(f"[SERVER] Nhận từ {addr}: {obj}")
 
     # Ví dụ phản hồi: gửi lại đối tượng đã sửa
-    if isinstance(obj, dict):
-        obj['server_response'] = "Dữ liệu đã nhận!"
-    elif isinstance(obj, str):
-        obj = f"[SERVER] Đã nhận: {obj}"
-
+    obj.setData(obj.data + 1)
+    print(obj.data)
     response = pickle.dumps(obj)
     server_socket.sendto(response, addr)

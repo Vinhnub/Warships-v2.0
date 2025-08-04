@@ -12,7 +12,9 @@ class NetWork():
         try:
             self._client.sendto(pickle.dumps(data), (self.server, self.port))
             responseData, serverAddr = self._client.recvfrom(4096)
-            return pickle.loads(responseData)
+            result = pickle.loads(responseData)
+            print(result)
+            return result
         except socket.error as e:
             print(e)
 
