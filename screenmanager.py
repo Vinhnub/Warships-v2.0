@@ -14,6 +14,15 @@ class Screen():
 class MenuScreen(Screen):
     pass
 
+class PrepareScreen(Screen):
+    pass
+
+class PlayingScreen(Screen):
+    pass
+
+class FindingScreen(Screen):
+    pass
+
 class ScreenManager():
     def __init__(self):
         self.currentScreen = MenuScreen()
