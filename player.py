@@ -1,6 +1,7 @@
 
 class Player():
-    def __init__(self, network):
+    def __init__(self, name, network):
+        self.name = name
         self.network = network
         self.data = None
     

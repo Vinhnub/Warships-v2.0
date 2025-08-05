@@ -1,8 +1,12 @@
 import pygame
 from pygame.locals import *
+import pygwidgets
 from constants import *
+
 import pygwidgets
 import os
+from listPath import *
+
 class AnimatedImage():
     def __init__(self, window, loc, lstPath, fps=0):
         self.window = window
@@ -25,13 +29,22 @@ class AnimatedButton():
         self.loc = loc
         self.lstImageUp = [pygame.image.load(path).convert_alpha() for path in lstImageUp]
         self.lstImageDown = [pygame.image.load(path).convert_alpha() for path in lstImageDown]
-        self.state = 0 # 0: up, 1: down, -1: disarmed
+        self.state = 0 # 0: up, 1: down, -1: disarmed, 2: disable
         self.indexImage = 0
         self.__hitBox = self.lstImageUp[self.indexImage].get_rect(topleft=self.loc)
         self._startTime = pygame.time.get_ticks()
         self.fps = fps
 
+    def disable(self):
+        self.state = 2
+
+    def enable(self):
+        self.state = 0
+
     def handleEvent(self, eventObj):
+        if self.state == 2:
+            return False
+
         if eventObj.type not in (pygame.MOUSEMOTION, pygame.MOUSEBUTTONUP, pygame.MOUSEBUTTONDOWN):
             return False
 
@@ -55,7 +68,7 @@ class AnimatedButton():
         return False
 
     def draw(self):
-        if self.state == 0:
+        if self.state == 0 or self.state == 2:
             self.window.blit(self.lstImageUp[self.indexImage], self.loc)
             if pygame.time.get_ticks() - self._startTime >= self.fps and self.fps != 0:
                 self._startTime = pygame.time.get_ticks()
@@ -107,3 +120,31 @@ class Warning:
           else:
               self.active = False
            
+class InputData():
+    def __init__(self, window, loc):
+        self.window = window
+        self.loc = loc
+        self.background = AnimatedImage(self.window, loc, [resource_path("assets/images/inputdata/background.png")])
+        self.enterBtn = AnimatedButton(self.window, (self.loc[0] + 500 - 170, self.loc[1] + 285), [resource_path("assets/images/inputdata/enterBtn_u.png")], [resource_path("assets/images/inputdata/enterBtn_d.png")])
+        self.backBtn = AnimatedButton(self.window, (self.loc[0] + 100, self.loc[1] + 285), [resource_path("assets/images/inputdata/backBtn_u.png")], [resource_path("assets/images/inputdata/backBtn_d.png")])
+        self.inputName = pygwidgets.InputText(self.window, (self.loc[0] + 100, self.loc[1] + 80), fontSize=40, width=300)
+        self.inputServerIP = pygwidgets.InputText(self.window, (self.loc[0] + 100, self.loc[1] + 140), fontSize=40, width=300)
+
+    def draw(self):
+        self.background.draw()
+        self.inputName.draw()
+        self.inputServerIP.draw()
+        self.enterBtn.draw()
+        self.backBtn.draw()
+
+    def handleEvent(self, event):
+        self.inputName.handleEvent(event)
+        self.inputServerIP.handleEvent(event)
+        if self.backBtn.handleEvent(event):
+            return (-1, "", "")
+        if self.enterBtn.handleEvent(event):
+            textName = self.inputName.getValue()
+            textServerIP = self.inputServerIP.getValue()
+            return (1, textName, textServerIP)
+        return (0, "", "")
+
