@@ -104,7 +104,6 @@ class Warning:
         self.loc = loc
         self.duration = duration
         self.active = None
-
         image_path = os.path.join('assets', 'images', 'ErrorImage', 'error.png')
         self._image = pygame.image.load(image_path).convert_alpha()
 
@@ -145,6 +144,6 @@ class InputData():
         if self.enterBtn.handleEvent(event):
             textName = self.inputName.getValue()
             textServerIP = self.inputServerIP.getValue()
-            return (1, textName, textServerIP)
+            if textName != "" and textServerIP != "": return (1, textName, textServerIP)
         return (0, "", "")
 

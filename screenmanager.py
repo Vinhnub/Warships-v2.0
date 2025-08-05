@@ -26,6 +26,7 @@ class MenuScreen(Screen):
         self.offBtn = AnimatedButton(self.window, (375, 350), [resource_path("assets/images/buttons/offBtn_u.png")], [resource_path("assets/images/buttons/offBtn_d.png")])
         self.image = [AnimatedImage(self.window, (0, 0), path) for path in listPathImageMenuScreen]
         self.inputData = None
+        self.warning = None
     
     def draw(self):
         for item in self.image:
@@ -73,6 +74,8 @@ class FindingScreen(Screen):
         self.joinBtn = AnimatedButton(self.window, (550, 350), [resource_path("assets/images/buttons/joinBtn_u.png")], [resource_path("assets/images/buttons/joinBtn_d.png")])
         self.backBtn = AnimatedButton(self.window, (550, 450), [resource_path("assets/images/buttons/backBtn_u.png")], [resource_path("assets/images/buttons/backBtn_d.png")])
         self.image = [AnimatedImage(self.window, (0, 0), path) for path in listPathImageMenuScreen]
+        self.warning = None
+
     def draw(self):
         for item in self.image:
             item.draw()
@@ -83,6 +86,7 @@ class FindingScreen(Screen):
     def handleEvent(self, event):
         if self.backBtn.handleEvent(event):
             self.screenManager.changeScreen(MenuScreen(self.screenManager, self.window))
+            self.screenManager.player = None
         if self.createBtn.handleEvent(event):
             print("create")
         if self.joinBtn.handleEvent(event):
