@@ -8,6 +8,7 @@ PORT = 5555
 server_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 server_socket.bind((HOST, PORT))
 
+dataServer = {}
 print(f"[SERVER] Đang lắng nghe tại {HOST}:{PORT}...")
 
 while True:

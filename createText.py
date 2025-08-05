@@ -2,9 +2,9 @@ import pygame
 
 pygame.init()
 # Đường dẫn tới file .ttf
-font_path = "fonts/PressStart2P-Regular.ttf"  
+font_path = "fonts/Roboto-Black.ttf"  
 
 # Load trực tiếp file
-font = pygame.font.Font(font_path, 50)
-text = font.render("Join", True, (255, 255, 255))
+font = pygame.font.Font(font_path, 30)
+text = font.render("back", True, (0, 0, 0))
 pygame.image.save(text, "text.png")

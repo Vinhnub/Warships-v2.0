@@ -14,7 +14,7 @@ pygame.init()
 pygame.mixer.init()
 window = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
 clock = pygame.time.Clock()
-main = ScreenManager(window)
+main = Main(window)
 
 while True:
 
