@@ -1,7 +1,8 @@
 import pygame
 from pygame.locals import *
 from constants import *
-
+import pygwidgets
+import os
 class AnimatedImage():
     def __init__(self, window, loc, lstPath, fps=0):
         self.window = window
@@ -83,3 +84,26 @@ class CustomText():
 
     def setLoc(self, newLoc):
         self.loc = newLoc
+
+class Warning:
+   def __init__(self, window, loc, duration=5000):
+        self.window = window
+        self.loc = loc
+        self.duration = duration
+        self.active = None
+
+        image_path = os.path.join('assets', 'images', 'ErrorImage', 'error.png')
+        self._image = pygame.image.load(image_path).convert_alpha()
+
+   def draw(self):
+       self._startTime = pygame.time.get_ticks()
+       self.active = True
+
+   def freshPerFrame(self):
+       if self.active:
+          currentTime = pygame.time.get_ticks() 
+          if currentTime - self._startTime <= self.duration:
+              self.window.blit(self._image, self.loc)
+          else:
+              self.active = False
+           
