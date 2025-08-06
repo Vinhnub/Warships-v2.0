@@ -126,24 +126,20 @@ class InputData():
         self.background = AnimatedImage(self.window, loc, [resource_path("assets/images/inputdata/background.png")])
         self.enterBtn = AnimatedButton(self.window, (self.loc[0] + 500 - 170, self.loc[1] + 285), [resource_path("assets/images/inputdata/enterBtn_u.png")], [resource_path("assets/images/inputdata/enterBtn_d.png")])
         self.backBtn = AnimatedButton(self.window, (self.loc[0] + 100, self.loc[1] + 285), [resource_path("assets/images/inputdata/backBtn_u.png")], [resource_path("assets/images/inputdata/backBtn_d.png")])
-        self.inputName = pygwidgets.InputText(self.window, (self.loc[0] + 100, self.loc[1] + 80), fontSize=40, width=300)
-        self.inputServerIP = pygwidgets.InputText(self.window, (self.loc[0] + 100, self.loc[1] + 140), fontSize=40, width=300)
+        self.input = pygwidgets.InputText(self.window, (self.loc[0] + 100, self.loc[1] + 80), fontSize=40, width=300)
 
     def draw(self):
         self.background.draw()
-        self.inputName.draw()
-        self.inputServerIP.draw()
+        self.input.draw()
         self.enterBtn.draw()
         self.backBtn.draw()
 
     def handleEvent(self, event):
-        self.inputName.handleEvent(event)
-        self.inputServerIP.handleEvent(event)
+        self.input.handleEvent(event)
         if self.backBtn.handleEvent(event):
-            return (-1, "", "")
+            return (-1, "")
         if self.enterBtn.handleEvent(event):
-            textName = self.inputName.getValue()
-            textServerIP = self.inputServerIP.getValue()
-            if textName != "" and textServerIP != "": return (1, textName, textServerIP)
-        return (0, "", "")
+            data = self.input.getValue()
+            if data != "": return (1, data)
+        return (0, "")
 

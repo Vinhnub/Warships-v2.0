@@ -58,7 +58,6 @@ class MenuScreen(Screen):
                 self.inputData = None
             elif res[0] == 1:
                 self.screenManager.changeScreen(FindingScreen(self.screenManager, self.window))
-                self.screenManager.player = Player(res[1], NetWork(res[2]))
 
 class PrepareScreen(Screen):
     pass
@@ -92,20 +91,7 @@ class FindingScreen(Screen):
         if self.joinBtn.handleEvent(event):
             print("join")
 
-class Main():
-    def __init__(self, window):
-        self.window = window
-        self.currentScreen = MenuScreen(self, self.window)
-        self.player = None
 
-    def changeScreen(self, newScreen):
-        self.currentScreen = newScreen
-
-    def handleEvent(self, event):
-        self.currentScreen.handleEvent(event)
-    
-    def draw(self):
-        self.currentScreen.draw()
 
     
 

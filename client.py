@@ -8,6 +8,7 @@ from network import *
 from mySignal import *
 from widget import *
 from screenmanager import *
+from main import *
 
 # oPlayer = Player(NetWork('192.168.1.28'))
 pygame.init()
