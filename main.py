@@ -1,10 +1,11 @@
 from screenmanager import *
+from player import *
 
 class Main():
     def __init__(self, window):
         self.window = window
         self.currentScreen = MenuScreen(self, self.window)
-        self.player = None
+        self.game = None
 
     def changeScreen(self, newScreen):
         self.currentScreen = newScreen
@@ -14,3 +15,5 @@ class Main():
     
     def draw(self):
         self.currentScreen.draw()
+        if self.game:
+            self.game.draw()

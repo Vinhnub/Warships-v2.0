@@ -3,6 +3,7 @@ from widget import *
 from abc import abstractmethod
 from player import *
 from network import *
+from gamemode import *
 
 class Screen():
     @abstractmethod
@@ -48,7 +49,7 @@ class MenuScreen(Screen):
             self.exitBtn.disable()
             self.inputData = InputData(self.window, (400, 250))
         if self.offBtn.handleEvent(event):
-            print(2)
+            self.screenManager.game = OfflineMode(self.screenManager)
         if self.inputData is not None:
             res = self.inputData.handleEvent(event) 
             if res[0] == -1:
@@ -58,6 +59,7 @@ class MenuScreen(Screen):
                 self.inputData = None
             elif res[0] == 1:
                 self.screenManager.changeScreen(FindingScreen(self.screenManager, self.window))
+                self.screenManager.game = OnlineMode(self.screenManager, res[1])
 
 class PrepareScreen(Screen):
     pass
