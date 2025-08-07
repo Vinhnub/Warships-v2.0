@@ -81,16 +81,16 @@ class AnimatedButton():
         
 
 class CustomText():
-    def __init__(self, surface, loc, text, font_path, font_size, color=(0, 0, 0)):
-        self.surface = surface
+    def __init__(self, window, loc, text, font_path, font_size, color=(0, 0, 0)):
+        self.window = window
         self.loc = loc
         self.text = text
         self.font = pygame.font.Font(font_path, font_size)
         self.color = color
 
     def draw(self):
-        text_surface = self.font.render(self.text, True, self.color)
-        self.surface.blit(text_surface, self.loc)
+        text_window = self.font.render(self.text, True, self.color)
+        self.window.blit(text_window, self.loc)
 
     def setText(self, newText):
         self.text = newText

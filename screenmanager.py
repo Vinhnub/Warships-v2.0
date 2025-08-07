@@ -4,6 +4,7 @@ from abc import abstractmethod
 from player import *
 from network import *
 from gamemode import *
+import pygwidgets
 
 class Screen():
     @abstractmethod
@@ -67,6 +68,41 @@ class PrepareScreen(Screen):
 class PlayingScreen(Screen):
     pass
 
+class CreateRoom(Screen):
+    def __init__(self, screenManager, window, roomID):
+        self.window = window
+        self.screenManager = screenManager
+        self.roomIDText = CustomText(window, (500, 350), str(roomID), resource_path("fonts/PressStart2P-Regular.ttf"), font_size=50, color=(255, 255, 255))
+        self.backBtn = AnimatedButton(self.window, (550, 450), [resource_path("assets/images/buttons/backBtn_u.png")], [resource_path("assets/images/buttons/backBtn_d.png")])
+
+    def handleEvent(self, event):
+        if self.backBtn.handleEvent(event):
+            self.screenManager.changeScreen(FindingScreen(self.screenManager, self.window))
+            self.screenManager.game.type = None
+
+    def draw(self):
+        self.roomIDText.draw()
+        self.backBtn.draw()
+
+class JoinRoom(Screen):
+    def __init__(self, screenManager, window):
+        self.screenManager = screenManager
+        self.window = window
+        self.roomIDInput = pygwidgets.InputText(self.window, (500, 400), fontSize=50, width=300)
+        self.backBtn = AnimatedButton(self.window, (550, 450), [resource_path("assets/images/buttons/backBtn_u.png")], [resource_path("assets/images/buttons/backBtn_d.png")])
+
+    def handleEvent(self, event):
+        if self.roomIDInput.handleEvent(event):
+            self.screenManager.game.roomID = self.roomIDInput.getValue()
+        if self.backBtn.handleEvent(event):
+            self.screenManager.changeScreen(FindingScreen(self.screenManager, self.window))
+            self.screenManager.game.type = None
+
+    def draw(self):
+        self.backBtn.draw()
+        self.roomIDInput.draw()
+        
+
 class FindingScreen(Screen):
     def __init__(self, screenManager, window):
         self.screenManager = screenManager
@@ -89,9 +125,11 @@ class FindingScreen(Screen):
             self.screenManager.changeScreen(MenuScreen(self.screenManager, self.window))
             self.screenManager.player = None
         if self.createBtn.handleEvent(event):
-            print("create")
+            self.screenManager.game.type = "CREATEROOM"
+            self.screenManager.changeScreen(CreateRoom(self.screenManager, self.window, self.screenManager.game.createRoom()))
         if self.joinBtn.handleEvent(event):
-            print("join")
+            self.screenManager.game.type = "JOINROOM"
+            self.screenManager.changeScreen(JoinRoom(self.screenManager, self.window))
 
 
 
