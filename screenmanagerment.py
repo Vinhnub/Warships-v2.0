@@ -66,6 +66,9 @@ class PrepareScreen(Screen):
     def __init__(self, screenManager, window):
         self.screenManager = screenManager
         self.window = window
+
+    def handleEvent(self, event):
+        pass
     
     def draw(self):
         pass

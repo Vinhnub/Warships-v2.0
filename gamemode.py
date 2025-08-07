@@ -3,12 +3,10 @@ from bot import *
 from network import *
 import random
 from mySignal import *
-from screenmanager import *
 
 class GameMode():
-    def __init__(self, manager):
-        self.manager = manager
-        self.player = Player()
+    def __init__(self):
+        pass
 
     def draw(self):
         pass
@@ -21,7 +19,8 @@ class OfflineMode(GameMode):
 
 class OnlineMode(GameMode):
     def __init__(self, manager, serverIP):
-        super().__init__(manager)
+        self.manager = manager
+        self.player = Player()
         self.network = NetWork(serverIP)
         self.roomID = None
         self.type = None
@@ -42,7 +41,8 @@ class OnlineMode(GameMode):
         newSignal = SignalSended(self.type, self.roomID)
         respon = self.network.send(newSignal)
         if respon.phase == "PREPARE":
-            self.manager.changeScreen(PrepareScreen())
+            from screenmanagerment import PrepareScreen
+            self.manager.changeScreen(PrepareScreen(self.manager, self.manager.window))
 
 
 
