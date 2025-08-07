@@ -63,8 +63,9 @@ class MenuScreen(Screen):
                 self.screenManager.game = OnlineMode(self.screenManager, res[1])
 
 class PrepareScreen(Screen):
-    def __init__(self):
-        super().__init__()
+    def __init__(self, screenManager, window):
+        self.screenManager = screenManager
+        self.window = window
     
     def draw(self):
         pass
@@ -76,7 +77,7 @@ class CreateRoom(Screen):
     def __init__(self, screenManager, window, roomID):
         self.window = window
         self.screenManager = screenManager
-        self.roomIDText = CustomText(window, (500, 350), str(roomID), resource_path("fonts/PressStart2P-Regular.ttf"), font_size=50, color=(255, 255, 255))
+        self.roomIDText = CustomText(window, (500, 350), roomID, resource_path("fonts/PressStart2P-Regular.ttf"), font_size=50, color=(255, 255, 255))
         self.backBtn = AnimatedButton(self.window, (550, 450), [resource_path("assets/images/buttons/backBtn_u.png")], [resource_path("assets/images/buttons/backBtn_d.png")])
 
     def handleEvent(self, event):

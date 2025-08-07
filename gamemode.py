@@ -30,8 +30,8 @@ class OnlineMode(GameMode):
         pass
 
     def createRoom(self):
-        self.roomID = random.randint(10000, 99999)
-        return str(self.roomID)
+        self.roomID = str(random.randint(10000, 99999))
+        return self.roomID
 
     def joinRoom(self):
         pass
