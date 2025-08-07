@@ -38,12 +38,12 @@ def handleData(obj, addr):
                 serverData[obj.roomID]["LISTPLAYER"].append(addr)
                 return SignalRecieved(serverData[obj.roomID]["PHASE"])
             
-    print(serverData)
 
 def handleRequest(data, addr):
     obj = pickle.loads(data)
     response = pickle.dumps(handleData(obj, addr))
     server_socket.sendto(response, addr)
+    print(serverData)
 
 while True:
     data, addr = server_socket.recvfrom(4096)

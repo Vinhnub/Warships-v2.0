@@ -5,6 +5,6 @@ pygame.init()
 font_path = "fonts/Roboto-Black.ttf"  
 
 # Load trực tiếp file
-font = pygame.font.Font(font_path, 30)
-text = font.render("back", True, (0, 0, 0))
+font = pygame.font.Font(font_path, 50)
+text = font.render("Enter", True, (0, 0, 0))
 pygame.image.save(text, "text.png")

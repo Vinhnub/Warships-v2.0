@@ -94,9 +94,11 @@ class JoinRoom(Screen):
         self.window = window
         self.roomIDInput = pygwidgets.InputText(self.window, (500, 400), fontSize=50, width=300)
         self.backBtn = AnimatedButton(self.window, (550, 450), [resource_path("assets/images/buttons/backBtn_u.png")], [resource_path("assets/images/buttons/backBtn_d.png")])
+        self.enterBtn = AnimatedButton(self.window, (550, 550), [resource_path("assets/images/buttons/enterBtn_u.png")], [resource_path("assets/images/buttons/enterBtn_d.png")])
 
     def handleEvent(self, event):
-        if self.roomIDInput.handleEvent(event):
+        self.roomIDInput.handleEvent(event)
+        if self.enterBtn.handleEvent(event):
             self.screenManager.game.roomID = self.roomIDInput.getValue()
         if self.backBtn.handleEvent(event):
             self.screenManager.changeScreen(FindingScreen(self.screenManager, self.window))
@@ -105,6 +107,7 @@ class JoinRoom(Screen):
     def draw(self):
         self.backBtn.draw()
         self.roomIDInput.draw()
+        self.enterBtn.draw()
         
 
 class FindingScreen(Screen):

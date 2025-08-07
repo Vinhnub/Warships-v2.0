@@ -37,7 +37,7 @@ class OnlineMode(GameMode):
         pass
 
     def running(self):
-        if self.type == None:
+        if self.type is None or self.roomID is None or self.roomID == "":
             return
         newSignal = SignalSended(self.type, self.roomID)
         respon = self.network.send(newSignal)
