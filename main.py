@@ -1,4 +1,4 @@
-from screenmanager import *
+from gamemodeandscreenmanager import *
 from player import *
 
 class Main():

@@ -8,7 +8,7 @@ from player import *
 from network import *
 from mySignal import *
 from widget import *
-from screenmanager import *
+from gamemodeandscreenmanager import *
 from main import *
 
 
