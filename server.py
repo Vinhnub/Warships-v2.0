@@ -14,36 +14,45 @@ serverData = {}
 print(f"[SERVER] Đang lắng nghe tại {HOST}:{PORT}...")
 
 def handleData(obj, addr):
+    print(obj, addr)
     if obj.type == "CREATEROOM":
         if obj.roomID not in serverData:
             serverData[obj.roomID] = {"PHASE" : "CREATEROOM", 
                                       "TIME" : None,
                                       "TURNINDEX" : 0,
-                                      "LISTPLAYER" : [addr],
+                                      "LISTPLAYER" : [addr[0]],
                                       "PLAYER" : {
-                                          addr : None
+                                          addr[0] : None
                                         }
                                       }
         return SignalRecieved(serverData[obj.roomID]["PHASE"])
 
     if obj.type == "JOINROOM":
         if obj.roomID not in serverData:
-            return SignalRecieved("ERROR")
+            print(1)
+            return SignalRecieved("INVALID")
         else:
             if len(serverData[obj.roomID]["LISTPLAYER"]) >= 2:
-                return SignalRecieved("ERROR")
+                print(2)
+                return SignalRecieved("INVALID")
             else:
+                print(3)
                 serverData[obj.roomID]["PHASE"] = "PREPARE"
-                serverData[obj.roomID]["PLAYER"][addr] = None
-                serverData[obj.roomID]["LISTPLAYER"].append(addr)
+                serverData[obj.roomID]["PLAYER"][addr[0]] = None
+                serverData[obj.roomID]["LISTPLAYER"].append(addr[0])
                 return SignalRecieved(serverData[obj.roomID]["PHASE"])
             
 
 def handleRequest(data, addr):
-    obj = pickle.loads(data)
-    response = pickle.dumps(handleData(obj, addr))
-    server_socket.sendto(response, addr)
-    print(serverData)
+    try:
+        obj = pickle.loads(data)
+        result = handleData(obj, addr)
+        response = pickle.dumps(result)
+        server_socket.sendto(response, addr)
+        print(serverData)
+    except Exception as e:
+        print(f"[SERVER ERROR] Gói tin từ {addr} bị lỗi: {e}")
+
 
 while True:
     data, addr = server_socket.recvfrom(4096)
