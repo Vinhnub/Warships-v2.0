@@ -23,4 +23,3 @@ def handle_request(data, addr):
 while True:
     data, addr = server_socket.recvfrom(4096)
     threading.Thread(target=handle_request, args=(data, addr)).start()
-

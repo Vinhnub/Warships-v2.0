@@ -3,6 +3,7 @@ from pygame.locals import *
 from constants import *
 import sys
 import random
+import time
 from player import *
 from network import *
 from mySignal import *
@@ -10,7 +11,7 @@ from widget import *
 from screenmanager import *
 from main import *
 
-# oPlayer = Player(NetWork('192.168.1.28'))
+
 pygame.init()
 pygame.mixer.init()
 window = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))

@@ -1,3 +1,3 @@
-class PlayerAI():
+class Bot():
     def __init__(self):
         pass
