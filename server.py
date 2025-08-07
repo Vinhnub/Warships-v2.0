@@ -15,7 +15,6 @@ print(f"[SERVER] Đang lắng nghe tại {HOST}:{PORT}...")
 
 def handleData(obj, addr):
     if obj.type == "CREATEROOM":
-        print(obj)
         if obj.roomID not in serverData:
             serverData[obj.roomID] = {"PHASE" : "CREATEROOM", 
                                       "TIME" : None,
@@ -25,12 +24,24 @@ def handleData(obj, addr):
                                           addr : None
                                         }
                                       }
-        print(serverData)
         return SignalRecieved(serverData[obj.roomID]["PHASE"])
+
+    if obj.type == "JOINROOM":
+        if obj.roomID not in serverData:
+            return SignalRecieved("ERROR")
+        else:
+            if len(serverData[obj.roomID]["LISTPLAYER"]) >= 2:
+                return SignalRecieved("ERROR")
+            else:
+                serverData[obj.roomID]["PHASE"] = "PREPARE"
+                serverData[obj.roomID]["PLAYER"][addr] = None
+                serverData[obj.roomID]["LISTPLAYER"].append(addr)
+                return SignalRecieved(serverData[obj.roomID]["PHASE"])
+            
+    print(serverData)
 
 def handleRequest(data, addr):
     obj = pickle.loads(data)
-    print(f"[SERVER] Nhận từ {addr}: {obj}")
     response = pickle.dumps(handleData(obj, addr))
     server_socket.sendto(response, addr)
 

@@ -3,6 +3,7 @@ from bot import *
 from network import *
 import random
 from mySignal import *
+from screenmanager import *
 
 class GameMode():
     def __init__(self, manager):
@@ -30,7 +31,6 @@ class OnlineMode(GameMode):
 
     def createRoom(self):
         self.roomID = random.randint(10000, 99999)
-        self.type = "CREATEROOM"
         return self.roomID
 
     def joinRoom(self):
@@ -41,6 +41,9 @@ class OnlineMode(GameMode):
             return
         newSignal = SignalSended(self.type, self.roomID)
         respon = self.network.send(newSignal)
+        if respon.phase == "PREPARE":
+            self.manager.changeScreen(PrepareScreen())
+
 
 
 

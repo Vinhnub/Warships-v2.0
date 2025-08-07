@@ -63,7 +63,11 @@ class MenuScreen(Screen):
                 self.screenManager.game = OnlineMode(self.screenManager, res[1])
 
 class PrepareScreen(Screen):
-    pass
+    def __init__(self):
+        super().__init__()
+    
+    def draw(self):
+        pass
 
 class PlayingScreen(Screen):
     pass
