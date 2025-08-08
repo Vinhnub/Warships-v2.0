@@ -176,6 +176,7 @@ class EnemyTurnScreen(Screen):
         
     def handleEvent(self, event):
         pass
+
     def draw(self):
         self.field.draw()
         self.screenManager.game.player.draw(self.window, False)
@@ -205,7 +206,7 @@ class OnlineMode():
     def running(self, event):
         if self.type is None or self.roomID is None or self.roomID == "":
             return
-        newSignal = SignalSended(self.type, self.roomID)
+        newSignal = SignalSended(self.type, self.roomID, self.data)
         respon = self.network.send(newSignal)
         if respon.phase == "PREPARE":
             if not isinstance(self.manager.currentScreen, PrepareScreen):
