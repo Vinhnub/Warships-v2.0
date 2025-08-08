@@ -8,3 +8,6 @@ FIELD_COORD = (277, 30)
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
 RED = (255, 0, 0)
+MATRIX_ROTATE_RIGHT = ((1, 0), (0, 0), (0, 1), (1, 1))
+MATRIX_ROTATE_LEFT = ((0, 0), (0, 1), (1, 1), (1, 0))
+TIME_EACH_TURN = 60000 # ms

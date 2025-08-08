@@ -142,15 +142,16 @@ class PrepareScreen(Screen):
     def __init__(self, screenManager, window):
         super().__init__(screenManager, window)
         self.field = AnimatedImage(self.window, FIELD_COORD, [resource_path("assets/images/field.png")])
-        self.readyBtn = AnimatedButton(self.window, (500, 700), [resource_path("assets/images/buttons/readyBtn_u.png")], [[resource_path("assets/images/buttons/readyBtn_d.png")]], [resource_path("assets/images/buttons/readyBtn_dis.png")])
+        self.readyBtn = AnimatedButton(self.window, (500, 700), [resource_path("assets/images/buttons/readyBtn_u.png")], [resource_path("assets/images/buttons/readyBtn_d.png")], [resource_path("assets/images/buttons/readyBtn_dis.png")])
+        self.background = AnimatedImage(self.window, (0, 0), [resource_path("assets/images/mainscreen/mainscreen_1.png")])
 
     def handleEvent(self, event):
-        pass
+        self.readyBtn.handleEvent(event)
     
     def draw(self):
+        self.background.draw()
         self.field.draw()
         self.readyBtn.draw()
-
 
 class PlayingScreen(Screen):
     def __init__(self, screenManager, window):
@@ -182,18 +183,19 @@ class OnlineMode():
         self.roomID = str(random.randint(10000, 99999))
         return self.roomID
 
-    def running(self):
+    def running(self, event):
         if self.type is None or self.roomID is None or self.roomID == "":
             return
         newSignal = SignalSended(self.type, self.roomID)
         respon = self.network.send(newSignal)
         if respon.phase == "PREPARE":
-            self.manager.changeScreen(PrepareScreen(self.manager, self.manager.window))
-
-
+            if not isinstance(self.manager.currentScreen, PrepareScreen):
+                self.manager.changeScreen(PrepareScreen(self.manager, self.manager.window))
+            self.type = "WAITING"
+            self.player.handleEvent(event)
         
 
     def draw(self):
-        pass
+        self.player.draw()
 
 

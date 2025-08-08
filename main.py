@@ -13,7 +13,7 @@ class Main():
     def handleEvent(self, event):
         self.currentScreen.handleEvent(event)
         if self.game:
-            self.game.running()
+            self.game.running(event)
     
     def draw(self):
         self.currentScreen.draw()

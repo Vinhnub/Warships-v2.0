@@ -14,7 +14,6 @@ serverData = {}
 print(f"[SERVER] Đang lắng nghe tại {HOST}:{PORT}...")
 
 def handleData(obj, addr):
-    print(obj, addr)
     if obj.type == "CREATEROOM":
         if obj.roomID not in serverData:
             serverData[obj.roomID] = {"PHASE" : "CREATEROOM", 
@@ -33,20 +32,21 @@ def handleData(obj, addr):
 
     if obj.type == "JOINROOM":
         if obj.roomID not in serverData:
-            print(1)
             return SignalRecieved("INVALID")
         else:
             if len(serverData[obj.roomID]["LISTPLAYER"]) >= 2:
-                print(2)
                 return SignalRecieved("INVALID")
             else:
-                print(3)
                 serverData[obj.roomID]["PHASE"] = "PREPARE"
                 serverData[obj.roomID]["PLAYER"][addr[0]] = {"ready" : False, "posShip" : None, "listTorpedo" : []}
                 serverData[obj.roomID]["LISTPLAYER"].append(addr[0])
                 return SignalRecieved(serverData[obj.roomID]["PHASE"])
-    
-
+            
+    if serverData[obj.roomID]["PHASE"] == "PREPARE":
+        if obj.type == "WAITING":
+            return SignalRecieved(serverData[obj.roomID]["PHASE"])
+        
+        return SignalRecieved(serverData[obj.roomID]["PHASE"])
     
 
 def handleRequest(data, addr):

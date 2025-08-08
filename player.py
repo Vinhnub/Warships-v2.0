@@ -1,16 +1,68 @@
+import pygame
+from pygame.locals import *
+from constants import *
+from listPath import *
 from ship import *
 from torpedo import *
-from radar import *
 
 class Player():
-    def __init__(self, mode=False): # mode: false: offline, true: online
-        self.listShip = []
-        self.__listTorpedo = []
-        self.__listEnemyTorpedo = []
-        self.radar = Radar() if mode else None
+    def __init__(self):
+        self.__listShips = [Ship(path[1], path[0], path[2]) for path in listPathShip]
+        self.__isMouseDown = False
+        self.__firstPos = None # pos when player click mouse down to move or ronate ship
+        self.__shipSelected = None # the ship player select to move
+        self.isReady = False
+        self.__listMyTorpedo = []
+        self.__listEnermyTorpedo = []
+        self.__listPositionOfShips = [[False for _ in range(10)] for __ in range(10)]
+        self.canFire = None
+        self.numberCorrect = 0
+        self.numberCorrectE = 0 # number correctly fire of enermy
+        self.startTime = None # it is a time when player fire, it use for delay 3s after fire to know player fire correct or incorrect
+        self.finishGame = None # it is a time when one of players win, delay 5s and return to mainscreen
 
-    def appendTorpedo(self, newTorpedo):
-        self.__listTorpedo.append(newTorpedo)
+    # check enermy fire correct or incorrect 
 
-    def appendEnemyTorpedo(self, newTorpedo):
-        self.__listEnemyTorpedo.append(newTorpedo)    
+    def updateListPositionOfShip(self):
+        for ship in self.__listShips:
+            for x in range(ship.loc[0], ship.loc[0] + ship.width, CELL_SIZE[0]):
+                for y in range(ship.loc[1], ship.loc[1] + ship.height, CELL_SIZE[0]):
+                    self.__listPositionOfShips[int((x - FIELD_COORD[0])/CELL_SIZE[0])][int((y - FIELD_COORD[1])/CELL_SIZE[1])] = True
+
+
+    def draw(self, window):
+        for ship in self.__listShips:
+            ship.draw(window)
+
+    def handleEvent(self, event):
+        if event.type == pygame.MOUSEBUTTONDOWN and event.button == 3:
+            self.__firstPos = pygame.mouse.get_pos()
+            for ship in self.__listShips:
+                if ship.getHitBox().collidepoint(self.__firstPos):
+                    ship.rotate(True)
+                    if ship.isCollideAnotherShip(self.__listShips) or ship.isOutOfField():
+                        ship.rotate(False)
+                    else:
+                        ship.updateNewLoc()
+                    
+        elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+            self.__firstPos = pygame.mouse.get_pos()
+            for ship in self.__listShips:
+                if ship.getHitBox().collidepoint(self.__firstPos):
+                    self.__shipSelected = ship
+                    self.__isMouseDown = True
+
+        elif event.type == pygame.MOUSEBUTTONUP and event.button == 1 and self.__isMouseDown == True:
+            if self.__shipSelected.isCollideAnotherShip(self.__listShips) or self.__shipSelected.isOutOfField():
+                self.__shipSelected.loc = self.__shipSelected.oldLoc
+                self.__shipSelected.updateHitBox()
+            else:
+                self.__shipSelected.updateNewLoc()
+            self.__isMouseDown = False
+        
+        if self.__isMouseDown:  
+            if event.type == MOUSEMOTION:
+                mousePos = pygame.mouse.get_pos()
+                self.__shipSelected.updatePos(self.__firstPos, mousePos)
+
+            
