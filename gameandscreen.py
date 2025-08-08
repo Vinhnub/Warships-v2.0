@@ -159,15 +159,9 @@ class OnlineMode():
         self.roomID = None
         self.type = None
 
-    def changeTurn(self):
-        pass
-
     def createRoom(self):
         self.roomID = str(random.randint(10000, 99999))
         return self.roomID
-
-    def joinRoom(self):
-        pass
 
     def running(self):
         if self.type is None or self.roomID is None or self.roomID == "":
