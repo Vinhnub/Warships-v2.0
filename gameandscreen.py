@@ -148,8 +148,7 @@ class PrepareScreen(Screen):
     def handleEvent(self, event):
         if self.readyBtn.handleEvent(event):
             self.readyBtn.disable()
-            self.screenManager.game.type = "READY"
-            self.screenManager.game.data = self.screenManager.game.player.calListPosShip()
+            self.screenManager.game.ready()
     
     def draw(self):
         self.background.draw()
@@ -202,6 +201,10 @@ class OnlineMode():
     def createRoom(self):
         self.roomID = str(random.randint(10000, 99999))
         return self.roomID
+    
+    def ready(self):
+        self.type = "READY"
+        self.data = self.player.calListPosShip()
 
     def running(self, event):
         if self.type is None or self.roomID is None or self.roomID == "":

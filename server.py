@@ -14,6 +14,9 @@ server_socket.bind((HOST, PORT))
 serverData = {}
 print(f"[SERVER] Đang lắng nghe tại {HOST}:{PORT}...")
 
+def printdata(serverData):
+    pass
+
 def handleData(obj, addr):
     
     # ======== CREATE AND JOIN ROOM LOGIC ========
