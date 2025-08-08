@@ -162,8 +162,8 @@ class MyTurnScreen(Screen):
         super().__init__(screenManager, window)
         self.field = AnimatedImage(self.window, FIELD_COORD, [resource_path("assets/images/field.png")])
 
-    def handleEvent(self):
-        return super().handleEvent()
+    def handleEvent(self, event):
+        pass
 
     def draw(self):
         self.field.draw()
@@ -174,9 +174,8 @@ class EnemyTurnScreen(Screen):
         super().__init__(screenManager, window)
         self.field = AnimatedImage(self.window, FIELD_COORD, [resource_path("assets/images/field.png")])
         
-    def handleEvent(self):
-        return super().handleEvent()
-    
+    def handleEvent(self, event):
+        pass
     def draw(self):
         self.field.draw()
         self.screenManager.game.player.draw(self.window, False)
