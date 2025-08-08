@@ -37,7 +37,7 @@ class Player():
     def draw(self, window, isMyTurn=None):
         if isMyTurn is None:
             for ship in self.__listShips:
-                ship.draw()
+                ship.draw(window)
         if isMyTurn:
             for oTorpedo in self.__listMyTorpedo:
                 oTorpedo.draw()
