@@ -13,28 +13,41 @@ class Player():
         self.__shipSelected = None # the ship player select to move
         self.isReady = False
         self.__listMyTorpedo = []
-        self.__listEnermyTorpedo = []
-        self.__listPositionOfShips = [[False for _ in range(10)] for __ in range(10)]
+        self.__listEnemyTorpedo = []
         self.canFire = None
         self.numberCorrect = 0
         self.numberCorrectE = 0 # number correctly fire of enermy
         self.startTime = None # it is a time when player fire, it use for delay 3s after fire to know player fire correct or incorrect
         self.finishGame = None # it is a time when one of players win, delay 5s and return to mainscreen
+        self.__listPosShip = [[False for _ in range(10)] for __ in range(10)]
 
     # check enermy fire correct or incorrect 
 
-    def updateListPositionOfShip(self):
+    def calListPosShip(self):
         for ship in self.__listShips:
             for x in range(ship.loc[0], ship.loc[0] + ship.width, CELL_SIZE[0]):
                 for y in range(ship.loc[1], ship.loc[1] + ship.height, CELL_SIZE[0]):
-                    self.__listPositionOfShips[int((x - FIELD_COORD[0])/CELL_SIZE[0])][int((y - FIELD_COORD[1])/CELL_SIZE[1])] = True
+                    self.__listPosShip[int((x - FIELD_COORD[0])/CELL_SIZE[0])][int((y - FIELD_COORD[1])/CELL_SIZE[1])] = True
 
-
-    def draw(self, window):
-        for ship in self.__listShips:
-            ship.draw(window)
-
+        return self.__listPosShip
+    
     def handleEvent(self, event):
+        self.moveShip(event)
+
+    def draw(self, window, isMyTurn=None):
+        if isMyTurn is None:
+            for ship in self.__listShips:
+                ship.draw()
+        if isMyTurn:
+            for oTorpedo in self.__listMyTorpedo:
+                oTorpedo.draw()
+        else:
+            for ship in self.__listShips:
+                ship.draw(window)
+            for oTorpedo in self.__listEnemyTorpedo:
+                oTorpedo.draw()
+
+    def moveShip(self, event):
         if event.type == pygame.MOUSEBUTTONDOWN and event.button == 3:
             self.__firstPos = pygame.mouse.get_pos()
             for ship in self.__listShips:
@@ -64,5 +77,6 @@ class Player():
             if event.type == MOUSEMOTION:
                 mousePos = pygame.mouse.get_pos()
                 self.__shipSelected.updatePos(self.__firstPos, mousePos)
+
 
             

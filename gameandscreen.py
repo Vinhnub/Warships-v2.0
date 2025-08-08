@@ -146,14 +146,18 @@ class PrepareScreen(Screen):
         self.background = AnimatedImage(self.window, (0, 0), [resource_path("assets/images/mainscreen/mainscreen_1.png")])
 
     def handleEvent(self, event):
-        self.readyBtn.handleEvent(event)
+        if self.readyBtn.handleEvent(event):
+            self.readyBtn.disable()
+            self.screenManager.game.type = "READY"
+            self.screenManager.game.data = self.screenManager.game.player.calListPosShip()
     
     def draw(self):
         self.background.draw()
         self.field.draw()
         self.readyBtn.draw()
+        self.screenManager.game.player.draw(self.window)
 
-class PlayingScreen(Screen):
+class MyTurnScreen(Screen):
     def __init__(self, screenManager, window):
         super().__init__(screenManager, window)
         self.field = AnimatedImage(self.window, FIELD_COORD, [resource_path("assets/images/field.png")])
@@ -162,7 +166,22 @@ class PlayingScreen(Screen):
         return super().handleEvent()
 
     def draw(self):
-        pass
+        self.field.draw()
+        self.screenManager.game.player.draw(self.window, True)
+
+class EnemyTurnScreen(Screen):
+    def __init__(self, screenManager, window):
+        super().__init__(screenManager, window)
+        self.field = AnimatedImage(self.window, FIELD_COORD, [resource_path("assets/images/field.png")])
+        
+    def handleEvent(self):
+        return super().handleEvent()
+    
+    def draw(self):
+        self.field.draw()
+        self.screenManager.game.player.draw(self.window, False)
+
+
 
 # ============================================================ MODE ============================================================
 
@@ -178,6 +197,7 @@ class OnlineMode():
         self.network = NetWork(serverIP)
         self.roomID = None
         self.type = None
+        self.data = None
 
     def createRoom(self):
         self.roomID = str(random.randint(10000, 99999))
@@ -193,9 +213,18 @@ class OnlineMode():
                 self.manager.changeScreen(PrepareScreen(self.manager, self.manager.window))
             self.type = "WAITING"
             self.player.handleEvent(event)
+
+        if respon.phase == "PLAYING":
+            if respon.turnIP == respon.playerIP:
+                if not isinstance(self.manager.currentScreen, MyTurnScreen):
+                    self.manager.changeScreen(MyTurnScreen(self.manager, self.manager.window))
+
+            else:
+                if not isinstance(self.manager.currentScreen, EnemyTurnScreen):
+                    self.manager.changeScreen(EnemyTurnScreen(self.manager, self.manager.window))
         
 
     def draw(self):
-        self.player.draw()
+        pass
 
 
