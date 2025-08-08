@@ -4,7 +4,7 @@ from mySignal import *
 import time
 import threading
 
-HOST = '192.168.1.28'  
+HOST = '26.253.176.29'  
 PORT = 5555    
 
 server_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -22,7 +22,11 @@ def handleData(obj, addr):
                                       "TURNINDEX" : 0,
                                       "LISTPLAYER" : [addr[0]],
                                       "PLAYER" : {
-                                          addr[0] : None
+                                          addr[0] : {
+                                              "ready" : False,
+                                              "posShip" : None,
+                                              "listTorpedo" : []
+                                          }
                                         }
                                       }
         return SignalRecieved(serverData[obj.roomID]["PHASE"])
@@ -38,10 +42,12 @@ def handleData(obj, addr):
             else:
                 print(3)
                 serverData[obj.roomID]["PHASE"] = "PREPARE"
-                serverData[obj.roomID]["PLAYER"][addr[0]] = None
+                serverData[obj.roomID]["PLAYER"][addr[0]] = {"ready" : False, "posShip" : None, "listTorpedo" : []}
                 serverData[obj.roomID]["LISTPLAYER"].append(addr[0])
                 return SignalRecieved(serverData[obj.roomID]["PHASE"])
-            
+    
+
+    
 
 def handleRequest(data, addr):
     try:

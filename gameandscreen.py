@@ -7,11 +7,15 @@ import pygwidgets
 from bot import *
 import random
 from mySignal import *
+from constants import *
+
+#============================================================ SCREEN MANAGER ============================================================
 
 class Screen():
     @abstractmethod
-    def __init__(self):
-        pass
+    def __init__(self, screenManager, window):
+        self.screenManager = screenManager
+        self.window = window
     
     @abstractmethod
     def handleEvent(self):
@@ -21,10 +25,10 @@ class Screen():
     def draw(self):
         pass
 
+
 class MenuScreen(Screen):
     def __init__(self, screenManager, window):
-        self.screenManager = screenManager
-        self.window = window
+        super().__init__(screenManager, window)
         self.exitBtn = AnimatedButton(self.window, (550, 450), [resource_path("assets/images/buttons/exitBtn_u.png")], [resource_path("assets/images/buttons/exitBtn_d.png")])
         self.onlBtn = AnimatedButton(self.window, (375, 250), [resource_path("assets/images/buttons/onlBtn_u.png")], [resource_path("assets/images/buttons/onlBtn_d.png")])
         self.offBtn = AnimatedButton(self.window, (375, 350), [resource_path("assets/images/buttons/offBtn_u.png")], [resource_path("assets/images/buttons/offBtn_d.png")])
@@ -50,7 +54,9 @@ class MenuScreen(Screen):
             self.onlBtn.disable()
             self.offBtn.disable()
             self.exitBtn.disable()
-            self.inputData = InputData(self.window, (400, 250))
+            #self.inputData = InputData(self.window, (400, 250))
+            self.screenManager.changeScreen(FindingScreen(self.screenManager, self.window))
+            self.screenManager.game = OnlineMode(self.screenManager, '26.253.176.29')
         if self.offBtn.handleEvent(event):
             self.screenManager.game = OfflineMode(self.screenManager)
         if self.inputData is not None:
@@ -64,24 +70,10 @@ class MenuScreen(Screen):
                 self.screenManager.changeScreen(FindingScreen(self.screenManager, self.window))
                 self.screenManager.game = OnlineMode(self.screenManager, res[1])
 
-class PrepareScreen(Screen):
-    def __init__(self, screenManager, window):
-        self.screenManager = screenManager
-        self.window = window
-
-    def handleEvent(self, event):
-        pass
-    
-    def draw(self):
-        pass
-
-class PlayingScreen(Screen):
-    pass
 
 class CreateRoom(Screen):
     def __init__(self, screenManager, window, roomID):
-        self.window = window
-        self.screenManager = screenManager
+        super().__init__(screenManager, window)
         self.roomIDText = CustomText(window, (500, 350), roomID, resource_path("fonts/PressStart2P-Regular.ttf"), font_size=50, color=(255, 255, 255))
         self.backBtn = AnimatedButton(self.window, (550, 450), [resource_path("assets/images/buttons/backBtn_u.png")], [resource_path("assets/images/buttons/backBtn_d.png")])
 
@@ -95,10 +87,10 @@ class CreateRoom(Screen):
         self.roomIDText.draw()
         self.backBtn.draw()
 
+
 class JoinRoom(Screen):
     def __init__(self, screenManager, window):
-        self.screenManager = screenManager
-        self.window = window
+        super().__init__(screenManager, window)
         self.roomIDInput = pygwidgets.InputText(self.window, (500, 400), fontSize=50, width=300)
         self.backBtn = AnimatedButton(self.window, (550, 450), [resource_path("assets/images/buttons/backBtn_u.png")], [resource_path("assets/images/buttons/backBtn_d.png")])
         self.enterBtn = AnimatedButton(self.window, (550, 550), [resource_path("assets/images/buttons/enterBtn_u.png")], [resource_path("assets/images/buttons/enterBtn_d.png")])
@@ -120,8 +112,7 @@ class JoinRoom(Screen):
 
 class FindingScreen(Screen):
     def __init__(self, screenManager, window):
-        self.screenManager = screenManager
-        self.window = window
+        super().__init__(screenManager, window)
         self.createBtn = AnimatedButton(self.window, (500, 250), [resource_path("assets/images/buttons/createBtn_u.png")], [resource_path("assets/images/buttons/createBtn_d.png")])
         self.joinBtn = AnimatedButton(self.window, (550, 350), [resource_path("assets/images/buttons/joinBtn_u.png")], [resource_path("assets/images/buttons/joinBtn_d.png")])
         self.backBtn = AnimatedButton(self.window, (550, 450), [resource_path("assets/images/buttons/backBtn_u.png")], [resource_path("assets/images/buttons/backBtn_d.png")])
@@ -145,6 +136,34 @@ class FindingScreen(Screen):
         if self.joinBtn.handleEvent(event):
             self.screenManager.game.type = "JOINROOM"
             self.screenManager.changeScreen(JoinRoom(self.screenManager, self.window))
+
+
+class PrepareScreen(Screen):
+    def __init__(self, screenManager, window):
+        super().__init__(screenManager, window)
+        self.field = AnimatedImage(self.window, FIELD_COORD, [resource_path("assets/images/field.png")])
+        self.readyBtn = AnimatedButton(self.window, (500, 700), [resource_path("assets/images/buttons/readyBtn_u.png")], [[resource_path("assets/images/buttons/readyBtn_d.png")]], [resource_path("assets/images/buttons/readyBtn_dis.png")])
+
+    def handleEvent(self, event):
+        pass
+    
+    def draw(self):
+        self.field.draw()
+        self.readyBtn.draw()
+
+
+class PlayingScreen(Screen):
+    def __init__(self, screenManager, window):
+        super().__init__(screenManager, window)
+        self.field = AnimatedImage(self.window, FIELD_COORD, [resource_path("assets/images/field.png")])
+
+    def handleEvent(self):
+        return super().handleEvent()
+
+    def draw(self):
+        pass
+
+# ============================================================ MODE ============================================================
 
 class OfflineMode():
     def __init__(self, manager):
@@ -170,6 +189,9 @@ class OnlineMode():
         respon = self.network.send(newSignal)
         if respon.phase == "PREPARE":
             self.manager.changeScreen(PrepareScreen(self.manager, self.manager.window))
+
+
+        
 
     def draw(self):
         pass

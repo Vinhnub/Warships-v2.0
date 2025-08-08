@@ -9,8 +9,9 @@ class SignalSended():
         return str(self.type) + " " + str(self.roomID) + " " + str(self.listShip) + " " + str(self.posFire)
     
 class SignalRecieved():
-    def __init__(self, phase, turnIP=None, playerIP=None):
+    def __init__(self, phase, type, turnIP=None, playerIP=None):
         self.phase = phase
+        self.type = type
         self.turnIP = turnIP
         self.playerIP = playerIP
 

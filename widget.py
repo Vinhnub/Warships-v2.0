@@ -24,11 +24,12 @@ class AnimatedImage():
             self.__indexFrame = (self.__indexFrame + 1) % self.totalFrame
 
 class AnimatedButton():
-    def __init__(self, window, loc, lstImageUp, lstImageDown, fps=0):
+    def __init__(self, window, loc, lstImageUp, lstImageDown, listImageDisable=None, fps=0):
         self.window = window
         self.loc = loc
         self.lstImageUp = [pygame.image.load(path).convert_alpha() for path in lstImageUp]
         self.lstImageDown = [pygame.image.load(path).convert_alpha() for path in lstImageDown]
+        self.lstImageDisable = self.lstImageUp if listImageDisable is None else [pygame.image.load(path).convert_alpha() for path in listImageDisable]
         self.state = 0 # 0: up, 1: down, -1: disarmed, 2: disable
         self.indexImage = 0
         self.__hitBox = self.lstImageUp[self.indexImage].get_rect(topleft=self.loc)
@@ -68,17 +69,21 @@ class AnimatedButton():
         return False
 
     def draw(self):
-        if self.state == 0 or self.state == 2:
+        if self.state == 0:
             self.window.blit(self.lstImageUp[self.indexImage], self.loc)
             if pygame.time.get_ticks() - self._startTime >= self.fps and self.fps != 0:
                 self._startTime = pygame.time.get_ticks()
                 self.indexImage = (self.indexImage + 1) % len(self.lstImageUp)
-        else: 
+        elif self.state == 1 or self.state == -1: 
             self.window.blit(self.lstImageDown[self.indexImage], self.loc)
             if pygame.time.get_ticks() - self._startTime >= self.fps and self.fps != 0:
                 self._startTime = pygame.time.get_ticks()
                 self.indexImage = (self.indexImage + 1) % len(self.lstImageDown)
-        
+        else:
+            self.window.blit(self.lstImageDisable[self.indexImage], self.loc)
+            if pygame.time.get_ticks() - self._startTime >= self.fps and self.fps != 0:
+                self._startTime = pygame.time.get_ticks()
+                self.indexImage = (self.indexImage + 1) % len(self.lstImageDisable)
 
 class CustomText():
     def __init__(self, window, loc, text, font_path, font_size, color=(0, 0, 0)):
