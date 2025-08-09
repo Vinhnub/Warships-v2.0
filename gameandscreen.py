@@ -218,7 +218,8 @@ class OnlineMode():
         if respon.phase == "PREPARE":
             if not isinstance(self.manager.currentScreen, PrepareScreen):
                 self.manager.changeScreen(PrepareScreen(self.manager, self.manager.window))
-            self.type = "WAITING"
+                self.type = "WAITING_PR"
+                self.data = None
             self.player.handleEvent(event)
 
         if respon.phase == "PLAYING":
@@ -226,7 +227,7 @@ class OnlineMode():
                 if not isinstance(self.manager.currentScreen, MyTurnScreen):
                     self.manager.changeScreen(MyTurnScreen(self.manager, self.manager.window))
                     self.player.canFire = True
-                    self.type = "WAITING"
+                    self.type = "WAITING_PL"
                     self.data = len(self.player.listEnemyTorpedo)
                 
                 res = self.player.handleEvent(event)
@@ -237,13 +238,13 @@ class OnlineMode():
 
                 if respon.type == "FIRERESULT":
                     self.player.listMyTorpedo.append(Torpedo(self.manager.window, self.data, listPathTopedoA, pathImageTorpedo, respon.data, 100))
-                    self.type = "WAITING"
+                    self.type = "WAITING_PL"
                     self.data = len(self.player.listEnemyTorpedo)
 
             else:
                 if not isinstance(self.manager.currentScreen, EnemyTurnScreen):
                     self.manager.changeScreen(EnemyTurnScreen(self.manager, self.manager.window))
-                    self.type = "WAITING"
+                    self.type = "WAITING_PL"
                     self.data = len(self.player.listEnemyTorpedo)
                 
                 if respon.type == "ENEMYFIRE":

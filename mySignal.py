@@ -5,7 +5,7 @@ class SignalSended():
         self.data = data
 
     def __str__(self):
-        return str(self.type) + " " + str(self.roomID) + " " + str(self.listShip) + " " + str(self.posFire)
+        return str(self.type) + " " + str(self.roomID) + " " + str(self.data) 
     
 class SignalRecieved():
     def __init__(self, phase, type=None, turnIP=None, playerIP=None, data=None):
@@ -16,4 +16,4 @@ class SignalRecieved():
         self.data = data
 
     def __str__(self):
-        return str(self.phase) + " " + str(self.turnIP) + " " + str(self.playerIP) #+ " " + str(self.posFire)
+        return str(self.phase) + " " + str(self.type) + " " +  str(self.turnIP) + " " + str(self.playerIP) + " " + str(self.data)

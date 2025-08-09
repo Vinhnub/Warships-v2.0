@@ -111,7 +111,7 @@ def handleData(obj, addr):
         enemyIndex = 1 - serverData[obj.roomID]["LISTPLAYER"].index(addr[0])
         enemy = serverData[obj.roomID]["LISTPLAYER"][enemyIndex]
 
-        if obj.type == "WAITING":
+        if obj.type == "WAITING_PL":
             if obj.data == len(serverData[obj.roomID]["PLAYER"][enemy]["listTorpedo"]):
                 return SignalRecieved(serverData[obj.roomID]["PHASE"], 
                                       turnIP=serverData[obj.roomID]["LISTPLAYER"][serverData[obj.roomID]["TURNINDEX"]], 
@@ -154,9 +154,10 @@ def handleRequest(data, addr):
     try:
         obj = pickle.loads(data)
         result = handleData(obj, addr)
+        logging.info(f"{obj} {addr} {result}")
         response = pickle.dumps(result)
         server_socket.sendto(response, addr)
-        printdata(serverData)
+        #printdata(serverData)
     except Exception as e:
         logging.error(f"[SERVER ERROR] Gói tin từ {addr} bị lỗi: {e}")
 

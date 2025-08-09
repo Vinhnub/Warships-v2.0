@@ -33,6 +33,7 @@ class Player():
         return self.__listPosShip
     
     def isCorrect(self, pos):
+        if pos is None: return False
         return self.__listPosShip[pos[0]][pos[1]]
     
     def handleEvent(self, event):
