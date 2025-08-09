@@ -32,6 +32,9 @@ class Player():
 
         return self.__listPosShip
     
+    def isCorrect(self, pos):
+        return self.__listPosShip[pos[0]][pos[1]]
+    
     def handleEvent(self, event):
         if (not self.isReady):
             self.moveShip(event)

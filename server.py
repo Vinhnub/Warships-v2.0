@@ -5,6 +5,7 @@ import time
 import threading
 import random
 import logging
+from constants import *
 
 # Cấu hình logging
 logging.basicConfig(
@@ -102,6 +103,11 @@ def handleData(obj, addr):
     # ======== PLAYING PHASE LOGIC ========
 
     if serverData[obj.roomID]["PHASE"] == "PLAYING":
+
+        if TIME_EACH_TURN - (time.time() - serverData[obj.roomID]["TIME"]) <= 0:
+            serverData[obj.roomID]["TURNINDEX"] = 1 - serverData[obj.roomID]["TURNINDEX"]
+            serverData[obj.roomID]["TIME"] = time.time() - (TIME_EACH_TURN - 3000)
+
         enemyIndex = 1 - serverData[obj.roomID]["LISTPLAYER"].index(addr[0])
         enemy = serverData[obj.roomID]["LISTPLAYER"][enemyIndex]
 
@@ -119,6 +125,7 @@ def handleData(obj, addr):
             
         if obj.type == "FIRE":
             pos = obj.data
+            serverData[obj.roomID]["TIME"] = 
             if pos != serverData[obj.roomID]["PLAYER"][addr[0]]["lastPosFire"]: 
                 serverData[obj.roomID]["PLAYER"][addr[0]]["listTorpedo"].append(pos)
                 serverData[obj.roomID]["PLAYER"][addr[0]]["lastPosFire"] = pos
@@ -139,8 +146,8 @@ def handleData(obj, addr):
 
         
         return SignalRecieved(serverData[obj.roomID]["PHASE"], 
-                                      turnIP=serverData[obj.roomID]["LISTPLAYER"][serverData[obj.roomID]["TURNINDEX"]], 
-                                      playerIP=addr[0])
+                              turnIP=serverData[obj.roomID]["LISTPLAYER"][serverData[obj.roomID]["TURNINDEX"]], 
+                              playerIP=addr[0])
     
 
 def handleRequest(data, addr):

@@ -247,7 +247,7 @@ class OnlineMode():
                     self.data = len(self.player.listEnemyTorpedo)
                 
                 if respon.type == "ENEMYFIRE":
-                    self.player.listEnemyTorpedo.append(Torpedo(self.manager.window, respon.data, listPathTopedoA, pathImageTorpedo, False, 100))
+                    self.player.listEnemyTorpedo.append(Torpedo(self.manager.window, respon.data, listPathTopedoA, pathImageTorpedo, self.player.isCorrect(respon.data), 100))
 
 
 
