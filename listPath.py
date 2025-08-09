@@ -18,3 +18,15 @@ listPathShip = [(resource_path("assets/images/ship2.png"), (FIELD_COORD[0] + 3, 
                (resource_path("assets/images/ship4.png"), (FIELD_COORD[0] + 3 + CELL_SIZE[0]*3, FIELD_COORD[1] + 3), 4),
                (resource_path("assets/images/ship5.png"), (FIELD_COORD[0] + 3 + CELL_SIZE[0]*4, FIELD_COORD[1] + 3), 5),
                ]
+
+listPathTopedoA = [resource_path("assets/images/Torpedo_1.png"),
+                resource_path("assets/images/Torpedo_2.png"),
+                resource_path("assets/images/Torpedo_3.png"),
+                resource_path("assets/images/Torpedo_4.png"),
+                resource_path("assets/images/Torpedo_5.png"),
+                resource_path("assets/images/Torpedo_6.png"),
+                resource_path("assets/images/Torpedo_7.png"),
+                resource_path("assets/images/Torpedo_8.png"),
+                   ]
+
+pathImageTorpedo = [resource_path("assets/images/Torpedo_correct.png"),resource_path("assets/images/Torpedo_incorrect.png")]

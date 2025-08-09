@@ -6,14 +6,15 @@ from ship import *
 from torpedo import *
 
 class Player():
-    def __init__(self):
+    def __init__(self, window):
+        self.window = window
         self.__listShips = [Ship(path[1], path[0], path[2]) for path in listPathShip]
         self.__isMouseDown = False
         self.__firstPos = None # pos when player click mouse down to move or ronate ship
         self.__shipSelected = None # the ship player select to move
         self.isReady = False
-        self.__listMyTorpedo = []
-        self.__listEnemyTorpedo = []
+        self.listMyTorpedo = []
+        self.listEnemyTorpedo = []
         self.canFire = None
         self.numberCorrect = 0
         self.numberCorrectE = 0 # number correctly fire of enermy
@@ -32,19 +33,33 @@ class Player():
         return self.__listPosShip
     
     def handleEvent(self, event):
-        self.moveShip(event)
+        if (not self.isReady):
+            self.moveShip(event)
+        if self.canFire:
+            return self.fire(event)
+        return False
+
+    def fire(self, event):
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            firePos = pygame.mouse.get_pos()
+            if FIELD_COORD[0] < firePos[0] and firePos[0] < FIELD_COORD[0] + FIELD_WIDTH and FIELD_COORD[1] < firePos[1] and firePos[1] < FIELD_COORD[1] + FIELD_HEIGHT:
+                for oTorpedo in self.listMyTorpedo:
+                    if oTorpedo.getHitBox().collidepoint(firePos):
+                        return False
+                return (int((firePos[0] - FIELD_COORD[0])/CELL_SIZE[0]), int((firePos[1] - FIELD_COORD[1])/CELL_SIZE[1]))
+        return False
 
     def draw(self, window, isMyTurn=None):
         if isMyTurn is None:
             for ship in self.__listShips:
                 ship.draw(window)
         if isMyTurn:
-            for oTorpedo in self.__listMyTorpedo:
+            for oTorpedo in self.listMyTorpedo:
                 oTorpedo.draw()
         else:
             for ship in self.__listShips:
                 ship.draw(window)
-            for oTorpedo in self.__listEnemyTorpedo:
+            for oTorpedo in self.listEnemyTorpedo:
                 oTorpedo.draw()
 
     def moveShip(self, event):

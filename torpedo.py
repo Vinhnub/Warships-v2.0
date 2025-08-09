@@ -5,7 +5,7 @@ import pygame
 class Torpedo():
     def __init__(self, window, loc, listPathTopedoA, pathImages, isHitTheTarget, spf=0): # spf: Time to display 1 image
         self.window = window
-        self.loc = (FIELD_COORD[0] + int((loc[0] - FIELD_COORD[0])/CELL_SIZE[0])*CELL_SIZE[0] + 3, FIELD_COORD[1] + int((loc[1] - FIELD_COORD[1])/CELL_SIZE[1])*CELL_SIZE[1] + 3)
+        self.loc = (FIELD_COORD[0] + loc[0] * CELL_SIZE[0] + 3, FIELD_COORD[1] + loc[1] * CELL_SIZE[1] + 3)
         self.__listImageAnimation = [pygame.image.load(path).convert_alpha() for path in listPathTopedoA]
         self.__spf = spf # seconds per frame
         self.__image = pygame.image.load(pathImages[0]).convert_alpha() if isHitTheTarget else pygame.image.load(pathImages[1]).convert_alpha()

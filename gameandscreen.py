@@ -160,6 +160,7 @@ class MyTurnScreen(Screen):
     def __init__(self, screenManager, window):
         super().__init__(screenManager, window)
         self.field = AnimatedImage(self.window, FIELD_COORD, [resource_path("assets/images/field.png")])
+        self.timer = None
 
     def handleEvent(self, event):
         pass
@@ -172,7 +173,8 @@ class EnemyTurnScreen(Screen):
     def __init__(self, screenManager, window):
         super().__init__(screenManager, window)
         self.field = AnimatedImage(self.window, FIELD_COORD, [resource_path("assets/images/field.png")])
-        
+        self.timer = None
+
     def handleEvent(self, event):
         pass
 
@@ -186,13 +188,14 @@ class EnemyTurnScreen(Screen):
 
 class OfflineMode():
     def __init__(self, manager):
-        super().__init__(manager)
+        self.manager = manager
+        self.player = Player()
         self.playerAI = Bot()
 
 class OnlineMode():
     def __init__(self, manager, serverIP):
         self.manager = manager
-        self.player = Player()
+        self.player = Player(self.manager.window)
         self.network = NetWork(serverIP)
         self.roomID = None
         self.type = None
@@ -205,6 +208,7 @@ class OnlineMode():
     def ready(self):
         self.type = "READY"
         self.data = self.player.calListPosShip()
+        self.player.isReady = True
 
     def running(self, event):
         if self.type is None or self.roomID is None or self.roomID == "":
@@ -221,13 +225,34 @@ class OnlineMode():
             if respon.turnIP == respon.playerIP:
                 if not isinstance(self.manager.currentScreen, MyTurnScreen):
                     self.manager.changeScreen(MyTurnScreen(self.manager, self.manager.window))
+                    self.player.canFire = True
+                    self.type = "WAITING"
+                    self.data = len(self.player.listEnemyTorpedo)
+                
+                res = self.player.handleEvent(event)
+                if res:
+                    self.player.canFire = False
+                    self.type = "FIRE"
+                    self.data = res
+
+                if respon.type == "FIRERESULT":
+                    self.player.listMyTorpedo.append(Torpedo(self.manager.window, self.data, listPathTopedoA, pathImageTorpedo, respon.data, 100))
+                    self.type = "WAITING"
+                    self.data = len(self.player.listEnemyTorpedo)
 
             else:
                 if not isinstance(self.manager.currentScreen, EnemyTurnScreen):
                     self.manager.changeScreen(EnemyTurnScreen(self.manager, self.manager.window))
-        
+                    self.type = "WAITING"
+                    self.data = len(self.player.listEnemyTorpedo)
+                
+                if respon.type == "ENEMYFIRE":
+                    self.player.listEnemyTorpedo.append(Torpedo(self.manager.window, respon.data, listPathTopedoA, pathImageTorpedo, False, 100))
+
+
 
     def draw(self):
         pass
+
 
 
