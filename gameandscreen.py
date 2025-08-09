@@ -245,10 +245,13 @@ class OnlineMode():
                 if not isinstance(self.manager.currentScreen, EnemyTurnScreen):
                     self.manager.changeScreen(EnemyTurnScreen(self.manager, self.manager.window))
                     self.type = "WAITING_PL"
-                    self.data = len(self.player.listEnemyTorpedo)
+                    self.canFire = True
+                self.data = len(self.player.listEnemyTorpedo)
                 
                 if respon.type == "ENEMYFIRE":
-                    self.player.listEnemyTorpedo.append(Torpedo(self.manager.window, respon.data, listPathTopedoA, pathImageTorpedo, self.player.isCorrect(respon.data), 100))
+                    if self.canFire:
+                        self.player.listEnemyTorpedo.append(Torpedo(self.manager.window, respon.data, listPathTopedoA, pathImageTorpedo, self.player.isCorrect(respon.data), 100))
+                        self.canFire = False
 
 
 
