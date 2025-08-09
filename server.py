@@ -106,7 +106,7 @@ def handleData(obj, addr):
 
         if TIME_EACH_TURN - (time.time() - serverData[obj.roomID]["TIME"]) <= 0:
             serverData[obj.roomID]["TURNINDEX"] = 1 - serverData[obj.roomID]["TURNINDEX"]
-            serverData[obj.roomID]["TIME"] = time.time() - (TIME_EACH_TURN - 3000)
+            serverData[obj.roomID]["TIME"] = time.time()
 
         enemyIndex = 1 - serverData[obj.roomID]["LISTPLAYER"].index(addr[0])
         enemy = serverData[obj.roomID]["LISTPLAYER"][enemyIndex]
@@ -125,7 +125,7 @@ def handleData(obj, addr):
             
         if obj.type == "FIRE":
             pos = obj.data
-            serverData[obj.roomID]["TIME"] = 
+            serverData[obj.roomID]["TIME"] = time.time() - (TIME_EACH_TURN - 3000)
             if pos != serverData[obj.roomID]["PLAYER"][addr[0]]["lastPosFire"]: 
                 serverData[obj.roomID]["PLAYER"][addr[0]]["listTorpedo"].append(pos)
                 serverData[obj.roomID]["PLAYER"][addr[0]]["lastPosFire"] = pos
