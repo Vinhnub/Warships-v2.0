@@ -113,9 +113,11 @@ def handleData(obj, addr):
 
         if obj.type == "WAITING_PL":
             if obj.data == len(serverData[obj.roomID]["PLAYER"][enemy]["listTorpedo"]):
-                return SignalRecieved(serverData[obj.roomID]["PHASE"], 
+                return SignalRecieved(serverData[obj.roomID]["PHASE"],  
+                                      type="WAITING_PL",
                                       turnIP=serverData[obj.roomID]["LISTPLAYER"][serverData[obj.roomID]["TURNINDEX"]], 
-                                      playerIP=addr[0])
+                                      playerIP=addr[0],
+                                      data=serverData[obj.roomID]["TIME"])
             else:
                 return SignalRecieved(serverData[obj.roomID]["PHASE"], 
                                       type="ENEMYFIRE", 
@@ -125,7 +127,7 @@ def handleData(obj, addr):
             
         if obj.type == "FIRE":
             pos = obj.data
-            serverData[obj.roomID]["TIME"] = time.time() - (TIME_EACH_TURN - 3)
+            serverData[obj.roomID]["TIME"] = time.time() - (TIME_EACH_TURN - 4)
             if pos != serverData[obj.roomID]["PLAYER"][addr[0]]["lastPosFire"]: 
                 serverData[obj.roomID]["PLAYER"][addr[0]]["listTorpedo"].append(pos)
                 serverData[obj.roomID]["PLAYER"][addr[0]]["lastPosFire"] = pos
@@ -146,18 +148,20 @@ def handleData(obj, addr):
 
         
         return SignalRecieved(serverData[obj.roomID]["PHASE"], 
+                              type="WAITING_PL",
                               turnIP=serverData[obj.roomID]["LISTPLAYER"][serverData[obj.roomID]["TURNINDEX"]], 
-                              playerIP=addr[0])
+                              playerIP=addr[0],
+                              data=serverData[obj.roomID]["TIME"])
     
 
 def handleRequest(data, addr):
     try:
         obj = pickle.loads(data)
         result = handleData(obj, addr)
-        #logging.info(f"{obj} {addr} {result}")
+        logging.info(f"{obj} {addr} {result}")
         response = pickle.dumps(result)
         server_socket.sendto(response, addr)
-        printdata(serverData)
+        #printdata(serverData)
     except Exception as e:
         logging.error(f"[SERVER ERROR] Gói tin từ {addr} bị lỗi: {e}")
 
