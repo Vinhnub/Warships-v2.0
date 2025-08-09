@@ -161,7 +161,7 @@ class MyTurnScreen(Screen):
     def __init__(self, screenManager, window):
         super().__init__(screenManager, window)
         self.field = AnimatedImage(self.window, FIELD_COORD, [resource_path("assets/images/field.png")])
-        self.timer = CustomText(self.window, (0, 0), "", resource_path("fonts/PressStart2P-Regular.ttf"), 30)
+        self.timer = CustomText(self.window, (0, 0), "", resource_path("fonts/PressStart2P-Regular.ttf"), 30, (255, 255, 255))
 
     def handleEvent(self, event):
         pass
@@ -169,12 +169,13 @@ class MyTurnScreen(Screen):
     def draw(self):
         self.field.draw()
         self.screenManager.game.player.draw(self.window, True)
+        self.timer.draw()
 
 class EnemyTurnScreen(Screen):
     def __init__(self, screenManager, window):
         super().__init__(screenManager, window)
         self.field = AnimatedImage(self.window, FIELD_COORD, [resource_path("assets/images/field.png")])
-        self.timer = CustomText(self.window, (0, 0), "", resource_path("fonts/PressStart2P-Regular.ttf"), 30)
+        self.timer = CustomText(self.window, (0, 0), "", resource_path("fonts/PressStart2P-Regular.ttf"), 30, (255, 255, 255))
 
     def handleEvent(self, event):
         pass
@@ -182,6 +183,7 @@ class EnemyTurnScreen(Screen):
     def draw(self):
         self.field.draw()
         self.screenManager.game.player.draw(self.window, False)
+        self.timer.draw()
 
 # ============================================================ MODE ============================================================
 
@@ -236,7 +238,7 @@ class OnlineMode():
                     self.data = res
 
                 if respon.type == "WAITING_PL":
-                    self.manager.currentScreen.timer.setText(str(TIME_EACH_TURN - (time.time() + respon.data)))
+                    self.manager.currentScreen.timer.setText(str(int(TIME_EACH_TURN - (time.time() - respon.data))))
 
                 if respon.type == "FIRERESULT":
                     self.player.listMyTorpedo.append(Torpedo(self.manager.window, self.data, listPathTopedoA, pathImageTorpedo, respon.data, 100))
@@ -252,7 +254,7 @@ class OnlineMode():
                 self.data = len(self.player.listEnemyTorpedo)
 
                 if respon.type == "WAITING_PL":
-                    self.manager.currentScreen.timer.setText(str(TIME_EACH_TURN - (time.time() + respon.data)))
+                    self.manager.currentScreen.timer.setText(str(int(TIME_EACH_TURN - (time.time() - respon.data))))
                 
                 if respon.type == "ENEMYFIRE":
                     if self.canFire:
