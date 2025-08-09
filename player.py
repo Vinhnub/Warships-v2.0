@@ -59,13 +59,15 @@ class Player():
                 ship.draw(window)
         if isMyTurn:
             for oTorpedo in self.listMyTorpedo:
-                oTorpedo.draw()
+                if not oTorpedo.drawAnimation():
+                    oTorpedo.draw()
         else:
             for ship in self.__listShips:
                 ship.draw(window)
             for oTorpedo in self.listEnemyTorpedo:
-                oTorpedo.draw()
-
+                if not oTorpedo.drawAnimation():
+                    oTorpedo.draw()
+        
     def moveShip(self, event):
         if event.type == pygame.MOUSEBUTTONDOWN and event.button == 3:
             self.__firstPos = pygame.mouse.get_pos()

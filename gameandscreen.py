@@ -246,13 +246,13 @@ class OnlineMode():
                     self.manager.changeScreen(EnemyTurnScreen(self.manager, self.manager.window))
                     self.type = "WAITING_PL"
                     self.canFire = True
+    
                 self.data = len(self.player.listEnemyTorpedo)
                 
                 if respon.type == "ENEMYFIRE":
                     if self.canFire:
                         self.player.listEnemyTorpedo.append(Torpedo(self.manager.window, respon.data, listPathTopedoA, pathImageTorpedo, self.player.isCorrect(respon.data), 100))
                         self.canFire = False
-
 
 
     def draw(self):
