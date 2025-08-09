@@ -44,14 +44,14 @@ class Bot:
         for ship in ships:
             for pos in ship:
                 if x == pos[0] and y == pos[1]:
-                    self.board[x][y] = 1
+                    self._board[x][y] = 1
                     for i in self.getNeighbors(x, y):
                         self._suspiciousCells.append(i)
                     self._streak.append(target)
                     if len(self._streak) == 2:
                         self.checkStreak() 
                     return True
-        self.board[x][y] = -1
+        self._board[x][y] = -1
         return False
 
     def getNeighbors(self, x, y):
@@ -91,20 +91,18 @@ class Bot:
         
     def checkStreak(self):
         if self._streak[0][0] == self._streak[1][0]:
-            self._suspiciousCells = self._suspiciousCells[2]
-            self.hitHorizon()
+            self._suspiciousCells = [self._suspiciousCells[2]]
+
+            self.hitHorizon(self._suspiciousCells)
         elif self._streak[0][1] == self._streak[1][1]:
-            self._suspiciousCells = self._suspiciousCells[3]
-            self.hitVertical()
+            self._suspiciousCells = [self._suspiciousCells[3]]
+            self.hitVertical(self._suspiciousCells)
     def hitHorizon(self,target):
         if self.checkTarget(target):
             self._suspiciousCells = self._suspiciousCells[2]
     def hitVertical(self, target):
         if self.checkTarget(target):
             self._suspiciousCells = self._suspiciousCells[3]
-    def checkShips(self):
-        for ship in ships:
-            if all(self._board[posx][posy] == 1 for posx, posy in ship ):
                 
 ships = [
     [(0, 0), (0, 1), (0, 2), (0, 3), (0, 4)],
