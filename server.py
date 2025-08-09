@@ -125,7 +125,7 @@ def handleData(obj, addr):
             
         if obj.type == "FIRE":
             pos = obj.data
-            serverData[obj.roomID]["TIME"] = time.time() - (TIME_EACH_TURN - 3000)
+            serverData[obj.roomID]["TIME"] = time.time() - (TIME_EACH_TURN - 3)
             if pos != serverData[obj.roomID]["PLAYER"][addr[0]]["lastPosFire"]: 
                 serverData[obj.roomID]["PLAYER"][addr[0]]["listTorpedo"].append(pos)
                 serverData[obj.roomID]["PLAYER"][addr[0]]["lastPosFire"] = pos
