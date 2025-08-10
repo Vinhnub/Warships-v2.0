@@ -63,6 +63,7 @@ def handleData(obj, addr):
                                           addr[0] : {
                                               "ready" : False,
                                               "posShip" : None,
+                                              "listShip" : None,
                                               "listTorpedo" : [],
                                               "lastPosFire" : None,
                                               "numCorrect" : 0,
@@ -80,7 +81,14 @@ def handleData(obj, addr):
                 return SignalRecieved("INVALID")
             else:
                 serverData[obj.roomID]["PHASE"] = "PREPARE"
-                serverData[obj.roomID]["PLAYER"][addr[0]] = {"ready" : False, "posShip" : None, "listTorpedo" : [], "lastPosFire" : None, "numCorrect" : 0, "coolDown" : 0}
+                serverData[obj.roomID]["PLAYER"][addr[0]] = {"ready" : False, 
+                                                             "posShip" : None, 
+                                                             "listShip" : None,
+                                                             "listTorpedo" : [], 
+                                                             "lastPosFire" : None, 
+                                                             "numCorrect" : 0, 
+                                                             "coolDown" : 0
+                                                             }
                 serverData[obj.roomID]["LISTPLAYER"].append(addr[0])
                 return SignalRecieved(serverData[obj.roomID]["PHASE"])
 
@@ -90,7 +98,7 @@ def handleData(obj, addr):
         if obj.type == "READY":
             serverData[obj.roomID]["PLAYER"][addr[0]]["ready"] = True
             serverData[obj.roomID]["PLAYER"][addr[0]]["posShip"] = obj.data
-            serverData[obj.roomID]["PLAYER"][addr[0]]["coolDown"] = time.time()
+            serverData[obj.roomID]["PLAYER"][addr[0]]["coolDown"] = time.time() - COOL_DOWN
             enemyIndex = 1 - serverData[obj.roomID]["LISTPLAYER"].index(addr[0])
             enemy = serverData[obj.roomID]["LISTPLAYER"][enemyIndex]
             if serverData[obj.roomID]["PLAYER"][enemy]["ready"]:
@@ -168,6 +176,14 @@ def handleData(obj, addr):
                               data=TIME_EACH_TURN - (time.time() - serverData[obj.roomID]["TIME"]))
     
     if serverData[obj.roomID]["PHASE"] == "END":
+        if obj.type == "MYSHIP":
+            serverData[obj.roomID]["PLAYER"][addr[0]]["listShip"] = obj.data
+            enemyIndex = 1 - serverData[obj.roomID]["LISTPLAYER"].index(addr[0])
+            enemy = serverData[obj.roomID]["LISTPLAYER"][enemyIndex]
+            return SignalRecieved(serverData[obj.roomID]["PHASE"],
+                                  type="ENEMYSHIP",
+                                  data=serverData[obj.roomID]["PLAYER"][enemy]["listShip"])
+
         return SignalRecieved(serverData[obj.roomID]["PHASE"],
                               data=(serverData[obj.roomID]["PLAYER"][addr[0]]["numCorrect"] >= NUM_CELL_SHIP))
 

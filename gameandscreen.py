@@ -153,6 +153,7 @@ class PrepareScreen(Screen):
         if self.readyBtn.handleEvent(event):
             self.readyBtn.disable()
             self.screenManager.game.ready()
+            self.screenManager.game.player.isFinish = False
     
     def draw(self):
         self.background.draw()
@@ -316,3 +317,12 @@ class OnlineMode():
         if self.signalRecieve.phase == "END":
             if not isinstance(self.manager.currentScreen, EndScreen):
                 self.manager.changeScreen(EndScreen(self.manager, self.manager.window, self.signalRecieve.data))
+                self.player.isFinish = True
+                self.signalSend.data = self.player.listShip
+                self.signalSend.type = "MYSHIP"
+
+            if self.signalRecieve.type == "ENEMYSHIP":
+                self.player.listEnemyShip = self.signalRecieve.data
+                self.signalSend.type = None
+                self.signalSend.data = None
+            
