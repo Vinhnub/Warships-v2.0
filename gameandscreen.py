@@ -192,12 +192,15 @@ class EndScreen(Screen):
     def __init__(self, screenManager, window, isWin): 
         super().__init__(screenManager, window)
         self.banner = CustomText(self.window, (0, 0), str(isWin), resource_path("fonts/PressStart2P-Regular.ttf"), 30, (255, 255, 255))
+        self.field = AnimatedImage(self.window, FIELD_COORD, [resource_path("assets/images/field.png")])
 
     def handleEvent(self, event):
         pass
     
     def draw(self):
         self.banner.draw()
+        self.field.draw()
+        self.screenManager.game.player.draw(self.window, True)
 
 # ============================================================ MODE ============================================================
 
@@ -216,19 +219,16 @@ class OnlineMode():
         self.signalRecieve = SignalRecieved()
         self.isRun = False
         self.sendLock = threading.Lock()
-        self.isStart = False
         
     def reset(self):
         self.isRun = False
         self.signalSend = SignalSended()
         self.signalRecieve = SignalRecieved()
         self.player = Player(self.manager.window)
-
+    
     def start(self):
-        if not self.isStart:
-            self.isStart = True
-            threading.Thread(target=self.updSender, daemon=True).start()
-            threading.Thread(target=self.udpReciever, daemon=True).start()
+        threading.Thread(target=self.updSender, daemon=True).start()
+        threading.Thread(target=self.udpReciever, daemon=True).start()
 
     def createRoom(self):
         self.signalSend.roomID = str(random.randint(10000, 99999))
@@ -290,6 +290,8 @@ class OnlineMode():
 
                 if self.signalRecieve.type == "WAITING_PL":
                     self.manager.currentScreen.timer.setText(str(int(self.signalRecieve.data)))
+                    if time.time() - self.signalRecieve.timeCoolDown > COOL_DOWN and self.player.canFire == False:
+                        self.player.canFire = True
 
                 if self.signalRecieve.type == "FIRERESULT":
                     self.player.listMyTorpedo.append(Torpedo(self.manager.window, self.player.lastPosFire, listPathTopedoA, pathImageTorpedo, self.signalRecieve.data, 100))
@@ -308,9 +310,9 @@ class OnlineMode():
                     self.manager.currentScreen.timer.setText(str(int(self.signalRecieve.data)))
                 
                 if self.signalRecieve.type == "ENEMYFIRE":
-                    if self.player.canFire:
+                    if self.player.lastPosEnemyFire != self.signalRecieve.data:
+                        self.player.lastPosEnemyFire = self.signalRecieve.data
                         self.player.listEnemyTorpedo.append(Torpedo(self.manager.window, self.signalRecieve.data, listPathTopedoA, pathImageTorpedo, self.player.isCorrect(self.signalRecieve.data), 100))
-                        self.player.canFire = False
 
         if self.signalRecieve.phase == "END":
             if not isinstance(self.manager.currentScreen, EndScreen):

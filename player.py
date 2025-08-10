@@ -17,6 +17,7 @@ class Player():
         self.listEnemyTorpedo = []
         self.canFire = None
         self.lastPosFire = None
+        self.lastPosEnemyFire = None
         self.__listPosShip = [[False for _ in range(10)] for __ in range(10)]
 
     # check enermy fire correct or incorrect 
