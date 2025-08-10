@@ -6,19 +6,17 @@ from ship import *
 from torpedo import *
 
 class Player():
-    def __init__(self):
+    def __init__(self, window):
+        self.window = window
         self.__listShips = [Ship(path[1], path[0], path[2]) for path in listPathShip]
         self.__isMouseDown = False
         self.__firstPos = None # pos when player click mouse down to move or ronate ship
         self.__shipSelected = None # the ship player select to move
         self.isReady = False
-        self.__listMyTorpedo = []
-        self.__listEnemyTorpedo = []
+        self.listMyTorpedo = []
+        self.listEnemyTorpedo = []
         self.canFire = None
-        self.numberCorrect = 0
-        self.numberCorrectE = 0 # number correctly fire of enermy
-        self.startTime = None # it is a time when player fire, it use for delay 3s after fire to know player fire correct or incorrect
-        self.finishGame = None # it is a time when one of players win, delay 5s and return to mainscreen
+        self.lastPosFire = None
         self.__listPosShip = [[False for _ in range(10)] for __ in range(10)]
 
     # check enermy fire correct or incorrect 
@@ -31,23 +29,45 @@ class Player():
 
         return self.__listPosShip
     
+    def isCorrect(self, pos):
+        if pos is None: return False
+        return self.__listPosShip[pos[0]][pos[1]]
+    
     def handleEvent(self, event):
-        self.moveShip(event)
+        if (not self.isReady):
+            self.moveShip(event)
+        if self.canFire:
+            return self.fire(event)
+        return False
+
+    def fire(self, event):
+        if event is None: return False
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            firePos = pygame.mouse.get_pos()
+            if FIELD_COORD[0] < firePos[0] and firePos[0] < FIELD_COORD[0] + FIELD_WIDTH and FIELD_COORD[1] < firePos[1] and firePos[1] < FIELD_COORD[1] + FIELD_HEIGHT:
+                for oTorpedo in self.listMyTorpedo:
+                    if oTorpedo.getHitBox().collidepoint(firePos):
+                        return False
+                return (int((firePos[0] - FIELD_COORD[0])/CELL_SIZE[0]), int((firePos[1] - FIELD_COORD[1])/CELL_SIZE[1]))
+        return False
 
     def draw(self, window, isMyTurn=None):
         if isMyTurn is None:
             for ship in self.__listShips:
                 ship.draw(window)
         if isMyTurn:
-            for oTorpedo in self.__listMyTorpedo:
-                oTorpedo.draw()
+            for oTorpedo in self.listMyTorpedo:
+                if not oTorpedo.drawAnimation():
+                    oTorpedo.draw()
         else:
             for ship in self.__listShips:
                 ship.draw(window)
-            for oTorpedo in self.__listEnemyTorpedo:
-                oTorpedo.draw()
-
+            for oTorpedo in self.listEnemyTorpedo:
+                if not oTorpedo.drawAnimation():
+                    oTorpedo.draw()
+        
     def moveShip(self, event):
+        if event is None: return
         if event.type == pygame.MOUSEBUTTONDOWN and event.button == 3:
             self.__firstPos = pygame.mouse.get_pos()
             for ship in self.__listShips:

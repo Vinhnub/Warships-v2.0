@@ -1,27 +1,21 @@
 import random
-
-class Bot:
+class BotLogic:
     def __init__(self, BOARD_SIZE=10):
         self._BOARD_SIZE = BOARD_SIZE
         self._board = [[0] * self._BOARD_SIZE for _ in range(self._BOARD_SIZE)]
         self._cells = [(x, y) for x in range(self._BOARD_SIZE) for y in range(self._BOARD_SIZE)]
-        self._ships = [
-            [(0,0),(0,1),(0,2),(0,3),(0,4)],     # 5 ô
-            [(2,2),(3,2),(4,2),(5,2)],           # 4 ô
-            [(7,0),(7,1),(7,2)],                 # 3 ô
-            [(5,5),(5,6),(5,7)],                 # 3 ô
-            [(9,8),(9,9)]                       # 2 ô
-        ]
         self._turnCount = 0
         self._preSuspicious = []
         self._suspicious = []
         self._streak = []
         self._direction = None
         self._directionMode = None  # forward hoặc backward
-        self._remainShips = [len(ship) for ship in self._ships]
+        self._remainShips = []
         self._rootCell = None
         self._result = None
-
+    def set_enemy_player(self, enemy_player):
+        self._ships = enemy_player.calListPosShip()
+        self._remainShips = [len(ship) for ship in self._ships]
     def secondBoard(self):
         secondBoard = [[0 for _ in range(self._BOARD_SIZE)] for _ in range(self._BOARD_SIZE)]
         for shipSize in self._remainShips:
@@ -88,8 +82,8 @@ class Bot:
                     self._ships.remove(ship)
                     self._remainShips.remove(sunk_size)
                     self.resetTargeting()
-                    return True, sunk_size
-                return True, None
+                    return True
+                return True
 
         self._board[x][y] = -1
         return False, None
@@ -144,15 +138,4 @@ class Bot:
         else:
             self._result = self.randomMode()
         return self._result
-
-if __name__ == "__main__":
-    bot = Bot()
-    turn = 1
-    while bot._ships:  # còn tàu thì tiếp tục bắn
-        hit, sunk = bot.takeTurn()
-        print(f"Lượt {turn}: {'Trúng!' if hit else 'Trượt!'}")
-        if sunk:
-            print(f"→ Tàu {sunk} ô đã chìm!")
-        turn += 1
-    print("Game kết thúc, hết tàu để bắn!")
 

@@ -5,10 +5,10 @@ from player import *
 from network import *
 import pygwidgets
 from botLogic import *
+from botPlayer import *
 import random
 from mySignal import *
 from constants import *
-
 #============================================================ SCREEN MANAGER ============================================================
 
 class Screen():
@@ -58,6 +58,9 @@ class MenuScreen(Screen):
             self.screenManager.changeScreen(FindingScreen(self.screenManager, self.window))
             self.screenManager.game = OnlineMode(self.screenManager, '26.253.176.29')
         if self.offBtn.handleEvent(event):
+            self.onlBtn.disable()
+            self.offBtn.disable()
+            self.exitBtn.disable()
             self.screenManager.game = OfflineMode(self.screenManager)
         if self.inputData is not None:
             res = self.inputData.handleEvent(event) 
@@ -184,15 +187,57 @@ class EnemyTurnScreen(Screen):
 
 # ============================================================ MODE ============================================================
 
-class OfflineMode():
+class OfflineMode:
     def __init__(self, manager):
-        super().__init__(manager)
-        self.playerAI = Bot()
+        self.manager = manager
+        self.player = Player(manager.window)
+        self.bot = PlayerAI(manager.window, self.player)
+        self.phase = "PREPARE"
+        self.turn = "player"
+
+    def running(self, event):
+        if self.phase == "PREPARE":
+            if not isinstance(self.manager.currentScreen, PrepareScreen):
+                self.manager.changeScreen(PrepareScreen(self.manager, self.manager.window))
+            self.type = "WAITING"
+            self.player.handleEvent(event)
+        elif self.phase == "PLAYING":
+            if self.turn == "player":
+                if not isinstance(self.manager.currentScreen, MyTurnScreen):
+                    self.manager.changeScreen(MyTurnScreen(self.manager, self.manager.window))
+                pos = self.player.handleEvent(event)
+                print(pos)
+                if pos:
+                    is_hit = self.bot.isCorrect(pos)                    
+                    if not is_hit:
+                        self.turn = "bot" 
+
+            else:
+                if not isinstance(self.manager.currentScreen, EnemyTurnScreen):
+                    self.manager.changeScreen(EnemyTurnScreen(self.manager, self.manager.window))
+                pos = self.bot.make_move()
+                if pos is not None:
+                    is_hit = self.player.isCorrect(pos) 
+                    self.bot.update_after_shot(pos, is_hit)
+
+                    if not is_hit:
+                        self.turn = "player"  # Trượt thì chuyển lượt về player
+    def draw(self):
+        self.player.draw(self.manager.window, isMyTurn=(self.turn == "player"))
+        for torpedo in self.player.listMyTorpedo:
+            if not torpedo.drawAnimation():
+                torpedo.draw()
+    def ready(self):
+        self.player.isReady = True
+        self.bot.auto_place_ships()
+        self.bot.isReady = True
+        self.phase = "PLAYING"
+
 
 class OnlineMode():
     def __init__(self, manager, serverIP):
         self.manager = manager
-        self.player = Player()
+        self.player = Player(manager.window)
         self.network = NetWork(serverIP)
         self.roomID = None
         self.type = None

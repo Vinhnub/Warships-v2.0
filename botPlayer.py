@@ -1,26 +1,23 @@
-import pygame
-from pygame.locals import *
-from constants import *     
-from listPath import *        
+import random
+from constants import *
 from ship import Ship
-from torpedo import Torpedo   
-
+from botLogic import *
+from listPath import *
 class PlayerAI():
-    def __init__(self):
-        self.__listShips = [Ship(path[1], path[0], path[2]) for path in listPathShip]
+    def __init__(self, window, enemy):
+        self.window = window
+        self.__listShips = []
         self.isReady = False
-        self.__listMyTorpedo = []
-        self.__listEnemyTorpedo = []
+        self.listMyTorpedo = []
+        self.listEnemyTorpedo = []
         self.canFire = None
-        self.numberCorrect = 0
-        self.numberCorrectE = 0  
-        self.startTime = None    
-        self.finishGame = None
-
+        self.lastPosFire = None
+        self.__listPosShip = [[False for _ in range(10)] for __ in range(10)]
+        self._enemy = enemy
         self.__boardWidth = FIELD_WIDTH // CELL_SIZE[0]
         self.__boardHeight = FIELD_HEIGHT // CELL_SIZE[1]
-        self.__listPosShip = [[False for _ in range(self.__boardHeight)] for _ in range(self.__boardWidth)]
-
+        self.botLogic = BotLogic()
+        self.botLogic.set_enemy_player(enemy)
     def calListPosShip(self):
         self.__listPosShip = [[False for _ in range(self.__boardHeight)] for _ in range(self.__boardWidth)]
         for ship in self.__listShips:
@@ -31,57 +28,67 @@ class PlayerAI():
                     if 0 <= grid_x < self.__boardWidth and 0 <= grid_y < self.__boardHeight:
                         self.__listPosShip[grid_x][grid_y] = True
         return self.__listPosShip
-    
-    def handleEvent(self, event):
-        pass
 
-    # Vẽ tất cả đối tượng (tàu và đạn) lên cửa sổ
-    def draw(self, window, isMyTurn=None):
-        if isMyTurn is None:
-            # Vẽ tàu của AI
-            for ship in self.__listShips:
-                ship.draw(window)
-        elif isMyTurn:
-            # Nếu đến lượt mình bắn, vẽ đạn của mình
-            for oTorpedo in self.__listMyTorpedo:
-                oTorpedo.draw(window)
-        else:
-            # Nếu không phải lượt mình bắn, vẽ tàu AI và đạn của đối thủ
-            for ship in self.__listShips:
-                ship.draw(window)
-            for oTorpedo in self.__listEnemyTorpedo:
-                oTorpedo.draw(window)
+    def isCorrect(self, pos):
+        if pos is None:
+            return False
+        return self.__listPosShip[pos[0]][pos[1]]
 
-    # Hàm tự động đặt tàu (bạn cần bổ sung logic đặt tàu hợp lệ)
+    def grid_to_pixel(self, cell_x, cell_y):
+        pixel_x = FIELD_COORD[0] + cell_x * CELL_SIZE[0] + 3
+        pixel_y = FIELD_COORD[1] + cell_y * CELL_SIZE[1] + 3
+        return pixel_x, pixel_y
+
     def auto_place_ships(self):
-        # Ví dụ: đặt ngẫu nhiên các tàu trong danh sách
-        import random
-        for ship in self.__listShips:
+        ship_sizes = [5, 4, 3, 3, 2]
+        self.__listShips = []
+
+        for idx, size in enumerate(ship_sizes):
             placed = False
             while not placed:
-                # random vị trí x, y trên bảng
-                x = random.randint(FIELD_COORD[0], FIELD_COORD[0] + FIELD_WIDTH - ship.width)
-                y = random.randint(FIELD_COORD[1], FIELD_COORD[1] + FIELD_HEIGHT - ship.height)
-                # chuyển về vị trí chuẩn theo ô lưới
-                x = FIELD_COORD[0] + ((x - FIELD_COORD[0]) // CELL_SIZE[0]) * CELL_SIZE[0]
-                y = FIELD_COORD[1] + ((y - FIELD_COORD[1]) // CELL_SIZE[1]) * CELL_SIZE[1]
+                horizontal = random.choice([True, False])
 
-                # kiểm tra không đè lên tàu khác
-                collision = False
-                for other in self.__listShips:
-                    if other == ship:
-                        continue
-                    rect1 = pygame.Rect(x, y, ship.width, ship.height)
-                    rect2 = pygame.Rect(other.loc[0], other.loc[1], other.width, other.height)
-                    if rect1.colliderect(rect2):
-                        collision = True
+                if horizontal:
+                    cell_x = random.randint(0, self.__boardWidth - size)
+                    cell_y = random.randint(0, self.__boardHeight - 1)
+                else:
+                    cell_x = random.randint(0, self.__boardWidth - 1)
+                    cell_y = random.randint(0, self.__boardHeight - size)
+
+                can_place = True
+                for i in range(size):
+                    x = cell_x + (i if horizontal else 0)
+                    y = cell_y + (0 if horizontal else i)
+                    if self.__listPosShip[x][y]:
+                        can_place = False
                         break
-                if not collision:
-                    ship.loc = (x, y)
+
+                if can_place:
+                    for i in range(size):
+                        x = cell_x + (i if horizontal else 0)
+                        y = cell_y + (0 if horizontal else i)
+                        self.__listPosShip[x][y] = True
+
+                    start_pixel = self.grid_to_pixel(cell_x, cell_y)
+                    path = None
+                    for p in listPathShip:
+                        if p[2] == size:  
+                            path = p[0]
+                            break
+
+                    if path is None:
+                        path = listPathShip[0][0]
+
+                    ship = Ship(start_pixel, path, idx)
+                    self.__listShips.append(ship)
                     placed = True
 
-        self.calListPosShip()
         self.isReady = True
- 
 
-            
+    def ready(self):
+        return self.isReady
+    def makeHit(self):
+        hit, pos = self.botLogic.takeTurn()
+        if hit is False and pos is None:
+            return None
+        return pos
