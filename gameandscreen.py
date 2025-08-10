@@ -153,6 +153,7 @@ class PrepareScreen(Screen):
         if self.readyBtn.handleEvent(event):
             self.readyBtn.disable()
             self.screenManager.game.ready()
+            self.screenManager.game.player.isFinish = False
     
     def draw(self):
         self.background.draw()
@@ -289,7 +290,7 @@ class OnlineMode():
 
                 if self.signalRecieve.type == "WAITING_PL":
                     self.manager.currentScreen.timer.setText(str(int(self.signalRecieve.data)))
-                    if time.time() - self.signalRecieve.coolDown > COOL_DOWN and self.player.canFire == False:
+                    if self.signalRecieve.coolDown > COOL_DOWN and self.player.canFire == False:
                         self.player.canFire = True
 
                 if self.signalRecieve.type == "FIRERESULT":
@@ -316,3 +317,12 @@ class OnlineMode():
         if self.signalRecieve.phase == "END":
             if not isinstance(self.manager.currentScreen, EndScreen):
                 self.manager.changeScreen(EndScreen(self.manager, self.manager.window, self.signalRecieve.data))
+                self.player.isFinish = True
+                self.signalSend.data = self.player.listShip
+                self.signalSend.type = "MYSHIP"
+
+            if self.signalRecieve.type == "ENEMYSHIP":
+                self.player.listEnemyShip = self.signalRecieve.data
+                self.signalSend.type = None
+                self.signalSend.data = None
+            
