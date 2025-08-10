@@ -81,8 +81,8 @@ class CreateRoom(Screen):
     def handleEvent(self, event):
         if self.backBtn.handleEvent(event):
             self.screenManager.changeScreen(FindingScreen(self.screenManager, self.window))
-            self.screenManager.game.type = None
-            self.screenManager.game.roomID = None
+            self.screenManager.game.signalSend.type = None
+            self.screenManager.game.signalSend.roomID = None
 
     def draw(self):
         self.roomIDText.draw()
@@ -99,11 +99,11 @@ class JoinRoom(Screen):
     def handleEvent(self, event):
         self.roomIDInput.handleEvent(event)
         if self.enterBtn.handleEvent(event):
-            self.screenManager.game.roomID = self.roomIDInput.getValue()
+            self.screenManager.game.signalSend.roomID = self.roomIDInput.getValue()
         if self.backBtn.handleEvent(event):
             self.screenManager.changeScreen(FindingScreen(self.screenManager, self.window))
-            self.screenManager.game.type = None
-            self.screenManager.game.roomID = None
+            self.screenManager.game.signalSend.type = None
+            self.screenManager.game.signalSend.roomID = None
 
     def draw(self):
         self.backBtn.draw()
@@ -198,68 +198,66 @@ class OnlineMode():
         self.manager = manager
         self.player = Player(self.manager.window)
         self.network = NetWork(serverIP)
-        self.roomID = None
-        self.type = None
-        self.data = None
+        self.signalSend = SignalSended()
+        self.signalRecieve = SignalRecieved()
 
     def createRoom(self):
-        self.roomID = str(random.randint(10000, 99999))
-        return self.roomID
+        self.signalSend.roomID = str(random.randint(10000, 99999))
+        return self.signalSend.roomID
     
     def ready(self):
-        self.type = "READY"
-        self.data = self.player.calListPosShip()
+        self.signalSend.type = "READY"
+        self.signalSend.data = self.player.calListPosShip()
         self.player.isReady = True
 
     def running(self, event):
-        if self.type is None or self.roomID is None or self.roomID == "":
+        if self.signalSend.type is None or self.signalSend.roomID is None or self.signalSend.roomID == "":
             return
-        newSignal = SignalSended(self.type, self.roomID, self.data)
-        respon = self.network.send(newSignal)
-        if respon.phase == "PREPARE":
+        self.signalRecieve = self.network.send(self.signalSend)
+        if self.signalRecieve.phase == "PREPARE":
             if not isinstance(self.manager.currentScreen, PrepareScreen):
                 self.manager.changeScreen(PrepareScreen(self.manager, self.manager.window))
-                self.type = "WAITING_PR"
-                self.data = None
+                self.signalSend.type = "WAITING_PR"
+                self.signalSend.data = None
             self.player.handleEvent(event)
 
-        if respon.phase == "PLAYING":
-            if respon.turnIP == respon.playerIP:
+        if self.signalRecieve.phase == "PLAYING":
+            if self.signalRecieve.turnIP == self.signalRecieve.playerIP:
                 if not isinstance(self.manager.currentScreen, MyTurnScreen):
                     self.manager.changeScreen(MyTurnScreen(self.manager, self.manager.window))
                     self.player.canFire = True
-                    self.type = "WAITING_PL"
-                    self.data = len(self.player.listEnemyTorpedo)
+                    self.signalSend.type = "WAITING_PL"
+                    self.signalSend.data = len(self.player.listEnemyTorpedo)
                 
                 res = self.player.handleEvent(event)
                 if res:
                     self.player.canFire = False
-                    self.type = "FIRE"
-                    self.data = res
+                    self.signalSend.type = "FIRE"
+                    self.signalSend.data = res
 
-                if respon.type == "WAITING_PL":
-                    self.manager.currentScreen.timer.setText(str(int(TIME_EACH_TURN - (time.time() - respon.data))))
+                if self.signalRecieve.type == "WAITING_PL":
+                    self.manager.currentScreen.timer.setText(str(int(TIME_EACH_TURN - (time.time() - self.signalRecieve.data))))
 
-                if respon.type == "FIRERESULT":
-                    self.player.listMyTorpedo.append(Torpedo(self.manager.window, self.data, listPathTopedoA, pathImageTorpedo, respon.data, 100))
-                    self.type = "WAITING_PL"
-                    self.data = len(self.player.listEnemyTorpedo)
+                if self.signalRecieve.type == "FIRERESULT":
+                    self.player.listMyTorpedo.append(Torpedo(self.manager.window, self.data, listPathTopedoA, pathImageTorpedo, self.signalRecieve.data, 100))
+                    self.signalSend.type = "WAITING_PL"
+                    self.signalSend.data = len(self.player.listEnemyTorpedo)
 
             else:
                 if not isinstance(self.manager.currentScreen, EnemyTurnScreen):
                     self.manager.changeScreen(EnemyTurnScreen(self.manager, self.manager.window))
-                    self.type = "WAITING_PL"
-                    self.canFire = True
+                    self.signalSend.type = "WAITING_PL"
+                    self.player.canFire = True
     
-                self.data = len(self.player.listEnemyTorpedo)
+                self.signalSend.data = len(self.player.listEnemyTorpedo)
 
-                if respon.type == "WAITING_PL":
-                    self.manager.currentScreen.timer.setText(str(int(TIME_EACH_TURN - (time.time() - respon.data))))
+                if self.signalRecieve.type == "WAITING_PL":
+                    self.manager.currentScreen.timer.setText(str(int(TIME_EACH_TURN - (time.time() - self.signalRecieve.data))))
                 
-                if respon.type == "ENEMYFIRE":
-                    if self.canFire:
-                        self.player.listEnemyTorpedo.append(Torpedo(self.manager.window, respon.data, listPathTopedoA, pathImageTorpedo, self.player.isCorrect(respon.data), 100))
-                        self.canFire = False
+                if self.signalRecieve.type == "ENEMYFIRE":
+                    if self.player.canFire:
+                        self.player.listEnemyTorpedo.append(Torpedo(self.manager.window, self.signalRecieve.data, listPathTopedoA, pathImageTorpedo, self.player.isCorrect(self.signalRecieve.data), 100))
+                        self.player.canFire = False
 
 
     def draw(self):
