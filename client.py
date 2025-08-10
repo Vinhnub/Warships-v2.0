@@ -33,7 +33,7 @@ while True:
 
     main.draw()
 
-    pygame.display.update()
+    pygame.display.update() 
     
     
     clock.tick(FRAMES_PER_SECOND) 

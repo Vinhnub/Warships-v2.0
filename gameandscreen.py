@@ -261,6 +261,7 @@ class OnlineMode():
                 res = self.player.handleEvent(event)
                 if res:
                     self.player.canFire = False
+                    self.player.lastPosFire = res
                     self.signalSend.type = "FIRE"
                     self.signalSend.data = res
 
@@ -268,7 +269,7 @@ class OnlineMode():
                     self.manager.currentScreen.timer.setText(str(int(self.signalRecieve.data)))
 
                 if self.signalRecieve.type == "FIRERESULT":
-                    self.player.listMyTorpedo.append(Torpedo(self.manager.window, self.signalSend.data, listPathTopedoA, pathImageTorpedo, self.signalRecieve.data, 100))
+                    self.player.listMyTorpedo.append(Torpedo(self.manager.window, self.player.lastPosFire, listPathTopedoA, pathImageTorpedo, self.signalRecieve.data, 100))
                     self.signalSend.type = "WAITING_PL"
                     self.signalSend.data = len(self.player.listEnemyTorpedo)
 
