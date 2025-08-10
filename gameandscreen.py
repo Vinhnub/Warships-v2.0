@@ -219,19 +219,16 @@ class OnlineMode():
         self.signalRecieve = SignalRecieved()
         self.isRun = False
         self.sendLock = threading.Lock()
-        self.isStart = False
         
     def reset(self):
         self.isRun = False
         self.signalSend = SignalSended()
         self.signalRecieve = SignalRecieved()
         self.player = Player(self.manager.window)
-
+    
     def start(self):
-        if not self.isStart:
-            self.isStart = True
-            threading.Thread(target=self.updSender, daemon=True).start()
-            threading.Thread(target=self.udpReciever, daemon=True).start()
+        threading.Thread(target=self.updSender, daemon=True).start()
+        threading.Thread(target=self.udpReciever, daemon=True).start()
 
     def createRoom(self):
         self.signalSend.roomID = str(random.randint(10000, 99999))
