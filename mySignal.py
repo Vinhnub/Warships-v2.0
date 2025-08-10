@@ -1,5 +1,5 @@
 class SignalSended():
-    def __init__(self, type, roomID, data=None):
+    def __init__(self, type=None, roomID=None, data=None):
         self.type = type #wait, fire, createroom, joinroom
         self.roomID = roomID
         self.data = data
@@ -8,7 +8,7 @@ class SignalSended():
         return str(self.type) + " " + str(self.roomID) + " " + str(self.data) 
     
 class SignalRecieved():
-    def __init__(self, phase, type=None, turnIP=None, playerIP=None, data=None):
+    def __init__(self, phase=None, type=None, turnIP=None, playerIP=None, data=None):
         self.phase = phase
         self.type = type
         self.turnIP = turnIP

@@ -117,7 +117,7 @@ def handleData(obj, addr):
                                       type="WAITING_PL",
                                       turnIP=serverData[obj.roomID]["LISTPLAYER"][serverData[obj.roomID]["TURNINDEX"]], 
                                       playerIP=addr[0],
-                                      data=serverData[obj.roomID]["TIME"])
+                                      data=TIME_EACH_TURN - (time.time() - serverData[obj.roomID]["TIME"]))
             else:
                 return SignalRecieved(serverData[obj.roomID]["PHASE"], 
                                       type="ENEMYFIRE", 
@@ -151,7 +151,7 @@ def handleData(obj, addr):
                               type="WAITING_PL",
                               turnIP=serverData[obj.roomID]["LISTPLAYER"][serverData[obj.roomID]["TURNINDEX"]], 
                               playerIP=addr[0],
-                              data=serverData[obj.roomID]["TIME"])
+                              data=TIME_EACH_TURN - (time.time() - serverData[obj.roomID]["TIME"]))
     
 
 def handleRequest(data, addr):
