@@ -66,7 +66,7 @@ def handleData(obj, addr):
                                               "listTorpedo" : [],
                                               "lastPosFire" : None,
                                               "numCorrect" : 0,
-                                              "coolDown" : None
+                                              "coolDown" : 0
                                           }
                                         }
                                       }
@@ -129,7 +129,7 @@ def handleData(obj, addr):
                                       turnIP=serverData[obj.roomID]["LISTPLAYER"][serverData[obj.roomID]["TURNINDEX"]], 
                                       playerIP=addr[0],
                                       data=TIME_EACH_TURN - (time.time() - serverData[obj.roomID]["TIME"]), 
-                                      timeCoolDown=serverData[obj.roomID]["PLAYER"][addr[0]]["timeCoolDown"])
+                                      coolDown=serverData[obj.roomID]["PLAYER"][addr[0]]["coolDown"])
             else:
                 return SignalRecieved(serverData[obj.roomID]["PHASE"], 
                                       type="ENEMYFIRE", 
