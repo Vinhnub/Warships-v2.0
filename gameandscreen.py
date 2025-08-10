@@ -4,7 +4,7 @@ from abc import abstractmethod
 from player import *
 from network import *
 import pygwidgets
-from bot import *
+from botLogic import *
 import random
 from mySignal import *
 from constants import *
