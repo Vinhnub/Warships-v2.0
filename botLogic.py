@@ -6,13 +6,12 @@ class Bot:
         self._board = [[0] * self._BOARD_SIZE for _ in range(self._BOARD_SIZE)]
         self._cells = [(x, y) for x in range(self._BOARD_SIZE) for y in range(self._BOARD_SIZE)]
         self._ships = [
-            [(0, 0), (0, 1), (0, 2), (0, 3), (0, 4)],
-            [(2, 2), (3, 2), (4, 2), (5, 2)],
-            [(7, 0), (7, 1), (7, 2)],
-            [(5, 5), (6, 5)],
-            [(9, 9)]
+            [(0,0),(0,1),(0,2),(0,3),(0,4)],     # 5 ô
+            [(2,2),(3,2),(4,2),(5,2)],           # 4 ô
+            [(7,0),(7,1),(7,2)],                 # 3 ô
+            [(5,5),(5,6),(5,7)],                 # 3 ô
+            [(9,8),(9,9)]                       # 2 ô
         ]
-
         self._turnCount = 0
         self._preSuspicious = []
         self._suspicious = []
@@ -22,6 +21,7 @@ class Bot:
         self._remainShips = [len(ship) for ship in self._ships]
         self._rootCell = None
         self._result = None
+
     def secondBoard(self):
         secondBoard = [[0 for _ in range(self._BOARD_SIZE)] for _ in range(self._BOARD_SIZE)]
         for shipSize in self._remainShips:
@@ -38,31 +38,28 @@ class Bot:
                         for px, py in positions:
                             secondBoard[px][py] += 1
         return secondBoard
-
     def randomMode(self):
         EstimazeBoard = self.secondBoard()
-        self._suspicious = [pos for pos in self._suspicious if pos in self._cells]
-        if self._suspicious:
-            maxValue = max(EstimazeBoard[x][y] for (x, y) in self._suspicious)
-            bestCells = [(x, y) for (x, y) in self._suspicious if EstimazeBoard[x][y] == maxValue]
+        self._preSuspicious = [pos for pos in self._preSuspicious if pos in self._cells]
+        if self._preSuspicious:
+            maxValue = max(EstimazeBoard[x][y] for (x, y) in self._preSuspicious)
+            bestCells = [(x, y) for (x, y) in self._preSuspicious if EstimazeBoard[x][y] == maxValue]
         else:
             maxValue = max(max(row) for row in EstimazeBoard)
             bestCells = [(x, y) for x in range(self._BOARD_SIZE)
                          for y in range(self._BOARD_SIZE)
                          if EstimazeBoard[x][y] == maxValue and (x, y) in self._cells]
-
         if bestCells:
             return self.checkTarget(random.choice(bestCells))
         elif self._cells:
             return self.checkTarget(random.choice(self._cells))
         else:
-        # Hết ô để bắn rồi, game kết thúc hoặc không còn nước đi
+            # Hết ô để bắn rồi, game kết thúc hoặc không còn nước đi
             return False, None
-    def isShipSunk(self, ship):
-        return all(self._board[x][y] == 1 for (x, y) in ship)
     def checkTarget(self, target):
         if target not in self._cells:
             return False, None
+        print(f"Bot bắn ô: {target}")
         self._cells.remove(target)
         self._turnCount += 1
         x, y = target
@@ -97,11 +94,9 @@ class Bot:
         self._board[x][y] = -1
         return False, None
 
-
     def huntMode(self):
         if self._direction:
             dx, dy = self._direction
-
             if self._directionMode == "forward":
                 last_x, last_y = self._streak[-1]
                 nx, ny = last_x + dx, last_y + dy
@@ -110,7 +105,6 @@ class Bot:
                 else:
                     # chuyển sang bắn backward nếu forward hết ô
                     self._directionMode = "backward"
-
             if self._directionMode == "backward":
                 first_x, first_y = self._streak[0]
                 nx, ny = first_x - dx, first_y - dy
@@ -132,12 +126,7 @@ class Bot:
                         self.resetTargeting()
                         return self.randomMode()
         else:
-            # Nếu chưa xác định hướng, bắn theo suspicious hoặc random
-            if self._suspicious:
-                return self.checkTarget(self._suspicious.pop(0))
-            else:
-                return self.randomMode()
-
+            return self.randomMode()
     def getNeighbors(self, x, y):
         possible = [(x-1,y), (x+1,y), (x,y-1), (x,y+1)]
         return [p for p in possible if p in self._cells]
@@ -147,18 +136,23 @@ class Bot:
         self._streak.clear()
         self._suspicious.clear()
         self._preSuspicious.clear()
+    def isShipSunk(self, ship):
+        return all(self._board[x][y] == 1 for (x, y) in ship)
     def takeTurn(self):
-        if self._direction or self._suspicious or self._streak:
-            self._result =  self.huntMode()
+        if self._direction or self._preSuspicious or self._streak:
+            self._result = self.huntMode()
         else:
             self._result = self.randomMode()
-        if self._result is None:
-            return False, None
         return self._result
+
 if __name__ == "__main__":
     bot = Bot()
-    for i in range(1, 100):
+    turn = 1
+    while bot._ships:  # còn tàu thì tiếp tục bắn
         hit, sunk = bot.takeTurn()
-        print(f"Lượt {i}: {'Trúng!' if hit else 'Trượt!'}")
+        print(f"Lượt {turn}: {'Trúng!' if hit else 'Trượt!'}")
         if sunk:
             print(f"→ Tàu {sunk} ô đã chìm!")
+        turn += 1
+    print("Game kết thúc, hết tàu để bắn!")
+
