@@ -9,6 +9,7 @@ import random
 from mySignal import *
 from constants import *
 import time
+import threading
 
 #============================================================ SCREEN MANAGER ============================================================
 
@@ -200,6 +201,8 @@ class OnlineMode():
         self.network = NetWork(serverIP)
         self.signalSend = SignalSended()
         self.signalRecieve = SignalRecieved()
+        self.isRunning = False
+        self.sendLock = threading.Lock()
 
     def createRoom(self):
         self.signalSend.roomID = str(random.randint(10000, 99999))
@@ -210,10 +213,35 @@ class OnlineMode():
         self.signalSend.data = self.player.calListPosShip()
         self.player.isReady = True
 
+    def updSender(self):
+        while self.isRunning:
+            time.sleep(0.05)
+            with self.sendLock:
+                packet = pickle.dumps(self.signalSend)
+            try:
+                self.network.client.sendto(packet, self.network.addr)
+            except Exception as e:
+                print("[ERROR] Lỗi khi gửi dữ liệu:", e)
+            
+
+    def udpReciever(self):
+        while self.running:
+            try:
+                data, addr = self.network.client.recvfrom(4096)
+                self.signalRecieve = pickle.loads(data)
+            except Exception as e:
+                print("[ERROR] Lỗi khi nhận dữ liệu:", e)
+        
+
     def running(self, event):
+        if self.isRunning == False:
+            self.isRunning = True
+            threading.Thread(target=self.updSender, daemon=True).start()
+            threading.Thread(target=self.udpReciever, daemon=True).start()
+
         if self.signalSend.type is None or self.signalSend.roomID is None or self.signalSend.roomID == "":
             return
-        self.signalRecieve = self.network.send(self.signalSend)
+        
         if self.signalRecieve.phase == "PREPARE":
             if not isinstance(self.manager.currentScreen, PrepareScreen):
                 self.manager.changeScreen(PrepareScreen(self.manager, self.manager.window))
