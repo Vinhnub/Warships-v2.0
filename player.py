@@ -16,10 +16,7 @@ class Player():
         self.listMyTorpedo = []
         self.listEnemyTorpedo = []
         self.canFire = None
-        self.numberCorrect = 0
-        self.numberCorrectE = 0 # number correctly fire of enermy
-        self.startTime = None # it is a time when player fire, it use for delay 3s after fire to know player fire correct or incorrect
-        self.finishGame = None # it is a time when one of players win, delay 5s and return to mainscreen
+        self.lastPosFire = None
         self.__listPosShip = [[False for _ in range(10)] for __ in range(10)]
 
     # check enermy fire correct or incorrect 
