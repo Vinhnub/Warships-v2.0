@@ -73,7 +73,7 @@ def handleData(obj, addr):
     if obj.type == "JOINROOM":
         if obj.roomID not in serverData:
             return SignalRecieved("INVALID")
-        else:
+        elif serverData[obj.roomID]["PHASE"] == "CREATEROOM":
             if len(serverData[obj.roomID]["LISTPLAYER"]) >= 2:
                 return SignalRecieved("INVALID")
             else:
@@ -161,7 +161,7 @@ def handleRequest(data, addr):
         logging.info(f"{obj} {addr} {result}")
         response = pickle.dumps(result)
         server_socket.sendto(response, addr)
-        #printdata(serverData)
+        printdata(serverData)
     except Exception as e:
         logging.error(f"[SERVER ERROR] Gói tin từ {addr} bị lỗi: {e}")
 

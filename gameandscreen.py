@@ -132,6 +132,7 @@ class FindingScreen(Screen):
         if self.backBtn.handleEvent(event):
             self.screenManager.changeScreen(MenuScreen(self.screenManager, self.window))
             self.screenManager.player = None
+            self.screenManager.game = None
         if self.createBtn.handleEvent(event):
             self.screenManager.game.signalSend.type = "CREATEROOM"
             self.screenManager.changeScreen(CreateRoom(self.screenManager, self.window, self.screenManager.game.createRoom()))
@@ -233,7 +234,7 @@ class OnlineMode():
                 print("[ERROR] Lỗi khi nhận dữ liệu:", e)
         
 
-    def running(self, event):
+    def running(self, event=None):
         if self.isRunning == False:
             self.isRunning = True
             threading.Thread(target=self.updSender, daemon=True).start()
