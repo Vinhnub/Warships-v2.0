@@ -193,8 +193,8 @@ class EndScreen(Screen):
         super().__init__(screenManager, window)
         self.banner = CustomText(self.window, (0, 0), str(isWin), resource_path("fonts/PressStart2P-Regular.ttf"), 30, (255, 255, 255))
 
-    def handleEvent(self):
-        return super().handleEvent()
+    def handleEvent(self, event):
+        pass
     
     def draw(self):
         self.banner.draw()
