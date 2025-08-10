@@ -38,6 +38,7 @@ class Player():
         if (not self.isReady):
             self.moveShip(event)
         if self.canFire:
+            self.canFire = False
             return self.fire(event)
         return False
 

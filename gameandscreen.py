@@ -283,18 +283,14 @@ class OnlineMode():
                 
                 res = self.player.handleEvent(event)
                 if res:
-                    self.player.canFire = False
                     self.player.lastPosFire = res
                     self.signalSend.type = "FIRE"
                     self.signalSend.data = res
 
                 if self.signalRecieve.type == "WAITING_PL":
                     self.manager.currentScreen.timer.setText(str(int(self.signalRecieve.data)))
-                    try:
-                        if time.time() - self.signalRecieve.coolDown > COOL_DOWN and self.player.canFire == False:
-                            self.player.canFire = True
-                    except:
-                        print(self.signalRecieve.coolDown)
+                    if time.time() - self.signalRecieve.coolDown > COOL_DOWN and self.player.canFire == False:
+                        self.player.canFire = True
 
                 if self.signalRecieve.type == "FIRERESULT":
                     self.player.listMyTorpedo.append(Torpedo(self.manager.window, self.player.lastPosFire, listPathTopedoA, pathImageTorpedo, self.signalRecieve.data, 100))
