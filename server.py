@@ -118,10 +118,10 @@ def handleData(obj, addr):
 
                 player1 = serverData[obj.roomID]["LISTPLAYER"][0]
                 player2 = serverData[obj.roomID]["LISTPLAYER"][1]
-                if serverData[obj.roomID]["PLAYER"][player1]["numCorrect"] >= 3 or serverData[obj.roomID]["PLAYER"][player2]["numCorrect"] >= 3:
+                if serverData[obj.roomID]["PLAYER"][player1]["numCorrect"] >= NUM_CELL_SHIP or serverData[obj.roomID]["PLAYER"][player2]["numCorrect"] >= NUM_CELL_SHIP:
                     serverData[obj.roomID]["PHASE"] = "END"
                     return SignalRecieved(serverData[obj.roomID]["PHASE"],
-                              data=(serverData[obj.roomID]["PLAYER"][addr[0]]["numCorrect"] >= 3))
+                              data=(serverData[obj.roomID]["PLAYER"][addr[0]]["numCorrect"] >= NUM_CELL_SHIP))
 
                 return SignalRecieved(serverData[obj.roomID]["PHASE"],  
                                       type="WAITING_PL",
@@ -166,7 +166,7 @@ def handleData(obj, addr):
     
     if serverData[obj.roomID]["PHASE"] == "END":
         return SignalRecieved(serverData[obj.roomID]["PHASE"],
-                              data=(serverData[obj.roomID]["PLAYER"][addr[0]]["numCorrect"] >= 3))
+                              data=(serverData[obj.roomID]["PLAYER"][addr[0]]["numCorrect"] >= NUM_CELL_SHIP))
 
 
 def handleRequest(data, addr):
