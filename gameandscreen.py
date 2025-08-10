@@ -95,15 +95,13 @@ class FindingScreen(Screen):
             self.screenManager.game = None
         if self.createBtn.handleEvent(event):
             self.screenManager.game.signalSend.type = "CREATEROOM"
-            self.screenManager.game.isRunning = True
-            threading.Thread(target=self.screenManager.game.updSender, daemon=True).start()
-            threading.Thread(target=self.screenManager.game.udpReciever, daemon=True).start()
+            self.screenManager.game.isRun = True
+            self.screenManager.game.start()
             self.screenManager.changeScreen(CreateRoom(self.screenManager, self.window, self.screenManager.game.createRoom()))
         if self.joinBtn.handleEvent(event):
             self.screenManager.game.signalSend.type = "JOINROOM"
-            self.screenManager.game.isRunning = True
-            threading.Thread(target=self.screenManager.game.updSender, daemon=True).start()
-            threading.Thread(target=self.screenManager.game.udpReciever, daemon=True).start()
+            self.screenManager.game.isRun = True
+            self.screenManager.game.start()
             self.screenManager.changeScreen(JoinRoom(self.screenManager, self.window))
 
 
@@ -190,6 +188,17 @@ class EnemyTurnScreen(Screen):
         self.screenManager.game.player.draw(self.window, False)
         self.timer.draw()
 
+class EndScreen(Screen):
+    def __init__(self, screenManager, window, isWin): 
+        super().__init__(screenManager, window)
+        self.banner = CustomText(self.window, (0, 0), str(isWin), resource_path("fonts/PressStart2P-Regular.ttf"), 30, (255, 255, 255))
+
+    def handleEvent(self):
+        return super().handleEvent()
+    
+    def draw(self):
+        self.banner.draw()
+
 # ============================================================ MODE ============================================================
 
 class OfflineMode():
@@ -205,14 +214,21 @@ class OnlineMode():
         self.network = NetWork(serverIP)
         self.signalSend = SignalSended()
         self.signalRecieve = SignalRecieved()
-        self.isRunning = False
+        self.isRun = False
         self.sendLock = threading.Lock()
-
+        self.isStart = False
+        
     def reset(self):
-        self.isRunning = False
+        self.isRun = False
         self.signalSend = SignalSended()
         self.signalRecieve = SignalRecieved()
         self.player = Player(self.manager.window)
+
+    def start(self):
+        if not self.isStart:
+            self.isStart = True
+            threading.Thread(target=self.updSender, daemon=True).start()
+            threading.Thread(target=self.udpReciever, daemon=True).start()
 
     def createRoom(self):
         self.signalSend.roomID = str(random.randint(10000, 99999))
@@ -224,7 +240,7 @@ class OnlineMode():
         self.player.isReady = True
 
     def updSender(self):
-        while self.isRunning:
+        while self.isRun:
             time.sleep(0.05)
             with self.sendLock:
                 packet = pickle.dumps(self.signalSend)
@@ -235,7 +251,7 @@ class OnlineMode():
             
 
     def udpReciever(self):
-        while self.isRunning:
+        while self.isRun:
             try:
                 data, addr = self.network.client.recvfrom(4096)
                 self.signalRecieve = pickle.loads(data)
@@ -244,7 +260,7 @@ class OnlineMode():
         
 
     def running(self, event=None):
-        if self.isRunning == False:
+        if not self.isRun:
             return
 
         if self.signalSend.type is None or self.signalSend.roomID is None or self.signalSend.roomID == "":
@@ -295,3 +311,7 @@ class OnlineMode():
                     if self.player.canFire:
                         self.player.listEnemyTorpedo.append(Torpedo(self.manager.window, self.signalRecieve.data, listPathTopedoA, pathImageTorpedo, self.player.isCorrect(self.signalRecieve.data), 100))
                         self.player.canFire = False
+
+        if self.signalRecieve.phase == "END":
+            if not isinstance(self.manager.currentScreen, EndScreen):
+                self.manager.changeScreen(EndScreen(self.manager, self.manager.window, self.signalRecieve.data))

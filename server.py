@@ -64,7 +64,8 @@ def handleData(obj, addr):
                                               "ready" : False,
                                               "posShip" : None,
                                               "listTorpedo" : [],
-                                              "lastPosFire" : None
+                                              "lastPosFire" : None,
+                                              "numCorrect" : 0
                                           }
                                         }
                                       }
@@ -78,7 +79,7 @@ def handleData(obj, addr):
                 return SignalRecieved("INVALID")
             else:
                 serverData[obj.roomID]["PHASE"] = "PREPARE"
-                serverData[obj.roomID]["PLAYER"][addr[0]] = {"ready" : False, "posShip" : None, "listTorpedo" : [], "lastPosFire" : None}
+                serverData[obj.roomID]["PLAYER"][addr[0]] = {"ready" : False, "posShip" : None, "listTorpedo" : [], "lastPosFire" : None, "numCorrect" : 0}
                 serverData[obj.roomID]["LISTPLAYER"].append(addr[0])
                 return SignalRecieved(serverData[obj.roomID]["PHASE"])
 
@@ -103,6 +104,11 @@ def handleData(obj, addr):
     # ======== PLAYING PHASE LOGIC ========
 
     if serverData[obj.roomID]["PHASE"] == "PLAYING":
+
+        player1 = serverData[obj.roomID]["LISTPLAYER"][0]
+        player2 = serverData[obj.roomID]["LISTPLAYER"][1]
+        if serverData[obj.roomID]["PLAYER"][player1]["numCorrect"] >= 3 or serverData[obj.roomID]["PLAYER"][player2]["numCorrect"] >= 3:
+            serverData[obj.roomID]["PHASE"] = "END"
 
         if TIME_EACH_TURN - (time.time() - serverData[obj.roomID]["TIME"]) <= 0:
             serverData[obj.roomID]["TURNINDEX"] = 1 - serverData[obj.roomID]["TURNINDEX"]
@@ -133,6 +139,7 @@ def handleData(obj, addr):
                 serverData[obj.roomID]["PLAYER"][addr[0]]["lastPosFire"] = pos
                 
             if serverData[obj.roomID]["PLAYER"][enemy]["posShip"][pos[0]][pos[1]]:
+                serverData[obj.roomID]["PLAYER"][addr[0]]["numCorrect"] += 1
                 return SignalRecieved(serverData[obj.roomID]["PHASE"], 
                                       type="FIRERESULT", 
                                       turnIP=serverData[obj.roomID]["LISTPLAYER"][serverData[obj.roomID]["TURNINDEX"]], 
@@ -153,12 +160,16 @@ def handleData(obj, addr):
                               playerIP=addr[0],
                               data=TIME_EACH_TURN - (time.time() - serverData[obj.roomID]["TIME"]))
     
+    if serverData[obj.roomID]["PHASE"] == "END":
+        return SignalRecieved(serverData[obj.roomID]["PHASE"],
+                              data=(serverData[obj.roomID]["PLAYER"]["numCorrect"] >= 3))
+
 
 def handleRequest(data, addr):
     try:
         obj = pickle.loads(data)
         result = handleData(obj, addr)
-        logging.info(f"{obj} {addr} {result}")
+        #logging.info(f"{obj} {addr} {result}")
         response = pickle.dumps(result)
         server_socket.sendto(response, addr)
         printdata(serverData)
