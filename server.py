@@ -45,8 +45,8 @@ def printdata(serverData):
 | TIME      : {TIME_EACH_TURN - time.time() + serverData[roomID]["TIME"] if serverData[roomID]["TIME"] is not None else None}
 | TURN      : {serverData[roomID]["TURNINDEX"]}
 | LISTPLAYER: {serverData[roomID]["LISTPLAYER"]}
-| PLAYER {serverData[roomID]["LISTPLAYER"][0]} : ready : {serverData[roomID]["PLAYER"][serverData[roomID]["LISTPLAYER"][0]]["ready"]}, lastPosFire : {serverData[roomID]["PLAYER"][serverData[roomID]["LISTPLAYER"][0]]["lastPosFire"]}
-| PLAYER {serverData[roomID]["LISTPLAYER"][1] if len(serverData[roomID]["LISTPLAYER"] ) > 1 else None} : ready :{serverData[roomID]["PLAYER"][serverData[roomID]["LISTPLAYER"][1]]["ready"] if len(serverData[roomID]["LISTPLAYER"]) > 1 else None}, lastPosFire : {serverData[roomID]["PLAYER"][serverData[roomID]["LISTPLAYER"][1]]["lastPosFire"] if len(serverData[roomID]["LISTPLAYER"]) > 1 else None}
+| PLAYER {serverData[roomID]["LISTPLAYER"][0]} : numCorrect : {serverData[roomID]["PLAYER"][serverData[roomID]["LISTPLAYER"][0]]["numCorrect"]}, lastPosFire : {serverData[roomID]["PLAYER"][serverData[roomID]["LISTPLAYER"][0]]["lastPosFire"]}
+| PLAYER {serverData[roomID]["LISTPLAYER"][1] if len(serverData[roomID]["LISTPLAYER"] ) > 1 else None} : numCorrect :{serverData[roomID]["PLAYER"][serverData[roomID]["LISTPLAYER"][1]]["numCorrect"] if len(serverData[roomID]["LISTPLAYER"]) > 1 else None}, lastPosFire : {serverData[roomID]["PLAYER"][serverData[roomID]["LISTPLAYER"][1]]["lastPosFire"] if len(serverData[roomID]["LISTPLAYER"]) > 1 else None}
 ===========================
 """)
 
@@ -65,7 +65,8 @@ def handleData(obj, addr):
                                               "posShip" : None,
                                               "listTorpedo" : [],
                                               "lastPosFire" : None,
-                                              "numCorrect" : 0
+                                              "numCorrect" : 0,
+                                              "coolDown" : None
                                           }
                                         }
                                       }
@@ -79,7 +80,7 @@ def handleData(obj, addr):
                 return SignalRecieved("INVALID")
             else:
                 serverData[obj.roomID]["PHASE"] = "PREPARE"
-                serverData[obj.roomID]["PLAYER"][addr[0]] = {"ready" : False, "posShip" : None, "listTorpedo" : [], "lastPosFire" : None, "numCorrect" : 0}
+                serverData[obj.roomID]["PLAYER"][addr[0]] = {"ready" : False, "posShip" : None, "listTorpedo" : [], "lastPosFire" : None, "numCorrect" : 0, "coolDown" : 0}
                 serverData[obj.roomID]["LISTPLAYER"].append(addr[0])
                 return SignalRecieved(serverData[obj.roomID]["PHASE"])
 
@@ -89,6 +90,7 @@ def handleData(obj, addr):
         if obj.type == "READY":
             serverData[obj.roomID]["PLAYER"][addr[0]]["ready"] = True
             serverData[obj.roomID]["PLAYER"][addr[0]]["posShip"] = obj.data
+            serverData[obj.roomID]["PLAYER"][addr[0]]["coolDown"] = time.time()
             enemyIndex = 1 - serverData[obj.roomID]["LISTPLAYER"].index(addr[0])
             enemy = serverData[obj.roomID]["LISTPLAYER"][enemyIndex]
             if serverData[obj.roomID]["PLAYER"][enemy]["ready"]:
@@ -104,7 +106,6 @@ def handleData(obj, addr):
     # ======== PLAYING PHASE LOGIC ========
 
     if serverData[obj.roomID]["PHASE"] == "PLAYING":
-
 
         if TIME_EACH_TURN - (time.time() - serverData[obj.roomID]["TIME"]) <= 0:
             serverData[obj.roomID]["TURNINDEX"] = 1 - serverData[obj.roomID]["TURNINDEX"]
@@ -127,7 +128,8 @@ def handleData(obj, addr):
                                       type="WAITING_PL",
                                       turnIP=serverData[obj.roomID]["LISTPLAYER"][serverData[obj.roomID]["TURNINDEX"]], 
                                       playerIP=addr[0],
-                                      data=TIME_EACH_TURN - (time.time() - serverData[obj.roomID]["TIME"]))
+                                      data=TIME_EACH_TURN - (time.time() - serverData[obj.roomID]["TIME"]), 
+                                      timeCoolDown=serverData[obj.roomID]["PLAYER"][addr[0]]["timeCoolDown"])
             else:
                 return SignalRecieved(serverData[obj.roomID]["PHASE"], 
                                       type="ENEMYFIRE", 
@@ -137,26 +139,27 @@ def handleData(obj, addr):
             
         if obj.type == "FIRE":
             pos = obj.data
-            serverData[obj.roomID]["TIME"] = time.time() - (TIME_EACH_TURN - 4)
             if pos != serverData[obj.roomID]["PLAYER"][addr[0]]["lastPosFire"]: 
                 serverData[obj.roomID]["PLAYER"][addr[0]]["listTorpedo"].append(pos)
-                serverData[obj.roomID]["PLAYER"][addr[0]]["lastPosFire"] = pos
+                serverData[obj.roomID]["PLAYER"][addr[0]]["coolDown"] = time.time()
                 
             if serverData[obj.roomID]["PLAYER"][enemy]["posShip"][pos[0]][pos[1]]:
-                serverData[obj.roomID]["PLAYER"][addr[0]]["numCorrect"] += 1
+                if pos != serverData[obj.roomID]["PLAYER"][addr[0]]["lastPosFire"]:
+                    serverData[obj.roomID]["PLAYER"][addr[0]]["numCorrect"] += 1
+                    serverData[obj.roomID]["PLAYER"][addr[0]]["lastPosFire"] = pos
                 return SignalRecieved(serverData[obj.roomID]["PHASE"], 
                                       type="FIRERESULT", 
                                       turnIP=serverData[obj.roomID]["LISTPLAYER"][serverData[obj.roomID]["TURNINDEX"]], 
                                       playerIP=addr[0], 
                                       data=True)
             else:
+                serverData[obj.roomID]["PLAYER"][addr[0]]["lastPosFire"] = pos
+                serverData[obj.roomID]["TIME"] = time.time() - (TIME_EACH_TURN - 4)
                 return SignalRecieved(serverData[obj.roomID]["PHASE"], 
                                       type="FIRERESULT", 
                                       turnIP=serverData[obj.roomID]["LISTPLAYER"][serverData[obj.roomID]["TURNINDEX"]], 
                                       playerIP=addr[0], 
                                       data=False)
-            
-
         
         return SignalRecieved(serverData[obj.roomID]["PHASE"], 
                               type="WAITING_PL",
