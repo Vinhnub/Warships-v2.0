@@ -72,46 +72,6 @@ class MenuScreen(Screen):
                 self.screenManager.changeScreen(FindingScreen(self.screenManager, self.window))
                 self.screenManager.game = OnlineMode(self.screenManager, res[1])
 
-
-class CreateRoom(Screen):
-    def __init__(self, screenManager, window, roomID):
-        super().__init__(screenManager, window)
-        self.roomIDText = CustomText(window, (500, 350), roomID, resource_path("fonts/PressStart2P-Regular.ttf"), font_size=50, color=(255, 255, 255))
-        self.backBtn = AnimatedButton(self.window, (550, 450), [resource_path("assets/images/buttons/backBtn_u.png")], [resource_path("assets/images/buttons/backBtn_d.png")])
-
-    def handleEvent(self, event):
-        if self.backBtn.handleEvent(event):
-            self.screenManager.changeScreen(FindingScreen(self.screenManager, self.window))
-            self.screenManager.game.signalSend.type = None
-            self.screenManager.game.signalSend.roomID = None
-
-    def draw(self):
-        self.roomIDText.draw()
-        self.backBtn.draw()
-
-
-class JoinRoom(Screen):
-    def __init__(self, screenManager, window):
-        super().__init__(screenManager, window)
-        self.roomIDInput = pygwidgets.InputText(self.window, (500, 400), fontSize=50, width=300)
-        self.backBtn = AnimatedButton(self.window, (550, 450), [resource_path("assets/images/buttons/backBtn_u.png")], [resource_path("assets/images/buttons/backBtn_d.png")])
-        self.enterBtn = AnimatedButton(self.window, (550, 550), [resource_path("assets/images/buttons/enterBtn_u.png")], [resource_path("assets/images/buttons/enterBtn_d.png")])
-
-    def handleEvent(self, event):
-        self.roomIDInput.handleEvent(event)
-        if self.enterBtn.handleEvent(event):
-            self.screenManager.game.signalSend.roomID = self.roomIDInput.getValue()
-        if self.backBtn.handleEvent(event):
-            self.screenManager.changeScreen(FindingScreen(self.screenManager, self.window))
-            self.screenManager.game.signalSend.type = None
-            self.screenManager.game.signalSend.roomID = None
-
-    def draw(self):
-        self.backBtn.draw()
-        self.roomIDInput.draw()
-        self.enterBtn.draw()
-        
-
 class FindingScreen(Screen):
     def __init__(self, screenManager, window):
         super().__init__(screenManager, window)
@@ -135,11 +95,54 @@ class FindingScreen(Screen):
             self.screenManager.game = None
         if self.createBtn.handleEvent(event):
             self.screenManager.game.signalSend.type = "CREATEROOM"
+            self.screenManager.game.isRunning = True
+            threading.Thread(target=self.screenManager.game.updSender, daemon=True).start()
+            threading.Thread(target=self.screenManager.game.udpReciever, daemon=True).start()
             self.screenManager.changeScreen(CreateRoom(self.screenManager, self.window, self.screenManager.game.createRoom()))
         if self.joinBtn.handleEvent(event):
             self.screenManager.game.signalSend.type = "JOINROOM"
+            self.screenManager.game.isRunning = True
+            threading.Thread(target=self.screenManager.game.updSender, daemon=True).start()
+            threading.Thread(target=self.screenManager.game.udpReciever, daemon=True).start()
             self.screenManager.changeScreen(JoinRoom(self.screenManager, self.window))
 
+
+class CreateRoom(Screen):
+    def __init__(self, screenManager, window, roomID):
+        super().__init__(screenManager, window)
+        self.roomIDText = CustomText(window, (500, 350), roomID, resource_path("fonts/PressStart2P-Regular.ttf"), font_size=50, color=(255, 255, 255))
+        self.backBtn = AnimatedButton(self.window, (550, 450), [resource_path("assets/images/buttons/backBtn_u.png")], [resource_path("assets/images/buttons/backBtn_d.png")])
+
+    def handleEvent(self, event):
+        if self.backBtn.handleEvent(event):
+            self.screenManager.changeScreen(FindingScreen(self.screenManager, self.window))
+            self.screenManager.game.reset()
+
+    def draw(self):
+        self.roomIDText.draw()
+        self.backBtn.draw()
+
+
+class JoinRoom(Screen):
+    def __init__(self, screenManager, window):
+        super().__init__(screenManager, window)
+        self.roomIDInput = pygwidgets.InputText(self.window, (500, 400), fontSize=50, width=300)
+        self.backBtn = AnimatedButton(self.window, (550, 450), [resource_path("assets/images/buttons/backBtn_u.png")], [resource_path("assets/images/buttons/backBtn_d.png")])
+        self.enterBtn = AnimatedButton(self.window, (550, 550), [resource_path("assets/images/buttons/enterBtn_u.png")], [resource_path("assets/images/buttons/enterBtn_d.png")])
+
+    def handleEvent(self, event):
+        self.roomIDInput.handleEvent(event)
+        if self.enterBtn.handleEvent(event):
+            self.screenManager.game.signalSend.roomID = self.roomIDInput.getValue()
+        if self.backBtn.handleEvent(event):
+            self.screenManager.changeScreen(FindingScreen(self.screenManager, self.window))
+            self.screenManager.game.reset()
+
+    def draw(self):
+        self.backBtn.draw()
+        self.roomIDInput.draw()
+        self.enterBtn.draw()
+        
 
 class PrepareScreen(Screen):
     def __init__(self, screenManager, window):
@@ -205,6 +208,12 @@ class OnlineMode():
         self.isRunning = False
         self.sendLock = threading.Lock()
 
+    def reset(self):
+        self.isRunning = False
+        self.signalSend = SignalSended()
+        self.signalRecieve = SignalRecieved()
+        self.player = Player(self.manager.window)
+
     def createRoom(self):
         self.signalSend.roomID = str(random.randint(10000, 99999))
         return self.signalSend.roomID
@@ -226,7 +235,7 @@ class OnlineMode():
             
 
     def udpReciever(self):
-        while self.running:
+        while self.isRunning:
             try:
                 data, addr = self.network.client.recvfrom(4096)
                 self.signalRecieve = pickle.loads(data)
@@ -236,9 +245,7 @@ class OnlineMode():
 
     def running(self, event=None):
         if self.isRunning == False:
-            self.isRunning = True
-            threading.Thread(target=self.updSender, daemon=True).start()
-            threading.Thread(target=self.udpReciever, daemon=True).start()
+            return
 
         if self.signalSend.type is None or self.signalSend.roomID is None or self.signalSend.roomID == "":
             return
@@ -288,10 +295,3 @@ class OnlineMode():
                     if self.player.canFire:
                         self.player.listEnemyTorpedo.append(Torpedo(self.manager.window, self.signalRecieve.data, listPathTopedoA, pathImageTorpedo, self.player.isCorrect(self.signalRecieve.data), 100))
                         self.player.canFire = False
-
-
-    def draw(self):
-        pass
-
-
-
