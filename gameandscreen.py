@@ -132,10 +132,10 @@ class FindingScreen(Screen):
             self.screenManager.changeScreen(MenuScreen(self.screenManager, self.window))
             self.screenManager.player = None
         if self.createBtn.handleEvent(event):
-            self.screenManager.game.type = "CREATEROOM"
+            self.screenManager.game.signalSend.type = "CREATEROOM"
             self.screenManager.changeScreen(CreateRoom(self.screenManager, self.window, self.screenManager.game.createRoom()))
         if self.joinBtn.handleEvent(event):
-            self.screenManager.game.type = "JOINROOM"
+            self.screenManager.game.signalSend.type = "JOINROOM"
             self.screenManager.changeScreen(JoinRoom(self.screenManager, self.window))
 
 
@@ -236,10 +236,10 @@ class OnlineMode():
                     self.signalSend.data = res
 
                 if self.signalRecieve.type == "WAITING_PL":
-                    self.manager.currentScreen.timer.setText(str(int(TIME_EACH_TURN - (time.time() - self.signalRecieve.data))))
+                    self.manager.currentScreen.timer.setText(str(int(self.signalRecieve.data)))
 
                 if self.signalRecieve.type == "FIRERESULT":
-                    self.player.listMyTorpedo.append(Torpedo(self.manager.window, self.data, listPathTopedoA, pathImageTorpedo, self.signalRecieve.data, 100))
+                    self.player.listMyTorpedo.append(Torpedo(self.manager.window, self.signalSend.data, listPathTopedoA, pathImageTorpedo, self.signalRecieve.data, 100))
                     self.signalSend.type = "WAITING_PL"
                     self.signalSend.data = len(self.player.listEnemyTorpedo)
 
@@ -252,7 +252,7 @@ class OnlineMode():
                 self.signalSend.data = len(self.player.listEnemyTorpedo)
 
                 if self.signalRecieve.type == "WAITING_PL":
-                    self.manager.currentScreen.timer.setText(str(int(TIME_EACH_TURN - (time.time() - self.signalRecieve.data))))
+                    self.manager.currentScreen.timer.setText(str(int(self.signalRecieve.data)))
                 
                 if self.signalRecieve.type == "ENEMYFIRE":
                     if self.player.canFire:

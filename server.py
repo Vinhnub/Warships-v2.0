@@ -158,7 +158,7 @@ def handleRequest(data, addr):
     try:
         obj = pickle.loads(data)
         result = handleData(obj, addr)
-        #logging.info(f"{obj} {addr} {result}")
+        logging.info(f"{obj} {addr} {result}")
         response = pickle.dumps(result)
         server_socket.sendto(response, addr)
         #printdata(serverData)
