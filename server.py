@@ -173,7 +173,8 @@ def handleData(obj, addr):
                               type="WAITING_PL",
                               turnIP=serverData[obj.roomID]["LISTPLAYER"][serverData[obj.roomID]["TURNINDEX"]], 
                               playerIP=addr[0],
-                              data=TIME_EACH_TURN - (time.time() - serverData[obj.roomID]["TIME"]))
+                              data=TIME_EACH_TURN - (time.time() - serverData[obj.roomID]["TIME"]),
+                              coolDown=(time.time() - serverData[obj.roomID]["PLAYER"][addr[0]]["coolDown"]))
     
     if serverData[obj.roomID]["PHASE"] == "END":
         if obj.type == "MYSHIP":

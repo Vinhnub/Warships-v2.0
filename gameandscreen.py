@@ -153,13 +153,12 @@ class PrepareScreen(Screen):
         if self.readyBtn.handleEvent(event):
             self.readyBtn.disable()
             self.screenManager.game.ready()
-            self.screenManager.game.player.isFinish = False
     
     def draw(self):
         self.background.draw()
         self.field.draw()
         self.readyBtn.draw()
-        self.screenManager.game.player.draw(self.window)
+        self.screenManager.game.player.draw()
 
 class MyTurnScreen(Screen):
     def __init__(self, screenManager, window):
@@ -172,7 +171,7 @@ class MyTurnScreen(Screen):
 
     def draw(self):
         self.field.draw()
-        self.screenManager.game.player.draw(self.window, True)
+        self.screenManager.game.player.draw(True)
         self.timer.draw()
 
 class EnemyTurnScreen(Screen):
@@ -186,7 +185,7 @@ class EnemyTurnScreen(Screen):
 
     def draw(self):
         self.field.draw()
-        self.screenManager.game.player.draw(self.window, False)
+        self.screenManager.game.player.draw(False)
         self.timer.draw()
 
 class EndScreen(Screen):
@@ -201,7 +200,7 @@ class EndScreen(Screen):
     def draw(self):
         self.banner.draw()
         self.field.draw()
-        self.screenManager.game.player.draw(self.window, True)
+        self.screenManager.game.player.drawEnd()
 
 # ============================================================ MODE ============================================================
 
@@ -317,7 +316,6 @@ class OnlineMode():
         if self.signalRecieve.phase == "END":
             if not isinstance(self.manager.currentScreen, EndScreen):
                 self.manager.changeScreen(EndScreen(self.manager, self.manager.window, self.signalRecieve.data))
-                self.player.isFinish = True
                 self.signalSend.data = self.player.listShip
                 self.signalSend.type = "MYSHIP"
 

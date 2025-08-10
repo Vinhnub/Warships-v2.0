@@ -8,13 +8,12 @@ from torpedo import *
 class Player():
     def __init__(self, window):
         self.window = window
-        self.listShip = [Ship(path[1], path[0], path[2]) for path in listPathShip]
+        self.listShip = [Ship(self.window, path[1], path[0], path[2]) for path in listPathShip]
         self.listEnemyShip = None
         self.__isMouseDown = False
         self.__firstPos = None # pos when player click mouse down to move or ronate ship
         self.__shipSelected = None # the ship player select to move
         self.isReady = False
-        self.isFinish = False
         self.listMyTorpedo = []
         self.listEnemyTorpedo = []
         self.canFire = None
@@ -54,18 +53,23 @@ class Player():
                         return False
                 return (int((firePos[0] - FIELD_COORD[0])/CELL_SIZE[0]), int((firePos[1] - FIELD_COORD[1])/CELL_SIZE[1]))
         return False
+    
+    def drawEnd(self):
+        if self.listEnemyShip is not None:
+            for ship in self.listEnemyShip:
+                ship.draw()
 
-    def draw(self, window, isMyTurn=None):
+    def draw(self, isMyTurn=None):
         if isMyTurn is None:
             for ship in self.listShip:
-                ship.draw(window)
+                ship.draw()
         if isMyTurn:
             for oTorpedo in self.listMyTorpedo:
                 if not oTorpedo.drawAnimation():
                     oTorpedo.draw()
         else:
             for ship in self.listShip:
-                ship.draw(window)
+                ship.draw()
             for oTorpedo in self.listEnemyTorpedo:
                 if not oTorpedo.drawAnimation():
                     oTorpedo.draw()

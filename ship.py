@@ -3,7 +3,8 @@ import pygame
 from torpedo import *
 
 class Ship():
-    def __init__(self, loc, path, id):
+    def __init__(self, window, loc, path, id):
+        self.window = window
         self.oldLoc = loc
         self.loc = loc
         self.id = id
@@ -34,8 +35,8 @@ class Ship():
             self.width, self.height = self.height, self.width
             self.updateHitBox()
 
-    def draw(self, window):
-        window.blit(self.__image, self.loc)
+    def draw(self):
+        self.window.blit(self.__image, self.loc)
 
     def updatePos(self, mousePosOld, mousePosNew):
         self.loc = (self.oldLoc[0] + int((mousePosNew[0] - mousePosOld[0])/CELL_SIZE[0]) * CELL_SIZE[0], self.oldLoc[1] + int((mousePosNew[1] - mousePosOld[1])/CELL_SIZE[0]) * CELL_SIZE[0])
