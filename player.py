@@ -44,6 +44,7 @@ class Player():
         return False
 
     def fire(self, event):
+        if event is None: return False
         if event.type == pygame.MOUSEBUTTONDOWN:
             firePos = pygame.mouse.get_pos()
             if FIELD_COORD[0] < firePos[0] and firePos[0] < FIELD_COORD[0] + FIELD_WIDTH and FIELD_COORD[1] < firePos[1] and firePos[1] < FIELD_COORD[1] + FIELD_HEIGHT:
@@ -69,6 +70,7 @@ class Player():
                     oTorpedo.draw()
         
     def moveShip(self, event):
+        if event is None: return
         if event.type == pygame.MOUSEBUTTONDOWN and event.button == 3:
             self.__firstPos = pygame.mouse.get_pos()
             for ship in self.__listShips:

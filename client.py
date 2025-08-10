@@ -26,6 +26,8 @@ while True:
             sys.exit()
         main.handleEvent(event)
 
+    if main.game:
+        main.game.running()
 
     window.fill(BLACK)
 
