@@ -105,10 +105,6 @@ def handleData(obj, addr):
 
     if serverData[obj.roomID]["PHASE"] == "PLAYING":
 
-        player1 = serverData[obj.roomID]["LISTPLAYER"][0]
-        player2 = serverData[obj.roomID]["LISTPLAYER"][1]
-        if serverData[obj.roomID]["PLAYER"][player1]["numCorrect"] >= 3 or serverData[obj.roomID]["PLAYER"][player2]["numCorrect"] >= 3:
-            serverData[obj.roomID]["PHASE"] = "END"
 
         if TIME_EACH_TURN - (time.time() - serverData[obj.roomID]["TIME"]) <= 0:
             serverData[obj.roomID]["TURNINDEX"] = 1 - serverData[obj.roomID]["TURNINDEX"]
@@ -119,6 +115,14 @@ def handleData(obj, addr):
 
         if obj.type == "WAITING_PL":
             if obj.data == len(serverData[obj.roomID]["PLAYER"][enemy]["listTorpedo"]):
+
+                player1 = serverData[obj.roomID]["LISTPLAYER"][0]
+                player2 = serverData[obj.roomID]["LISTPLAYER"][1]
+                if serverData[obj.roomID]["PLAYER"][player1]["numCorrect"] >= 3 or serverData[obj.roomID]["PLAYER"][player2]["numCorrect"] >= 3:
+                    serverData[obj.roomID]["PHASE"] = "END"
+                    return SignalRecieved(serverData[obj.roomID]["PHASE"],
+                              data=(serverData[obj.roomID]["PLAYER"][addr[0]]["numCorrect"] >= 3))
+
                 return SignalRecieved(serverData[obj.roomID]["PHASE"],  
                                       type="WAITING_PL",
                                       turnIP=serverData[obj.roomID]["LISTPLAYER"][serverData[obj.roomID]["TURNINDEX"]], 
@@ -162,7 +166,7 @@ def handleData(obj, addr):
     
     if serverData[obj.roomID]["PHASE"] == "END":
         return SignalRecieved(serverData[obj.roomID]["PHASE"],
-                              data=(serverData[obj.roomID]["PLAYER"]["numCorrect"] >= 3))
+                              data=(serverData[obj.roomID]["PLAYER"][addr[0]]["numCorrect"] >= 3))
 
 
 def handleRequest(data, addr):
