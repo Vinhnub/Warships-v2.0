@@ -45,8 +45,8 @@ def printdata(serverData):
 | TIME      : {TIME_EACH_TURN - time.time() + serverData[roomID]["TIME"] if serverData[roomID]["TIME"] is not None else None}
 | TURN      : {serverData[roomID]["TURNINDEX"]}
 | LISTPLAYER: {serverData[roomID]["LISTPLAYER"]}
-| PLAYER {serverData[roomID]["LISTPLAYER"][0]} : numCorrect : {serverData[roomID]["PLAYER"][serverData[roomID]["LISTPLAYER"][0]]["numCorrect"]}, lastPosFire : {serverData[roomID]["PLAYER"][serverData[roomID]["LISTPLAYER"][0]]["lastPosFire"]}
-| PLAYER {serverData[roomID]["LISTPLAYER"][1] if len(serverData[roomID]["LISTPLAYER"] ) > 1 else None} : numCorrect :{serverData[roomID]["PLAYER"][serverData[roomID]["LISTPLAYER"][1]]["numCorrect"] if len(serverData[roomID]["LISTPLAYER"]) > 1 else None}, lastPosFire : {serverData[roomID]["PLAYER"][serverData[roomID]["LISTPLAYER"][1]]["lastPosFire"] if len(serverData[roomID]["LISTPLAYER"]) > 1 else None}
+| PLAYER {serverData[roomID]["LISTPLAYER"][0]} : numCorrect : {serverData[roomID]["PLAYER"][serverData[roomID]["LISTPLAYER"][0]]["numCorrect"]}, lastPosFire : {serverData[roomID]["PLAYER"][serverData[roomID]["LISTPLAYER"][0]]["lastPosFire"]}, coolDown : {time.time() - serverData[roomID]["PLAYER"][serverData[roomID]["LISTPLAYER"][0]]["coolDown"]}                    
+| PLAYER {serverData[roomID]["LISTPLAYER"][1] if len(serverData[roomID]["LISTPLAYER"] ) > 1 else None} : numCorrect :{serverData[roomID]["PLAYER"][serverData[roomID]["LISTPLAYER"][1]]["numCorrect"] if len(serverData[roomID]["LISTPLAYER"]) > 1 else None}, lastPosFire : {serverData[roomID]["PLAYER"][serverData[roomID]["LISTPLAYER"][1]]["lastPosFire"] if len(serverData[roomID]["LISTPLAYER"]) > 1 else None}, coolDown : {time.time() - serverData[roomID]["PLAYER"][serverData[roomID]["LISTPLAYER"][0]]["coolDown"] if len(serverData[roomID]["LISTPLAYER"]) > 1 else None}
 ===========================
 """)
 
@@ -129,7 +129,7 @@ def handleData(obj, addr):
                                       turnIP=serverData[obj.roomID]["LISTPLAYER"][serverData[obj.roomID]["TURNINDEX"]], 
                                       playerIP=addr[0],
                                       data=TIME_EACH_TURN - (time.time() - serverData[obj.roomID]["TIME"]), 
-                                      coolDown=serverData[obj.roomID]["PLAYER"][addr[0]]["coolDown"])
+                                      coolDown=(time.time() - serverData[obj.roomID]["PLAYER"][addr[0]]["coolDown"]))
             else:
                 return SignalRecieved(serverData[obj.roomID]["PHASE"], 
                                       type="ENEMYFIRE", 
@@ -176,10 +176,10 @@ def handleRequest(data, addr):
     try:
         obj = pickle.loads(data)
         result = handleData(obj, addr)
-        logging.info(f"{obj} {addr} {result}")
+        #logging.info(f"{obj} {addr} {result}")
         response = pickle.dumps(result)
         server_socket.sendto(response, addr)
-        #printdata(serverData)
+        printdata(serverData)
     except Exception as e:
         logging.error(f"[SERVER ERROR] Gói tin từ {addr} bị lỗi: {e}")
 
