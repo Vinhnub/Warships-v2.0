@@ -320,7 +320,7 @@ class OnlineMode():
                 self.signalSend.type = "MYSHIP"
 
             if self.signalRecieve.type == "ENEMYSHIP":
-                self.player.listEnemyShip = self.signalRecieve.data
+                self.player.calListEnemyShip(self.signalRecieve.data)
                 self.signalSend.type = None
                 self.signalSend.data = None
             
