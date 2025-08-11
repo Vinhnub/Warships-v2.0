@@ -4,6 +4,7 @@ from torpedo import *
 
 class Ship():
     def __init__(self, window, loc, path, id):
+        self.window = window
         self.oldLoc = loc
         self.loc = loc
         self.id = id

@@ -191,10 +191,8 @@ class OfflineMode:
     def __init__(self, manager):
         self.manager = manager
         self.player = Player(manager.window)
-        self.bot = PlayerAI(manager.window, self.player)
         self.phase = "PREPARE"
         self.turn = "player"
-
     def running(self, event):
         if self.phase == "PREPARE":
             if not isinstance(self.manager.currentScreen, PrepareScreen):
@@ -205,31 +203,30 @@ class OfflineMode:
             if self.turn == "player":
                 if not isinstance(self.manager.currentScreen, MyTurnScreen):
                     self.manager.changeScreen(MyTurnScreen(self.manager, self.manager.window))
-                pos = self.player.handleEvent(event)
-                print(pos)
-                if pos:
-                    is_hit = self.bot.isCorrect(pos)                    
-                    if not is_hit:
-                        self.turn = "bot" 
-
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    pos = self.player.handleEvent(event)
+                    print(pos)
+                    if pos:
+                        is_hit = self.bot.isCorrect(pos)
+                        if not is_hit:
+                            self.turn = "bot"
+                else:
+                    pass
             else:
                 if not isinstance(self.manager.currentScreen, EnemyTurnScreen):
                     self.manager.changeScreen(EnemyTurnScreen(self.manager, self.manager.window))
-                pos = self.bot.make_move()
-                if pos is not None:
-                    is_hit = self.player.isCorrect(pos) 
-                    self.bot.update_after_shot(pos, is_hit)
-
+                hit = self.bot.makeHit()
+                if hit:
+                    
                     if not is_hit:
-                        self.turn = "player"  # Trượt thì chuyển lượt về player
+                        self.turn = "player"
     def draw(self):
-        self.player.draw(isMyTurn=(self.turn == "player"))
-        for torpedo in self.player.listMyTorpedo:
-            if not torpedo.drawAnimation():
-                torpedo.draw()
+        pass
     def ready(self):
         self.player.isReady = True
+        self.bot = PlayerAI(self.manager.window, self.player)
         self.bot.auto_place_ships()
+        self.bot.get_ships_for_botlogic()
         self.bot.isReady = True
         self.phase = "PLAYING"
 

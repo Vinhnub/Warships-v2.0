@@ -3,6 +3,37 @@ from constants import *
 from ship import Ship
 from botLogic import *
 from listPath import *
+from torpedo import *
+from listPath import *
+def extract_ships_from_boolean_map(boolean_map):
+    rows = len(boolean_map)
+    cols = len(boolean_map[0]) if rows > 0 else 0
+
+    visited = [[False]*cols for _ in range(rows)]
+    ships = []
+
+    def neighbors(x, y):
+        # 4 hướng lên, xuống, trái, phải
+        for nx, ny in [(x-1,y), (x+1,y), (x,y-1), (x,y+1)]:
+            if 0 <= nx < cols and 0 <= ny < rows:
+                yield nx, ny
+
+    for y in range(rows):
+        for x in range(cols):
+            if boolean_map[y][x] and not visited[y][x]:
+                # BFS hoặc DFS để tìm tàu
+                stack = [(x,y)]
+                ship_cells = []
+                while stack:
+                    cx, cy = stack.pop()
+                    if not visited[cy][cx]:
+                        visited[cy][cx] = True
+                        ship_cells.append((cx, cy))
+                        for nx, ny in neighbors(cx, cy):
+                            if boolean_map[ny][nx] and not visited[ny][nx]:
+                                stack.append((nx, ny))
+                ships.append(ship_cells)
+    return ships
 class PlayerAI():
     def __init__(self, window, enemy):
         self.window = window
@@ -35,8 +66,8 @@ class PlayerAI():
         return self.__listPosShip[pos[0]][pos[1]]
 
     def grid_to_pixel(self, cell_x, cell_y):
-        pixel_x = FIELD_COORD[0] + cell_x * CELL_SIZE[0] + 3
-        pixel_y = FIELD_COORD[1] + cell_y * CELL_SIZE[1] + 3
+        pixel_x = FIELD_COORD[0] + cell_x * CELL_SIZE[0]
+        pixel_y = FIELD_COORD[1] + cell_y * CELL_SIZE[1]
         return pixel_x, pixel_y
 
     def auto_place_ships(self):
@@ -79,16 +110,22 @@ class PlayerAI():
                     if path is None:
                         path = listPathShip[0][0]
 
-                    ship = Ship(start_pixel, path, idx)
+                    ship = Ship(self.window, start_pixel, path, idx)
                     self.__listShips.append(ship)
                     placed = True
-
         self.isReady = True
 
     def ready(self):
         return self.isReady
     def makeHit(self):
+        pixel_loc = (FIELD_COORD[0] + pos[0] * CELL_SIZE[0] + 3, FIELD_COORD[1] + pos[1] * CELL_SIZE[1] + 3)
+        torpedo = Torpedo(self.window, pixel_loc, listPathTorpedoAnimation, [pathImageHit, pathImageMiss], hit, spf=50)
+        self.listMyTorpedo.append(torpedo)
+        self.lastPosFire = pos
         hit, pos = self.botLogic.takeTurn()
         if hit is False and pos is None:
             return None
-        return pos
+        elif:
+    
+    def get_ships_for_botlogic(self):
+        return extract_ships_from_boolean_map(self._enemy.__listPosShip)
