@@ -5,35 +5,6 @@ from botLogic import *
 from listPath import *
 from torpedo import *
 from listPath import *
-def extract_ships_from_boolean_map(boolean_map):
-    rows = len(boolean_map)
-    cols = len(boolean_map[0]) if rows > 0 else 0
-
-    visited = [[False]*cols for _ in range(rows)]
-    ships = []
-
-    def neighbors(x, y):
-        # 4 hướng lên, xuống, trái, phải
-        for nx, ny in [(x-1,y), (x+1,y), (x,y-1), (x,y+1)]:
-            if 0 <= nx < cols and 0 <= ny < rows:
-                yield nx, ny
-
-    for y in range(rows):
-        for x in range(cols):
-            if boolean_map[y][x] and not visited[y][x]:
-                # BFS hoặc DFS để tìm tàu
-                stack = [(x,y)]
-                ship_cells = []
-                while stack:
-                    cx, cy = stack.pop()
-                    if not visited[cy][cx]:
-                        visited[cy][cx] = True
-                        ship_cells.append((cx, cy))
-                        for nx, ny in neighbors(cx, cy):
-                            if boolean_map[ny][nx] and not visited[ny][nx]:
-                                stack.append((nx, ny))
-                ships.append(ship_cells)
-    return ships
 class PlayerAI():
     def __init__(self, window, enemy):
         self.window = window
@@ -116,6 +87,7 @@ class PlayerAI():
 
     def ready(self):
         return self.isReady
+    
     def makeHit(self):
         hit, pos = self.botLogic.takeTurn()
         if hit is False and pos is None:
@@ -128,20 +100,15 @@ class PlayerAI():
             return True
         elif not hit:
             return False
-    def draw(self, isMyTurn=None):
-        if isMyTurn is None:
-            for ship in self.listShip:
-                ship.draw()
+    def draw(self,window, isMyTurn=None):
+        self.window = window
         if isMyTurn:
             for oTorpedo in self.listMyTorpedo:
                 if not oTorpedo.drawAnimation():
                     oTorpedo.draw()
         else:
-            for ship in self.listShip:
+            for ship in self.__listShip:
                 ship.draw()
             for oTorpedo in self.listEnemyTorpedo:
                 if not oTorpedo.drawAnimation():
                     oTorpedo.draw()
-
-    def get_ships_for_botlogic(self):
-        return extract_ships_from_boolean_map(self._enemy.getlistPosShip())
