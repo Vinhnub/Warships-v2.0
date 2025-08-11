@@ -66,8 +66,8 @@ class Player():
     
     def numCorrect(self, pos):
         result = 0
-        for x in range(max(0, pos[0] - 1), min(9, pos[0] + 1)):
-            for y in range(max(0, pos[1] - 1), min(9, pos[1] + 1)):
+        for x in range(max(0, pos[0] - 1), min(10, pos[0] + 2)):
+            for y in range(max(0, pos[1] - 1), min(10, pos[1] + 2)):
                 if self.__listPosShip == 1:
                     result += 1
         return result

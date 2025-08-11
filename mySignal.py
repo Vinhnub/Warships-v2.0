@@ -6,7 +6,7 @@ class SignalSended():
         self.anotherData = data
 
     def __str__(self):
-        return str(self.type) + " " + str(self.roomID) + " " + str(self.data) 
+        return str(self.type) + " " + str(self.roomID) + " " + str(self.data) + " " + str(self.anotherData)
     
 class SignalRecieved():
     def __init__(self, phase=None, type=None, turnIP=None, playerIP=None, data=None, coolDown=None):
