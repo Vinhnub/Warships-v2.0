@@ -230,6 +230,7 @@ class OnlineMode():
         self.signalRecieve = SignalRecieved()
         self.isRun = False
         self.sendLock = threading.Lock()
+        self.isRecieveResult = False
         
     def reset(self):
         self.isRun = False
@@ -299,9 +300,9 @@ class OnlineMode():
                     self.signalSend.type = "FIRE_TORPEDO" if self.player.mode == 0 else "FIRE_RADAR"
                     if self.player.mode == 1: 
                         self.player.haveRadar -= 1
-                        print(self.player.haveRadar)
                         self.player.mode = 0
                     self.signalSend.data = res
+                    self.isRecieveResult = False
 
                 if self.signalRecieve.type == "WAITING_PL":
                     self.manager.currentScreen.timer.setText(str(int(self.signalRecieve.data)))
@@ -309,12 +310,15 @@ class OnlineMode():
                         self.player.canFire = True
 
                 if self.signalRecieve.type == "FIRE_TORPEDO_RESULT":
-                    self.player.listMyTorpedo.append(Torpedo(self.manager.window, self.player.lastPosFire, listPathTopedoA, pathImageTorpedo, self.signalRecieve.data, 100))
-                    self.signalSend.type = "WAITING_PL"
-                    self.signalSend.data = len(self.player.listEnemyTorpedo)
-                    self.signalSend.anotherData = self.player.lastPosEnemyRadar
-                    if self.signalRecieve.data == 2:
-                        self.player.haveRadar += 1
+                    if not self.isRecieveResult:
+                        self.isRecieveResult = True
+                        self.player.listMyTorpedo.append(Torpedo(self.manager.window, self.player.lastPosFire, listPathTopedoA, pathImageTorpedo, self.signalRecieve.data, 100))
+                        self.signalSend.type = "WAITING_PL"
+                        self.signalSend.data = len(self.player.listEnemyTorpedo)
+                        self.signalSend.anotherData = self.player.lastPosEnemyRadar
+                        if self.signalRecieve.data == 2:
+                            self.player.haveRadar += 1
+                            print(self.player.haveRadar)
 
                 if self.signalRecieve.type == "FIRE_RADAR_RESULT":
                     self.player.myRadar = Radar(self.manager.window, self.player.lastPosFire, listPathRadarA, self.signalRecieve.data, 100)
