@@ -21,7 +21,8 @@ class Player():
         self.__listPosShip = [[False for _ in range(10)] for __ in range(10)]
 
     # check enermy fire correct or incorrect 
-
+    def getlistPosShip(self):
+        return self.__listPosShip
     def calListPosShip(self):
         for ship in self.listShip:
             for x in range(ship.loc[0], ship.loc[0] + ship.width, CELL_SIZE[0]):

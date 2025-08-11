@@ -25,8 +25,6 @@ while True:
             pygame.quit()  
             sys.exit()
         main.handleEvent(event)
-
-
     window.fill(BLACK)
 
     main.draw()

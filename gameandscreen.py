@@ -201,6 +201,7 @@ class OfflineMode:
             self.player.handleEvent(event)
         elif self.phase == "PLAYING":
             if self.turn == "player":
+                self.player.canFire = True
                 if not isinstance(self.manager.currentScreen, MyTurnScreen):
                     self.manager.changeScreen(MyTurnScreen(self.manager, self.manager.window))
                 if event.type == pygame.MOUSEBUTTONDOWN:
@@ -209,17 +210,17 @@ class OfflineMode:
                     if pos:
                         is_hit = self.bot.isCorrect(pos)
                         if not is_hit:
-                            self.turn = "bot"
+                           self.turn = "bot"
                 else:
                     pass
             else:
                 if not isinstance(self.manager.currentScreen, EnemyTurnScreen):
                     self.manager.changeScreen(EnemyTurnScreen(self.manager, self.manager.window))
                 hit = self.bot.makeHit()
-                if hit:
-                    
-                    if not is_hit:
-                        self.turn = "player"
+                if not hit:
+                   self.turn = "player"
+                elif hit:
+                    self.turn = "bot"
     def draw(self):
         pass
     def ready(self):
@@ -229,7 +230,6 @@ class OfflineMode:
         self.bot.get_ships_for_botlogic()
         self.bot.isReady = True
         self.phase = "PLAYING"
-
 
 class OnlineMode():
     def __init__(self, manager, serverIP):
@@ -267,9 +267,6 @@ class OnlineMode():
             else:
                 if not isinstance(self.manager.currentScreen, EnemyTurnScreen):
                     self.manager.changeScreen(EnemyTurnScreen(self.manager, self.manager.window))
-        
 
     def draw(self):
         pass
-
-

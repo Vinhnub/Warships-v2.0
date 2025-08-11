@@ -39,11 +39,10 @@ class PlayerAI():
         self.window = window
         self.__listShips = []
         self.isReady = False
-        self.listMyTorpedo = []
-        self.listEnemyTorpedo = []
         self.canFire = None
         self.lastPosFire = None
         self.__listPosShip = [[False for _ in range(10)] for __ in range(10)]
+        self.listMyTorpedo = []
         self._enemy = enemy
         self.__boardWidth = FIELD_WIDTH // CELL_SIZE[0]
         self.__boardHeight = FIELD_HEIGHT // CELL_SIZE[1]
@@ -118,14 +117,23 @@ class PlayerAI():
     def ready(self):
         return self.isReady
     def makeHit(self):
-        pixel_loc = (FIELD_COORD[0] + pos[0] * CELL_SIZE[0] + 3, FIELD_COORD[1] + pos[1] * CELL_SIZE[1] + 3)
-        torpedo = Torpedo(self.window, pixel_loc, listPathTorpedoAnimation, [pathImageHit, pathImageMiss], hit, spf=50)
-        self.listMyTorpedo.append(torpedo)
-        self.lastPosFire = pos
         hit, pos = self.botLogic.takeTurn()
         if hit is False and pos is None:
             return None
-        elif:
-    
+        pixel_loc = (FIELD_COORD[0] + pos[0] * CELL_SIZE[0] + 3, FIELD_COORD[1] + pos[1] * CELL_SIZE[1] + 3)
+        torpedo = Torpedo(self.window, pixel_loc, listPathTopedoA ,pathImageTorpedo, hit, spf=50)
+        self.listMyTorpedo.append(torpedo)
+        self.lastPosFire = pos
+        if hit:
+            return True
+        elif not hit:
+            return False
+    def draw(self):
+        for torpedo in self.bot.listMyTorpedo[:]:
+            if not torpedo.drawAnimation():
+                 torpedo.draw(self.window)  # Vẽ ảnh trúng hoặc trượt
+            else:
+                 self.bot.listMyTorpedo.remove(torpedo)  # Hết animation thì xóa tên lửa khỏi danh sách
+
     def get_ships_for_botlogic(self):
-        return extract_ships_from_boolean_map(self._enemy.__listPosShip)
+        return extract_ships_from_boolean_map(self._enemy.getlistPosShip())
