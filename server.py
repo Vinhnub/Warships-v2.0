@@ -18,11 +18,6 @@ logging.basicConfig(
     ]
 )
 
-# # Ví dụ log
-# logging.debug("Server đang khởi động...")
-# logging.info("Đã kết nối với client 192.168.1.5")
-# logging.warning("Gói tin không hợp lệ")
-# logging.error("Lỗi xử lý dữ liệu")
 
 
 HOST = '26.253.176.29'  
@@ -186,8 +181,8 @@ def handleData(obj, addr):
                 serverData[obj.roomID]["PLAYER"][addr[0]]["lastPosRadar"] = pos
                 
             result = 0
-            for x in range(max(0, pos[0] - 1), min(9, pos[0] + 1)):
-                for y in range(max(0, pos[1] - 1), min(9, pos[1] + 1)):
+            for x in range(max(0, pos[0] - 1), min(10, pos[0] + 2)):
+                for y in range(max(0, pos[1] - 1), min(10, pos[1] + 2)):
                     if serverData[obj.roomID]["PLAYER"][enemy]["posShip"][x][y] == 1:
                         result += 1
             

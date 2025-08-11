@@ -299,6 +299,7 @@ class OnlineMode():
                     self.signalSend.type = "FIRE_TORPEDO" if self.player.mode == 0 else "FIRE_RADAR"
                     if self.player.mode == 1: 
                         self.player.haveRadar -= 1
+                        print(self.player.haveRadar)
                         self.player.mode = 0
                     self.signalSend.data = res
 
@@ -328,6 +329,7 @@ class OnlineMode():
                     self.player.canFire = True
     
                 self.signalSend.data = len(self.player.listEnemyTorpedo)
+                self.signalSend.anotherData = self.player.lastPosEnemyRadar
 
                 if self.signalRecieve.type == "WAITING_PL":
                     self.manager.currentScreen.timer.setText(str(int(self.signalRecieve.data)))
