@@ -171,7 +171,7 @@ class MyTurnScreen(Screen):
 
     def handleEvent(self, event):
         if self.switchModeBtn.handleEvent(event):
-            if self.screenManager.game.player.haveRadar:
+            if self.screenManager.game.player.haveRadar > 0:
                 self.screenManager.game.player.mode = 1 - self.screenManager.game.player.mode
 
     def draw(self):
@@ -294,7 +294,7 @@ class OnlineMode():
                 res = self.player.handleEvent(event)
                 if res:
                     self.player.lastPosFire = res
-                    self.signalSend.type = "FIRE"
+                    self.signalSend.type = "FIRETORPEDO"
                     self.signalSend.data = res
 
                 if self.signalRecieve.type == "WAITING_PL":
@@ -302,10 +302,12 @@ class OnlineMode():
                     if self.signalRecieve.coolDown > COOL_DOWN and self.player.canFire == False:
                         self.player.canFire = True
 
-                if self.signalRecieve.type == "FIRERESULT":
+                if self.signalRecieve.type == "FIRETORPEDORESULT":
                     self.player.listMyTorpedo.append(Torpedo(self.manager.window, self.player.lastPosFire, listPathTopedoA, pathImageTorpedo, self.signalRecieve.data, 100))
                     self.signalSend.type = "WAITING_PL"
                     self.signalSend.data = len(self.player.listEnemyTorpedo)
+                    if self.signalRecieve.data == 2:
+                        self.player.haveRadar += 1
 
             else:
                 if not isinstance(self.manager.currentScreen, EnemyTurnScreen):

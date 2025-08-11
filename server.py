@@ -145,29 +145,29 @@ def handleData(obj, addr):
                                       playerIP=addr[0], 
                                       data=serverData[obj.roomID]["PLAYER"][enemy]["lastPosFire"])
             
-        if obj.type == "FIRE":
+        if obj.type == "FIRETORPEDO":
             pos = obj.data
             if pos != serverData[obj.roomID]["PLAYER"][addr[0]]["lastPosFire"]: 
                 serverData[obj.roomID]["PLAYER"][addr[0]]["listTorpedo"].append(pos)
                 serverData[obj.roomID]["PLAYER"][addr[0]]["coolDown"] = time.time()
                 
-            if serverData[obj.roomID]["PLAYER"][enemy]["posShip"][pos[0]][pos[1]]:
+            if serverData[obj.roomID]["PLAYER"][enemy]["posShip"][pos[0]][pos[1]] > 0:
                 if pos != serverData[obj.roomID]["PLAYER"][addr[0]]["lastPosFire"]:
-                    serverData[obj.roomID]["PLAYER"][addr[0]]["numCorrect"] += 1
+                    if serverData[obj.roomID]["PLAYER"][enemy]["posShip"][pos[0]][pos[1]] == 1: serverData[obj.roomID]["PLAYER"][addr[0]]["numCorrect"] += 1
                     serverData[obj.roomID]["PLAYER"][addr[0]]["lastPosFire"] = pos
                 return SignalRecieved(serverData[obj.roomID]["PHASE"], 
-                                      type="FIRERESULT", 
+                                      type="FIRETORPEDORESULT", 
                                       turnIP=serverData[obj.roomID]["LISTPLAYER"][serverData[obj.roomID]["TURNINDEX"]], 
                                       playerIP=addr[0], 
-                                      data=True)
+                                      data=serverData[obj.roomID]["PLAYER"][enemy]["posShip"][pos[0]][pos[1]])
             else:
                 serverData[obj.roomID]["PLAYER"][addr[0]]["lastPosFire"] = pos
                 serverData[obj.roomID]["TIME"] = time.time() - (TIME_EACH_TURN - 4)
                 return SignalRecieved(serverData[obj.roomID]["PHASE"], 
-                                      type="FIRERESULT", 
+                                      type="FIRETORPEDORESULT", 
                                       turnIP=serverData[obj.roomID]["LISTPLAYER"][serverData[obj.roomID]["TURNINDEX"]], 
                                       playerIP=addr[0], 
-                                      data=False)
+                                      data=serverData[obj.roomID]["PLAYER"][enemy]["posShip"][pos[0]][pos[1]])
         
         return SignalRecieved(serverData[obj.roomID]["PHASE"], 
                               type="WAITING_PL",
