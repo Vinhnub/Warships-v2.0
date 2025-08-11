@@ -4,6 +4,7 @@ from constants import *
 from listPath import *
 from ship import *
 from torpedo import *
+from radar import *
 
 class Player():
     def __init__(self, window):
@@ -19,10 +20,11 @@ class Player():
         self.listEnemyTorpedo = []
         self.myRadar = None
         self.enemyRadar = None
+        self.haveRadar = False
         self.canFire = None
         self.lastPosFire = None
         self.lastPosEnemyFire = None
-        self.__listPosShip = [[False for _ in range(10)] for __ in range(10)]
+        self.__listPosShip = [[0 for _ in range(10)] for __ in range(10)]
 
     def getShipDetail(self):
         listTemp = []
@@ -35,15 +37,22 @@ class Player():
         count = 0
         self.listEnemyShip = []
         for item in data:
+            if count >= 5: return
             loc, direction = item
             self.listEnemyShip.append(Ship(self.window, loc, listPathShip[count][0], listPathShip[count][2], direction=direction))
             count += 1
 
     def calListPosShip(self):
+        count = 0
         for ship in self.listShip:
+            if count >= 5: break
+            count += 1
             for x in range(ship.loc[0], ship.loc[0] + ship.width, CELL_SIZE[0]):
                 for y in range(ship.loc[1], ship.loc[1] + ship.height, CELL_SIZE[0]):
-                    self.__listPosShip[int((x - FIELD_COORD[0])/CELL_SIZE[0])][int((y - FIELD_COORD[1])/CELL_SIZE[1])] = True
+                    self.__listPosShip[int((x - FIELD_COORD[0])/CELL_SIZE[0])][int((y - FIELD_COORD[1])/CELL_SIZE[1])] = 1
+        
+        for i in range(count, len(self.listShip)):
+            self.__listPosShip[int((self.listShip[i].loc[0] - FIELD_COORD[0])/CELL_SIZE[0])][int((self.listShip[i].loc[1] - FIELD_COORD[1])/CELL_SIZE[1])] = 2
 
         return self.__listPosShip
     

@@ -170,7 +170,9 @@ class MyTurnScreen(Screen):
         self.radarMode = AnimatedImage(self.window, (0, 600), [resource_path("assets/images/radarMode.png")])
 
     def handleEvent(self, event):
-        pass
+        if self.switchModeBtn.handleEvent(event):
+            if self.screenManager.game.player.haveRadar:
+                self.screenManager.game.player.mode = 1 - self.screenManager.game.player.mode
 
     def draw(self):
         self.field.draw()
