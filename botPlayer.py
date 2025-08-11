@@ -128,21 +128,20 @@ class PlayerAI():
             return True
         elif not hit:
             return False
-    def draw(self,window, isMyTurn=None):
-        self.window = window
+    def draw(self, isMyTurn=None):
         if isMyTurn is None:
             for ship in self.listShip:
-                ship.draw(window)
+                ship.draw()
         if isMyTurn:
             for oTorpedo in self.listMyTorpedo:
                 if not oTorpedo.drawAnimation():
-                    oTorpedo.draw(window)
+                    oTorpedo.draw()
         else:
             for ship in self.listShip:
-                ship.draw(window)
+                ship.draw()
             for oTorpedo in self.listEnemyTorpedo:
                 if not oTorpedo.drawAnimation():
-                    oTorpedo.draw(window)
+                    oTorpedo.draw()
 
     def get_ships_for_botlogic(self):
         return extract_ships_from_boolean_map(self._enemy.getlistPosShip())

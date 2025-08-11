@@ -63,17 +63,17 @@ class Player():
         self.window = window
         if isMyTurn is None:
             for ship in self.listShip:
-                ship.draw(window)
+                ship.draw()
         if isMyTurn:
             for oTorpedo in self.listMyTorpedo:
                 if not oTorpedo.drawAnimation():
-                    oTorpedo.draw(window)
+                    oTorpedo.draw()
         else:
             for ship in self.listShip:
-                ship.draw(window)
+                ship.draw()
             for oTorpedo in self.listEnemyTorpedo:
                 if not oTorpedo.drawAnimation():
-                    oTorpedo.draw(window)
+                    oTorpedo.draw()
         
     def moveShip(self, event):
         if event is None: return
