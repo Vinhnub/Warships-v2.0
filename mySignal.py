@@ -1,8 +1,9 @@
 class SignalSended():
-    def __init__(self, type=None, roomID=None, data=None):
+    def __init__(self, type=None, roomID=None, data=None, anotherData=None):
         self.type = type #wait, fire, createroom, joinroom
         self.roomID = roomID
         self.data = data
+        self.anotherData = data
 
     def __str__(self):
         return str(self.type) + " " + str(self.roomID) + " " + str(self.data) 

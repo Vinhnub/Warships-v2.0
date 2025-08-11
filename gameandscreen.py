@@ -10,6 +10,7 @@ from mySignal import *
 from constants import *
 import time
 import threading
+from radar import *
 
 #============================================================ SCREEN MANAGER ============================================================
 
@@ -94,12 +95,12 @@ class FindingScreen(Screen):
             self.screenManager.player = None
             self.screenManager.game = None
         if self.createBtn.handleEvent(event):
-            self.screenManager.game.signalSend.type = "CREATEROOM"
+            self.screenManager.game.signalSend.type = "CREATE_ROOM"
             self.screenManager.game.isRun = True
             self.screenManager.game.start()
             self.screenManager.changeScreen(CreateRoom(self.screenManager, self.window, self.screenManager.game.createRoom()))
         if self.joinBtn.handleEvent(event):
-            self.screenManager.game.signalSend.type = "JOINROOM"
+            self.screenManager.game.signalSend.type = "JOIN_ROOM"
             self.screenManager.game.isRun = True
             self.screenManager.game.start()
             self.screenManager.changeScreen(JoinRoom(self.screenManager, self.window))
@@ -172,7 +173,7 @@ class MyTurnScreen(Screen):
     def handleEvent(self, event):
         if self.switchModeBtn.handleEvent(event):
             if self.screenManager.game.player.haveRadar > 0:
-                self.screenManager.game.player.mode = 1 - self.screenManager.game.player.mode
+                self.screenManager.game.player.switchMode()
 
     def draw(self):
         self.field.draw()
@@ -290,11 +291,15 @@ class OnlineMode():
                     self.player.canFire = True
                     self.signalSend.type = "WAITING_PL"
                     self.signalSend.data = len(self.player.listEnemyTorpedo)
+                    self.signalSend.anotherData = self.player.lastPosEnemyRadar
                 
                 res = self.player.handleEvent(event)
                 if res:
                     self.player.lastPosFire = res
-                    self.signalSend.type = "FIRETORPEDO"
+                    self.signalSend.type = "FIRE_TORPEDO" if self.player.mode == 0 else "FIRE_RADAR"
+                    if self.player.mode == 1: 
+                        self.player.haveRadar -= 1
+                        self.player.mode = 0
                     self.signalSend.data = res
 
                 if self.signalRecieve.type == "WAITING_PL":
@@ -302,12 +307,19 @@ class OnlineMode():
                     if self.signalRecieve.coolDown > COOL_DOWN and self.player.canFire == False:
                         self.player.canFire = True
 
-                if self.signalRecieve.type == "FIRETORPEDORESULT":
+                if self.signalRecieve.type == "FIRE_TORPEDO_RESULT":
                     self.player.listMyTorpedo.append(Torpedo(self.manager.window, self.player.lastPosFire, listPathTopedoA, pathImageTorpedo, self.signalRecieve.data, 100))
                     self.signalSend.type = "WAITING_PL"
                     self.signalSend.data = len(self.player.listEnemyTorpedo)
+                    self.signalSend.anotherData = self.player.lastPosEnemyRadar
                     if self.signalRecieve.data == 2:
                         self.player.haveRadar += 1
+
+                if self.signalRecieve.type == "FIRE_RADAR_RESULT":
+                    self.player.myRadar = Radar(self.manager.window, self.player.lastPosFire, listPathRadarA, self.signalRecieve.data, 100)
+                    self.signalSend.type = "WAITING_PL"
+                    self.signalSend.data = len(self.player.listEnemyTorpedo)
+                    self.signalSend.anotherData = self.player.lastPosEnemyRadar
 
             else:
                 if not isinstance(self.manager.currentScreen, EnemyTurnScreen):
@@ -320,18 +332,23 @@ class OnlineMode():
                 if self.signalRecieve.type == "WAITING_PL":
                     self.manager.currentScreen.timer.setText(str(int(self.signalRecieve.data)))
                 
-                if self.signalRecieve.type == "ENEMYFIRE":
+                if self.signalRecieve.type == "ENEMY_FIRE_TORPEDO":
                     if self.player.lastPosEnemyFire != self.signalRecieve.data:
                         self.player.lastPosEnemyFire = self.signalRecieve.data
                         self.player.listEnemyTorpedo.append(Torpedo(self.manager.window, self.signalRecieve.data, listPathTopedoA, pathImageTorpedo, self.player.isCorrect(self.signalRecieve.data), 100))
+
+                if self.signalRecieve.type == "ENEMY_FIRE_RADAR":
+                    if self.player.lastPosEnemyRadar != self.signalRecieve.data:
+                        self.player.lastPosEnemyRadar = self.signalRecieve.data
+                        self.player.enemyRadar = Radar(self.manager.window, self.player.lastPosEnemyRadar, listPathRadarA, self.player.numCorrect(self.signalRecieve.data), 100)
 
         if self.signalRecieve.phase == "END":
             if not isinstance(self.manager.currentScreen, EndScreen):
                 self.manager.changeScreen(EndScreen(self.manager, self.manager.window, self.signalRecieve.data))
                 self.signalSend.data = self.player.getShipDetail()
-                self.signalSend.type = "MYSHIP"
+                self.signalSend.type = "MY_SHIP"
 
-            if self.signalRecieve.type == "ENEMYSHIP":
+            if self.signalRecieve.type == "ENEMY_SHIP":
                 if self.signalRecieve.data is not None:
                     self.player.calListEnemyShip(self.signalRecieve.data)
                     self.signalSend.type = None
