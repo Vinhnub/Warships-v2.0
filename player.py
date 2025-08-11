@@ -7,10 +7,10 @@ from torpedo import *
 from radar import *
 
 class Player():
-    def __init__(self, window):
+    def __init__(self, window, gameMode=True): #True: onl, False: off
         self.window = window
         self.mode = 0 # o: torpedo, 1: radar
-        self.listShip = [Ship(self.window, path[1], path[0], path[2]) for path in listPathShip]
+        self.listShip = [Ship(self.window, path[1], path[0], path[2]) for path in (listPathShipOnl if gameMode else listPathShipOff)] 
         self.listEnemyShip = None
         self.__isMouseDown = False
         self.__firstPos = None # pos when player click mouse down to move or ronate ship
@@ -24,7 +24,11 @@ class Player():
         self.canFire = None
         self.lastPosFire = None
         self.lastPosEnemyFire = None
+        self.lastPosEnemyRadar = None
         self.__listPosShip = [[0 for _ in range(10)] for __ in range(10)]
+
+    def switchMode(self):
+        self.mode = 1 - self.mode
 
     def getShipDetail(self):
         listTemp = []
@@ -39,7 +43,7 @@ class Player():
         for item in data:
             if count >= 5: return
             loc, direction = item
-            self.listEnemyShip.append(Ship(self.window, loc, listPathShip[count][0], listPathShip[count][2], direction=direction))
+            self.listEnemyShip.append(Ship(self.window, loc, listPathShipOnl[count][0], listPathShipOnl[count][2], direction=direction))
             count += 1
 
     def calListPosShip(self):
@@ -60,12 +64,22 @@ class Player():
         if pos is None: return False
         return self.__listPosShip[pos[0]][pos[1]]
     
+    def numCorrect(self, pos):
+        result = 0
+        for x in range(max(0, pos[0] - 1), min(9, pos[0] + 1)):
+            for y in range(max(0, pos[1] - 1), min(9, pos[1] + 1)):
+                if self.__listPosShip == 1:
+                    result += 1
+        return result
+    
     def handleEvent(self, event):
         if (not self.isReady):
             self.moveShip(event)
         if self.canFire:
-            self.canFire = False
-            return self.fire(event)
+            res = self.fire(event)
+            if res:
+                self.canFire = False
+            return res
         return False
 
     def fire(self, event):
@@ -73,9 +87,10 @@ class Player():
         if event.type == pygame.MOUSEBUTTONDOWN:
             firePos = pygame.mouse.get_pos()
             if FIELD_COORD[0] < firePos[0] and firePos[0] < FIELD_COORD[0] + FIELD_WIDTH and FIELD_COORD[1] < firePos[1] and firePos[1] < FIELD_COORD[1] + FIELD_HEIGHT:
-                for oTorpedo in self.listMyTorpedo:
-                    if oTorpedo.getHitBox().collidepoint(firePos):
-                        return False
+                if self.mode == 0:
+                    for oTorpedo in self.listMyTorpedo:
+                        if oTorpedo.getHitBox().collidepoint(firePos):
+                            return False
                 return (int((firePos[0] - FIELD_COORD[0])/CELL_SIZE[0]), int((firePos[1] - FIELD_COORD[1])/CELL_SIZE[1]))
         return False
     
