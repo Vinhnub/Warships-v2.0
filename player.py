@@ -9,7 +9,6 @@ class Player():
     def __init__(self, window):
         self.window = window
         self.listShip = [Ship(self.window, path[1], path[0], path[2]) for path in listPathShip]
-        self.listShipDetail = [] # this list contain attribute of each ship to send to server include loc, direction
         self.listEnemyShip = None
         self.__isMouseDown = False
         self.__firstPos = None # pos when player click mouse down to move or ronate ship
@@ -21,6 +20,12 @@ class Player():
         self.lastPosFire = None
         self.lastPosEnemyFire = None
         self.__listPosShip = [[False for _ in range(10)] for __ in range(10)]
+
+    def getShipDetail(self):
+        listTemp = []
+        for ship in self.listShip:
+            listTemp.append((ship.loc, ship.direction))
+        return listTemp
 
     def calListEnemyShip(self, data):
         if self.listEnemyShip is not None: return
@@ -34,7 +39,6 @@ class Player():
             for x in range(ship.loc[0], ship.loc[0] + ship.width, CELL_SIZE[0]):
                 for y in range(ship.loc[1], ship.loc[1] + ship.height, CELL_SIZE[0]):
                     self.__listPosShip[int((x - FIELD_COORD[0])/CELL_SIZE[0])][int((y - FIELD_COORD[1])/CELL_SIZE[1])] = True
-            self.listShipDetail.append((ship.loc, ship.direction))
 
         return self.__listPosShip
     
