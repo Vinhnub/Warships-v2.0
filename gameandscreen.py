@@ -165,6 +165,9 @@ class MyTurnScreen(Screen):
         super().__init__(screenManager, window)
         self.field = AnimatedImage(self.window, FIELD_COORD, [resource_path("assets/images/field.png")])
         self.timer = CustomText(self.window, (0, 0), "", resource_path("fonts/PressStart2P-Regular.ttf"), 30, (255, 255, 255))
+        self.switchModeBtn = AnimatedButton(self.window, (0, 700), [resource_path("assets/images/buttons/switchModeBtn_u.png")], [resource_path("assets/images/buttons/switchModeBtn_d.png")])
+        self.torpedoMode = AnimatedImage(self.window, (0, 600), [resource_path("assets/images/torpedoMode.png")])
+        self.radarMode = AnimatedImage(self.window, (0, 600), [resource_path("assets/images/radarMode.png")])
 
     def handleEvent(self, event):
         pass
@@ -173,6 +176,11 @@ class MyTurnScreen(Screen):
         self.field.draw()
         self.screenManager.game.player.draw(True)
         self.timer.draw()
+        self.switchModeBtn.draw()
+        if self.screenManager.game.player.mode == 0:
+            self.torpedoMode.draw()
+        else:
+            self.radarMode.draw()
 
 class EnemyTurnScreen(Screen):
     def __init__(self, screenManager, window):
@@ -320,7 +328,8 @@ class OnlineMode():
                 self.signalSend.type = "MYSHIP"
 
             if self.signalRecieve.type == "ENEMYSHIP":
-                self.player.calListEnemyShip(self.signalRecieve.data)
-                self.signalSend.type = None
-                self.signalSend.data = None
+                if self.signalRecieve.data is not None:
+                    self.player.calListEnemyShip(self.signalRecieve.data)
+                    self.signalSend.type = None
+                    self.signalSend.data = None
             

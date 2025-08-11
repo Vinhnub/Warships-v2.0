@@ -8,6 +8,7 @@ from torpedo import *
 class Player():
     def __init__(self, window):
         self.window = window
+        self.mode = 0 # o: torpedo, 1: radar
         self.listShip = [Ship(self.window, path[1], path[0], path[2]) for path in listPathShip]
         self.listEnemyShip = None
         self.__isMouseDown = False
@@ -16,6 +17,8 @@ class Player():
         self.isReady = False
         self.listMyTorpedo = []
         self.listEnemyTorpedo = []
+        self.myRadar = None
+        self.enemyRadar = None
         self.canFire = None
         self.lastPosFire = None
         self.lastPosEnemyFire = None
@@ -28,9 +31,11 @@ class Player():
         return listTemp
 
     def calListEnemyShip(self, data):
-        if self.listEnemyShip is not None: return
+        if self.listEnemyShip is not None or data is None: return
         count = 0
-        for loc, direction in data:
+        self.listEnemyShip = []
+        for item in data:
+            loc, direction = item
             self.listEnemyShip.append(Ship(self.window, loc, listPathShip[count][0], listPathShip[count][2], direction=direction))
             count += 1
 
@@ -80,12 +85,16 @@ class Player():
             for oTorpedo in self.listMyTorpedo:
                 if not oTorpedo.drawAnimation():
                     oTorpedo.draw()
+            if self.myRadar is not None:
+                self.myRadar.drawAnimation()
         else:
             for ship in self.listShip:
                 ship.draw()
             for oTorpedo in self.listEnemyTorpedo:
                 if not oTorpedo.drawAnimation():
                     oTorpedo.draw()
+            if self.enemyRadar is not None:
+                self.enemyRadar.drawAnimation()
         
     def moveShip(self, event):
         if event is None: return
