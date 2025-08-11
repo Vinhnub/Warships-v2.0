@@ -17,7 +17,10 @@ listPathShip = [(resource_path("assets/images/ship2.png"), (FIELD_COORD[0] + 3, 
                (resource_path("assets/images/ship3.png"), (FIELD_COORD[0] + 3 + CELL_SIZE[0]*2, FIELD_COORD[1] + 3), 3),
                (resource_path("assets/images/ship4.png"), (FIELD_COORD[0] + 3 + CELL_SIZE[0]*3, FIELD_COORD[1] + 3), 4),
                (resource_path("assets/images/ship5.png"), (FIELD_COORD[0] + 3 + CELL_SIZE[0]*4, FIELD_COORD[1] + 3), 5),
+               (resource_path("assets/images/radar.png"), (FIELD_COORD[0] + 3 + CELL_SIZE[0]*5, FIELD_COORD[1] + 3), 6),
+               (resource_path("assets/images/radar.png"), (FIELD_COORD[0] + 3 + CELL_SIZE[0]*6, FIELD_COORD[1] + 3), 7),
                ]
+# id 6, 7 is radar
 
 listPathTopedoA = [resource_path("assets/images/torpedo_animation/frame_00.png"),
                 resource_path("assets/images/torpedo_animation/frame_01.png"),
