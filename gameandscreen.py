@@ -316,11 +316,12 @@ class OnlineMode():
         if self.signalRecieve.phase == "END":
             if not isinstance(self.manager.currentScreen, EndScreen):
                 self.manager.changeScreen(EndScreen(self.manager, self.manager.window, self.signalRecieve.data))
-                self.signalSend.data = self.player.listShip
+                self.signalSend.data = self.player.getShipDetail()
                 self.signalSend.type = "MYSHIP"
 
             if self.signalRecieve.type == "ENEMYSHIP":
-                self.player.calListEnemyShip(self.signalRecieve.data)
-                self.signalSend.type = None
-                self.signalSend.data = None
+                if self.signalRecieve.data is not None:
+                    self.player.calListEnemyShip(self.signalRecieve.data)
+                    self.signalSend.type = None
+                    self.signalSend.data = None
             
