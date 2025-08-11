@@ -8,7 +8,7 @@ from torpedo import *
 class Player():
     def __init__(self, window):
         self.window = window
-        self.listShip = [Ship(self.window, path[1], path[0], path[2]) for path in listPathShip]
+        self.listShip = [Ship(path[1], path[0], path[2]) for path in listPathShip]
         self.listEnemyShip = None
         self.__isMouseDown = False
         self.__firstPos = None # pos when player click mouse down to move or ronate ship

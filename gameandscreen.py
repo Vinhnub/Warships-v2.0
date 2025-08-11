@@ -223,7 +223,7 @@ class OfflineMode:
                     if not is_hit:
                         self.turn = "player"  # Trượt thì chuyển lượt về player
     def draw(self):
-        self.player.draw(self.manager.window, isMyTurn=(self.turn == "player"))
+        self.player.draw(isMyTurn=(self.turn == "player"))
         for torpedo in self.player.listMyTorpedo:
             if not torpedo.drawAnimation():
                 torpedo.draw()
