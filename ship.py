@@ -3,7 +3,7 @@ import pygame
 from torpedo import *
 
 class Ship():
-    def __init__(self, loc, path, id):
+    def __init__(self, window, loc, path, id):
         self.oldLoc = loc
         self.loc = loc
         self.id = id
