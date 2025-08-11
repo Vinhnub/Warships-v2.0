@@ -11,6 +11,7 @@ from constants import *
 import time
 import threading
 from radar import *
+import pickle
 
 #============================================================ SCREEN MANAGER ============================================================
 
@@ -309,10 +310,11 @@ class OnlineMode():
                         self.player.mode = 0
                     self.signalSend.data = res
                     self.isRecieveResult = False
+                    self.player.coolDown = time.time()
 
                 if self.signalRecieve.type == "WAITING_PL":
                     self.manager.currentScreen.timer.setText(str(int(self.signalRecieve.data)))
-                    if self.signalRecieve.coolDown > COOL_DOWN and self.player.canFire == False:
+                    if time.time() - self.player.coolDown > COOL_DOWN and self.player.canFire == False:
                         self.player.canFire = True
 
                 if self.signalRecieve.type == "FIRE_TORPEDO_RESULT":
@@ -335,7 +337,6 @@ class OnlineMode():
                 if not isinstance(self.manager.currentScreen, EnemyTurnScreen):
                     self.manager.changeScreen(EnemyTurnScreen(self.manager, self.manager.window))
                     self.signalSend.type = "WAITING_PL"
-                    self.player.canFire = True
     
                 self.signalSend.data = len(self.player.listEnemyTorpedo)
                 self.signalSend.anotherData = self.player.lastPosEnemyRadar
@@ -351,7 +352,7 @@ class OnlineMode():
                 if self.signalRecieve.type == "ENEMY_FIRE_RADAR":
                     if self.player.lastPosEnemyRadar != self.signalRecieve.data:
                         self.player.lastPosEnemyRadar = self.signalRecieve.data
-                        self.player.enemyRadar = Radar(self.manager.window, self.player.lastPosEnemyRadar, listPathRadarA, self.player.numCorrect(self.signalRecieve.data), 100)
+                        self.player.enemyRadar = Radar(self.manager.window, self.player.lastPosEnemyRadar, listPathRadarA, self.player.numCorrect(self.player.lastPosEnemyRadar), 100)
 
         if self.signalRecieve.phase == "END":
             if not isinstance(self.manager.currentScreen, EndScreen):
