@@ -106,6 +106,3 @@ class Player():
             if event.type == MOUSEMOTION:
                 mousePos = pygame.mouse.get_pos()
                 self.__shipSelected.updatePos(self.__firstPos, mousePos)
-
-
-            

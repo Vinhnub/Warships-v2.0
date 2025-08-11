@@ -128,12 +128,21 @@ class PlayerAI():
             return True
         elif not hit:
             return False
-    def draw(self):
-        for torpedo in self.bot.listMyTorpedo[:]:
-            if not torpedo.drawAnimation():
-                 torpedo.draw(self.window)  # Vẽ ảnh trúng hoặc trượt
-            else:
-                 self.bot.listMyTorpedo.remove(torpedo)  # Hết animation thì xóa tên lửa khỏi danh sách
+    def draw(self,window, isMyTurn=None):
+        self.window = window
+        if isMyTurn is None:
+            for ship in self.listShip:
+                ship.draw(window)
+        if isMyTurn:
+            for oTorpedo in self.listMyTorpedo:
+                if not oTorpedo.drawAnimation():
+                    oTorpedo.draw(window)
+        else:
+            for ship in self.listShip:
+                ship.draw(window)
+            for oTorpedo in self.listEnemyTorpedo:
+                if not oTorpedo.drawAnimation():
+                    oTorpedo.draw(window)
 
     def get_ships_for_botlogic(self):
         return extract_ships_from_boolean_map(self._enemy.getlistPosShip())

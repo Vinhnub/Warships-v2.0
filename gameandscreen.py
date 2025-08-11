@@ -193,6 +193,7 @@ class OfflineMode:
         self.player = Player(manager.window)
         self.phase = "PREPARE"
         self.turn = "player"
+        self.bot = PlayerAI(self.manager.window, self.player)
     def running(self, event):
         if self.phase == "PREPARE":
             if not isinstance(self.manager.currentScreen, PrepareScreen):
@@ -208,11 +209,12 @@ class OfflineMode:
                     pos = self.player.handleEvent(event)
                     print(pos)
                     if pos:
-                        is_hit = self.bot.isCorrect(pos)
-                        if not is_hit:
-                           self.turn = "bot"
-                else:
-                    pass
+                        # Tạo Torpedo animation cho player
+                        pixel_loc = (FIELD_COORD[0] + pos[0] * CELL_SIZE[0] + 3, FIELD_COORD[1] + pos[1] * CELL_SIZE[1] + 3)
+                        torpedo = Torpedo(self.player.window, pixel_loc, listPathTopedoA,pathImageTorpedo, self.bot.isCorrect(pos), spf=50)
+                        self.player.listMyTorpedo.append(torpedo)
+                        if not self.bot.isCorrect(pos):
+                            self.turn = "bot"
             else:
                 if not isinstance(self.manager.currentScreen, EnemyTurnScreen):
                     self.manager.changeScreen(EnemyTurnScreen(self.manager, self.manager.window))
@@ -222,7 +224,11 @@ class OfflineMode:
                 elif hit:
                     self.turn = "bot"
     def draw(self):
-        pass
+        if self.turn == "player":
+            self.player.draw(self.manager.window, isMyTurn=True)
+        elif self.turn == "bot":
+            self.bot.draw(self.manager.window, isMyTurn=True)
+
     def ready(self):
         self.player.isReady = True
         self.bot = PlayerAI(self.manager.window, self.player)
