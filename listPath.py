@@ -56,4 +56,4 @@ listPathRadarA = [resource_path("assets/images/radar_frames/frame_00.png"),
                 resource_path("assets/images/radar_frames/frame_19.png"),
                    ]
 
-pathImageTorpedo = [resource_path("assets/images/Torpedo_correct.png"),resource_path("assets/images/Torpedo_incorrect.png")]
+pathImageTorpedo = [resource_path("assets/images/Torpedo_correct.png"),resource_path("assets/images/Torpedo_incorrect.png"), resource_path("assets/images/Torpedo_radar.png")]

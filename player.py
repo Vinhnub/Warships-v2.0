@@ -20,7 +20,7 @@ class Player():
         self.listEnemyTorpedo = []
         self.myRadar = None
         self.enemyRadar = None
-        self.haveRadar = False
+        self.haveRadar = 0
         self.canFire = None
         self.lastPosFire = None
         self.lastPosEnemyFire = None
