@@ -1,8 +1,4 @@
 import random
-
-# ============================
-# HÀM HỖ TRỢ: Tách tàu từ boolean map
-# ============================
 def extract_ships_from_boolean_map(boolean_map):
     rows = len(boolean_map)
     cols = len(boolean_map[0]) if rows > 0 else 0
@@ -11,7 +7,6 @@ def extract_ships_from_boolean_map(boolean_map):
     ships = []
 
     def neighbors(x, y):
-        # 4 hướng: lên, xuống, trái, phải
         for nx, ny in [(x - 1, y), (x + 1, y), (x, y - 1), (x, y + 1)]:
             if 0 <= nx < cols and 0 <= ny < rows:
                 yield nx, ny
@@ -32,10 +27,6 @@ def extract_ships_from_boolean_map(boolean_map):
                 ships.append(ship_cells)
     return ships
 
-
-# ============================
-# LỚP BOT LOGIC
-# ============================
 class BotLogic:
     def __init__(self, BOARD_SIZE=10):
         self._BOARD_SIZE = BOARD_SIZE
@@ -53,19 +44,12 @@ class BotLogic:
         self._ships = []
         self._result = None
 
-    # -------------------------
-    # Gán người chơi đối thủ và trích xuất tàu
-    # -------------------------
     def set_enemy_player(self, enemy_player):
-        # Lấy boolean map 10x10 từ đối thủ
         boolean_map = enemy_player.getlistPosShip()
 
-        # Nếu getlistPosShip trả về danh sách nhiều map, gộp lại
         if isinstance(boolean_map, list) and isinstance(boolean_map[0], list) and isinstance(boolean_map[0][0], bool):
-            # Trường hợp: 1 map duy nhất
             self._ships = extract_ships_from_boolean_map(boolean_map)
         else:
-            # Trường hợp: nhiều boolean map (mỗi tàu 1 map)
             merged_map = [[False] * self._BOARD_SIZE for _ in range(self._BOARD_SIZE)]
             for ship_map in boolean_map:
                 for y in range(self._BOARD_SIZE):
@@ -73,13 +57,8 @@ class BotLogic:
                         if ship_map[y][x]:
                             merged_map[y][x] = True
             self._ships = extract_ships_from_boolean_map(merged_map)
-
-        # Lưu kích thước tàu
         self._remainShips = [len(ship) for ship in self._ships]
 
-    # -------------------------
-    # Tính xác suất ô có tàu
-    # -------------------------
     def secondBoard(self):
         secondBoard = [[0] * self._BOARD_SIZE for _ in range(self._BOARD_SIZE)]
         for shipSize in self._remainShips:
@@ -99,9 +78,6 @@ class BotLogic:
                             secondBoard[py][px] += 1
         return secondBoard
 
-    # -------------------------
-    # Chế độ random tìm mục tiêu
-    # -------------------------
     def randomMode(self):
         EstimazeBoard = self.secondBoard()
         self._preSuspicious = [pos for pos in self._preSuspicious if pos in self._cells]
@@ -122,9 +98,6 @@ class BotLogic:
         else:
             return False, None
 
-    # -------------------------
-    # Bắn vào mục tiêu
-    # -------------------------
     def checkTarget(self, target):
         if target not in self._cells:
             return False, None
@@ -137,14 +110,10 @@ class BotLogic:
         for ship in list(self._ships):
             if target in ship:
                 self._board[y][x] = 1
-
-                # Lưu streak
                 if self._directionMode == "backward":
                     self._streak.insert(0, target)
                 else:
                     self._streak.append(target)
-
-                # Xác định hướng
                 if len(self._streak) == 1:
                     self._rootCell = target
                     self._preSuspicious.extend(self.getNeighbors(y, x))
@@ -161,16 +130,11 @@ class BotLogic:
                     self._ships.remove(ship)
                     self._remainShips.remove(sunk_size)
                     self.resetTargeting()
-                    return True
+                    return True, (y,x)
                 return True, (y, x)
-
-        # Trượt
         self._board[y][x] = -1
         return False, (y, x)
 
-    # -------------------------
-    # Chế độ săn tàu khi đã trúng
-    # -------------------------
     def huntMode(self):
         if self._direction:
             dy, dx = self._direction
@@ -201,16 +165,10 @@ class BotLogic:
         else:
             return self.randomMode()
 
-    # -------------------------
-    # Lấy ô lân cận
-    # -------------------------
     def getNeighbors(self, y, x):
         possible = [(y - 1, x), (y + 1, x), (y, x - 1), (y, x + 1)]
         return [p for p in possible if p in self._cells]
 
-    # -------------------------
-    # Reset thông tin săn tàu
-    # -------------------------
     def resetTargeting(self):
         self._direction = None
         self._directionMode = None
@@ -218,15 +176,9 @@ class BotLogic:
         self._suspicious.clear()
         self._preSuspicious.clear()
 
-    # -------------------------
-    # Kiểm tra tàu đã chìm
-    # -------------------------
     def isShipSunk(self, ship):
         return all(self._board[py][px] == 1 for (py, px) in ship)
 
-    # -------------------------
-    # Lượt bắn
-    # -------------------------
     def takeTurn(self):
         if self._direction or self._preSuspicious or self._streak:
             self._result = self.huntMode()

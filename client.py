@@ -11,7 +11,6 @@ from widget import *
 from gameandscreen import *
 from main import *
 
-
 pygame.init()
 pygame.mixer.init()
 window = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
