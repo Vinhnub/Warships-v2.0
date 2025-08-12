@@ -187,6 +187,9 @@ class EnemyTurnScreen(Screen):
 
 
 # ============================================================ MODE ============================================================
+import time
+import pygame
+
 class OfflineMode:
     def __init__(self, manager):
         self.manager = manager
@@ -198,90 +201,87 @@ class OfflineMode:
         self.delay_start_time = None
         self.delayTime = 800  # ms
         self.waiting_for_bot = False
-        self.next_bot_shot_time = 0
-        self.shot_delay = 0.5
 
         self.animation_end_time = 0
-        self.pending_hit_result = None  # Chưa có kết quả bắn
+        self.player_pending_hit = None  # Kết quả animation người chơi
+        self.bot_pending_hit = None     # Kết quả animation bot
 
-    def running(self, event):
+    def running(self, event=None):
         if event:
             self.handle_event(event)
         self.update()
 
     def handle_event(self, event):
-        print(f"[DEBUG] Phase: {self.phase}, Turn: {self.turn}, Bot is None? {self.bot is None}")
-
         if self.phase == "PREPARE":
             if not isinstance(self.manager.currentScreen, PrepareScreen):
                 self.manager.changeScreen(PrepareScreen(self.manager, self.manager.window))
+            self.player.handleEvent(event)
 
         elif self.phase == "PLAYING":
             if self.turn == "player":
+                self.player.canFire = True
                 if not isinstance(self.manager.currentScreen, MyTurnScreen):
-                    print("[DEBUG] Switching to MyTurnScreen")
                     self.manager.changeScreen(MyTurnScreen(self.manager, self.manager.window))
-                    return  # tránh xử lý click ngay trong frame đổi màn hình
 
                 if event.type == pygame.MOUSEBUTTONDOWN:
-                    mouse_pixel = pygame.mouse.get_pos()
-                    print(f"[DEBUG] Mouse pixel click: {mouse_pixel}")
                     pos = self.player.handleEvent(event)
-                    print(f"[DEBUG] Grid pos: {pos}")
-
+                    print(f"player: {pos}")
                     if pos:
                         hit = self.bot.isCorrect(pos)
-                        print(f"[DEBUG] Hit result: {hit}")
-
                         pixel_loc = (
                             FIELD_COORD[0] + pos[0] * CELL_SIZE[0] + 3,
                             FIELD_COORD[1] + pos[1] * CELL_SIZE[1] + 3
                         )
-                        torpedo = Torpedo(
-                            self.player.window,
-                            pixel_loc,
-                            listPathTopedoA,
-                            pathImageTorpedo,
-                            hit,
-                            spf=50
-                        )
+                        torpedo = Torpedo(self.player.window, pixel_loc, listPathTopedoA, pathImageTorpedo, hit, spf=50)
                         self.player.listMyTorpedo.append(torpedo)
 
-                        self.animation_end_time = time.time() + 1.2
-                        self.pending_hit_result = hit
-                    else:
-                        print("[DEBUG] Invalid click — outside board or already shot.")
+                        self.animation_end_time = time.time() + 1.2 
+                        self.player_pending_hit = hit
 
     def update(self):
         if self.phase != "PLAYING":
             return
 
-        # Xử lý kết thúc animation bắn của người chơi
-        if time.time() >= self.animation_end_time and self.pending_hit_result is not None:
-            if not self.pending_hit_result:
-                self.turn = "bot"
-                self.waiting_for_bot = True
-                self.delay_start_time = pygame.time.get_ticks()
-                self.manager.changeScreen(EnemyTurnScreen(self.manager, self.manager.window))
-            else:
-                self.turn = "player"
-                self.manager.changeScreen(MyTurnScreen(self.manager, self.manager.window))
-            self.pending_hit_result = None
+        now = time.time()
 
-        # BOT logic
-        if self.turn == "bot":
-            now = pygame.time.get_ticks()
-            if self.waiting_for_bot and now - self.delay_start_time >= self.delayTime:
-                self.waiting_for_bot = False
-                hit = self.bot.makeHit()
-
-                self.animation_end_time = time.time() + 1.2
-                if not hit:
-                    self.turn = "player"
-                    self.manager.changeScreen(MyTurnScreen(self.manager, self.manager.window))
-                else:
+        # Xử lý animation người chơi
+        if self.turn == "player" and self.player_pending_hit is not None:
+            if now >= self.animation_end_time:
+                if not self.player_pending_hit:
+                    print("Player missed, switching to bot's turn")
+                    self.turn = "bot"
                     self.waiting_for_bot = True
                     self.delay_start_time = pygame.time.get_ticks()
+                    self.manager.changeScreen(EnemyTurnScreen(self.manager, self.manager.window))
+                else:
+                    print("Player hit, continues turn")
+                    self.turn = "player"
+                    self.waiting_for_bot = False
+                self.player_pending_hit = None
+
+        #animation bot
+        if self.turn == "bot" and self.bot_pending_hit is not None:
+            if now >= self.animation_end_time:
+                if not self.bot_pending_hit:
+                    print("Bot missed, switching to player's turn")
+                    self.turn = "player"
+                    self.waiting_for_bot = False
+                    self.manager.changeScreen(MyTurnScreen(self.manager, self.manager.window))
+                else:
+                    print("Bot hit, continues turn")
+                    self.turn = "bot"
+                    self.waiting_for_bot = True
+                    self.delay_start_time = pygame.time.get_ticks()
+                self.bot_pending_hit = None
+
+        # BOT logic
+        if self.turn == "bot" and self.waiting_for_bot:
+            now_ticks = pygame.time.get_ticks()
+            if now_ticks - self.delay_start_time >= self.delayTime and self.bot_pending_hit is None:
+                self.waiting_for_bot = False
+                hit = self.bot.makeHit()
+                self.animation_end_time = time.time() + 1.2
+                self.bot_pending_hit = hit
 
     def draw(self):
         if self.turn == "player":
@@ -290,28 +290,21 @@ class OfflineMode:
             self.bot.draw(self.manager.window, isMyTurn=True)
 
     def ready(self):
-        print("[DEBUG] Player clicked Ready!")
         self.player.isReady = True
         self.player.calListPosShip()
-
-        # Tạo bot
         self.bot = PlayerAI(self.manager.window, self.player)
         self.bot.auto_place_ships()
         self.bot.isReady = True
-
-        # Chuyển sang phase chơi
         self.phase = "PLAYING"
         self.turn = "player"
-
-        # Reset trạng thái
-        self.pending_hit_result = None
+        print(f"Phase set to: {self.phase}, Turn set to: {self.turn}")
+        self.player_pending_hit = None
+        self.bot_pending_hit = None
         self.animation_end_time = 0
         self.waiting_for_bot = False
         self.delay_start_time = None
-        self.next_bot_shot_time = 0
-
-        # Vào ngay màn chơi của người
         self.manager.changeScreen(MyTurnScreen(self.manager, self.manager.window))
+
 
 
 

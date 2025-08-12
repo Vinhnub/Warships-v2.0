@@ -24,12 +24,14 @@ while True:
             pygame.quit()  
             sys.exit()
         main.handleEvent(event)
-    window.fill(BLACK)
 
+    if main.game:
+        main.game.running(None) 
+    window.fill(BLACK)
+    
     main.draw()
 
     pygame.display.update()
-    
     
     clock.tick(FRAMES_PER_SECOND) 
     fps = int(clock.get_fps())
