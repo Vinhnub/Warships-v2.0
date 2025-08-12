@@ -205,7 +205,9 @@ class OfflineMode:
         self.animation_end_time = 0
         self.player_pending_hit = None  # Kết quả animation người chơi
         self.bot_pending_hit = None     # Kết quả animation bot
-
+        
+        self.countBotHitTrue = 0
+        self.countPlayerHitTrue = 0
     def running(self, event=None):
         if event:
             self.handle_event(event)
@@ -270,6 +272,9 @@ class OfflineMode:
                 else:
                     print("Bot hit, continues turn")
                     self.turn = "bot"
+                    self.countBotHitTrue += 1
+                    if self.countBotHitTrue == 17:
+                       self.manager.changeScreen()
                     self.waiting_for_bot = True
                     self.delay_start_time = pygame.time.get_ticks()
                 self.bot_pending_hit = None
