@@ -184,12 +184,30 @@ class EnemyTurnScreen(Screen):
         self.field.draw()
         self.screenManager.game.player.draw(self.window, False)
 
+class WINTemporaryEndScreen(Screen):
+    def __init__(self, screenManager, window):
+        super().__init__(screenManager, window)
+        self.field = AnimatedImage(self.window, FIELD_COORD, [resource_path("assets/images/field.png")])
+        self.win = AnimatedImage(self.window, FIELD_COORD, [resource_path("assets/images/textWIN.png")])
+    def handleEvent(self):
+        pass
+    def draw(self):
+        self.field.draw()
+        self.win.draw()
 
+class LOSETemporaryEndScreen(Screen):
+    def __init__(self, screenManager, window):
+        super().__init__(screenManager, window)
+        self.field = AnimatedImage(self.window, FIELD_COORD, [resource_path("assets/images/field.png")])
+        self.lose = AnimatedImage(self.window, FIELD_COORD, [resource_path("assets/images/textLOSE.png")])
+    def handleEvent(self):
+        pass
+    def draw(self):
+        self.field.draw()
+        self.lose.draw()   
+        
 
 # ============================================================ MODE ============================================================
-import time
-import pygame
-
 class OfflineMode:
     def __init__(self, manager):
         self.manager = manager
@@ -243,9 +261,9 @@ class OfflineMode:
     def update(self):
         if self.phase != "PLAYING":
             return
-
+        if isinstance(self.manager.currentScreen, (WINTemporaryEndScreen, LOSETemporaryEndScreen)):
+           return
         now = time.time()
-
         # Xử lý animation người chơi
         if self.turn == "player" and self.player_pending_hit is not None:
             if now >= self.animation_end_time:
@@ -257,6 +275,9 @@ class OfflineMode:
                     self.manager.changeScreen(EnemyTurnScreen(self.manager, self.manager.window))
                 else:
                     print("Player hit, continues turn")
+                    self.countPlayerHitTrue += 1
+                    if self.countPlayerHitTrue == 17:
+                        self.manager.changeScreen(LOSETemporaryEndScreen(self.manager, self.manager.window))
                     self.turn = "player"
                     self.waiting_for_bot = False
                 self.player_pending_hit = None
@@ -274,7 +295,7 @@ class OfflineMode:
                     self.turn = "bot"
                     self.countBotHitTrue += 1
                     if self.countBotHitTrue == 17:
-                       self.manager.changeScreen()
+                       self.manager.changeScreen(LOSETemporaryEndScreen(self.manager, self.manager.window))
                     self.waiting_for_bot = True
                     self.delay_start_time = pygame.time.get_ticks()
                 self.bot_pending_hit = None
@@ -309,7 +330,8 @@ class OfflineMode:
         self.waiting_for_bot = False
         self.delay_start_time = None
         self.manager.changeScreen(MyTurnScreen(self.manager, self.manager.window))
-
+        self.countBotHitTrue = 0
+        self.countPlayerHitTrue = 0
 
 
 

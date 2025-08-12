@@ -30,7 +30,7 @@ while True:
     window.fill(BLACK)
     
     main.draw()
-
+    
     pygame.display.update()
     
     clock.tick(FRAMES_PER_SECOND) 
