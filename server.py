@@ -166,8 +166,7 @@ def handleData(obj, addr):
             
         if obj.type == "FIRE_RADAR":
             pos = obj.data
-            if pos != serverData[obj.roomID]["PLAYER"][addr[0]]["lastPosFire"]: 
-                serverData[obj.roomID]["PLAYER"][addr[0]]["lastPosFire"] = pos
+            if pos != serverData[obj.roomID]["PLAYER"][addr[0]]["lastPosRadar"]: 
                 serverData[obj.roomID]["PLAYER"][addr[0]]["lastPosRadar"] = pos
                 
             result = 0
@@ -202,15 +201,15 @@ def handleData(obj, addr):
 
 
 def handleRequest(data, addr):
-    try:
-        obj = pickle.loads(data)
-        result = handleData(obj, addr)
-        #logging.info(f"{obj} {addr} {result}")
-        response = pickle.dumps(result)
-        server_socket.sendto(response, addr)
-        printdata(serverData)
-    except Exception as e:
-        logging.error(f"[SERVER ERROR] Gói tin từ {addr} bị lỗi: {e}")
+    #try:
+    obj = pickle.loads(data)
+    result = handleData(obj, addr)
+    logging.info(f"{obj} {addr} {result}")
+    response = pickle.dumps(result)
+    server_socket.sendto(response, addr)
+    #printdata(serverData)
+   # except Exception as e:
+    #    logging.error(f"[SERVER ERROR] Gói tin từ {addr} bị lỗi: {e}")
 
 
 while True:

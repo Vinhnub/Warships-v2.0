@@ -33,16 +33,17 @@ class Screen():
 class MenuScreen(Screen):
     def __init__(self, screenManager, window):
         super().__init__(screenManager, window)
-        self.exitBtn = AnimatedButton(self.window, (550, 450), [resource_path("assets/images/buttons/exitBtn_u.png")], [resource_path("assets/images/buttons/exitBtn_d.png")])
-        self.onlBtn = AnimatedButton(self.window, (375, 250), [resource_path("assets/images/buttons/onlBtn_u.png")], [resource_path("assets/images/buttons/onlBtn_d.png")])
-        self.offBtn = AnimatedButton(self.window, (375, 350), [resource_path("assets/images/buttons/offBtn_u.png")], [resource_path("assets/images/buttons/offBtn_d.png")])
-        self.image = [AnimatedImage(self.window, (0, 0), path) for path in listPathImageMenuScreen]
+        self.exitBtn = AnimatedButton(self.window, (650, 520), [resource_path("assets/images/buttons/exitBtn_u.png")], [resource_path("assets/images/buttons/exitBtn_d.png")])
+        self.onlBtn = AnimatedButton(self.window, (475, 280), [resource_path("assets/images/buttons/onlBtn_u.png")], [resource_path("assets/images/buttons/onlBtn_d.png")])
+        self.offBtn = AnimatedButton(self.window, (475, 400), [resource_path("assets/images/buttons/offBtn_u.png")], [resource_path("assets/images/buttons/offBtn_d.png")])
+        self.background = AnimatedImage(self.window, (0, 0), listPathImageMenuScreen, 1500)
+        self.logo = AnimatedImage(self.window, (400, 120), listPathImageLogo, 1500)
         self.inputData = None
         self.warning = None
     
     def draw(self):
-        for item in self.image:
-            item.draw()
+        self.background.draw()
+        self.logo.draw()
         self.onlBtn.draw()
         self.offBtn.draw()
         self.exitBtn.draw()
@@ -77,14 +78,16 @@ class MenuScreen(Screen):
 class FindingScreen(Screen):
     def __init__(self, screenManager, window):
         super().__init__(screenManager, window)
-        self.createBtn = AnimatedButton(self.window, (500, 250), [resource_path("assets/images/buttons/createBtn_u.png")], [resource_path("assets/images/buttons/createBtn_d.png")])
-        self.joinBtn = AnimatedButton(self.window, (550, 350), [resource_path("assets/images/buttons/joinBtn_u.png")], [resource_path("assets/images/buttons/joinBtn_d.png")])
-        self.backBtn = AnimatedButton(self.window, (550, 450), [resource_path("assets/images/buttons/backBtn_u.png")], [resource_path("assets/images/buttons/backBtn_d.png")])
-        self.image = [AnimatedImage(self.window, (0, 0), path) for path in listPathImageMenuScreen]
+        self.createBtn = AnimatedButton(self.window, (600, 300), [resource_path("assets/images/buttons/createBtn_u.png")], [resource_path("assets/images/buttons/createBtn_d.png")])
+        self.joinBtn = AnimatedButton(self.window, (650, 400), [resource_path("assets/images/buttons/joinBtn_u.png")], [resource_path("assets/images/buttons/joinBtn_d.png")])
+        self.backBtn = AnimatedButton(self.window, (650, 500), [resource_path("assets/images/buttons/backBtn_u.png")], [resource_path("assets/images/buttons/backBtn_d.png")])
+        self.background = AnimatedImage(self.window, (0, 0), [resource_path("assets/images/background/image_5.png")])
+        self.banner = [AnimatedImage(self.window, loc, listPath) for loc, listPath in listPathImageBannerFindingScreen]
         self.warning = None
 
     def draw(self):
-        for item in self.image:
+        self.background.draw()
+        for item in self.banner:
             item.draw()
         self.createBtn.draw()
         self.joinBtn.draw()
@@ -110,8 +113,10 @@ class FindingScreen(Screen):
 class CreateRoom(Screen):
     def __init__(self, screenManager, window, roomID):
         super().__init__(screenManager, window)
-        self.roomIDText = CustomText(window, (500, 350), roomID, resource_path("fonts/PressStart2P-Regular.ttf"), font_size=50, color=(255, 255, 255))
-        self.backBtn = AnimatedButton(self.window, (550, 450), [resource_path("assets/images/buttons/backBtn_u.png")], [resource_path("assets/images/buttons/backBtn_d.png")])
+        self.roomIDText = CustomText(window, (622, 365), roomID, resource_path("fonts/PressStart2P-Regular.ttf"), font_size=50, color=(0, 0, 0))
+        self.backBtn = AnimatedButton(self.window, (650, 475), [resource_path("assets/images/buttons/backBtn_u.png")], [resource_path("assets/images/buttons/backBtn_d.png")])
+        self.background = AnimatedImage(self.window, (0, 0), [resource_path("assets/images/background/image_4.png")])
+        self.banner = [AnimatedImage(self.window, loc, listPath) for loc, listPath in listPathImageBannerCreateRoomScreen]
 
     def handleEvent(self, event):
         if self.backBtn.handleEvent(event):
@@ -119,6 +124,9 @@ class CreateRoom(Screen):
             self.screenManager.game.reset()
 
     def draw(self):
+        self.background.draw()
+        for item in self.banner:
+            item.draw()
         self.roomIDText.draw()
         self.backBtn.draw()
 
@@ -126,9 +134,11 @@ class CreateRoom(Screen):
 class JoinRoom(Screen):
     def __init__(self, screenManager, window):
         super().__init__(screenManager, window)
-        self.roomIDInput = pygwidgets.InputText(self.window, (500, 400), fontSize=50, width=300)
-        self.backBtn = AnimatedButton(self.window, (550, 450), [resource_path("assets/images/buttons/backBtn_u.png")], [resource_path("assets/images/buttons/backBtn_d.png")])
-        self.enterBtn = AnimatedButton(self.window, (550, 550), [resource_path("assets/images/buttons/enterBtn_u.png")], [resource_path("assets/images/buttons/enterBtn_d.png")])
+        self.roomIDInput = pygwidgets.InputText(self.window, (630, 365), fontSize=75, width=240)
+        self.backBtn = AnimatedButton(self.window, (490, 470), [resource_path("assets/images/buttons/backBtn_u.png")], [resource_path("assets/images/buttons/backBtn_d.png")])
+        self.enterBtn = AnimatedButton(self.window, (800, 470), [resource_path("assets/images/buttons/enterBtn_u.png")], [resource_path("assets/images/buttons/enterBtn_d.png")])
+        self.background = AnimatedImage(self.window, (0, 0), [resource_path("assets/images/background/image_3.png")])
+        self.banner = [AnimatedImage(self.window, loc, listPath) for loc, listPath in listPathImageBannerJoinRoomScreen]
 
     def handleEvent(self, event):
         self.roomIDInput.handleEvent(event)
@@ -139,6 +149,9 @@ class JoinRoom(Screen):
             self.screenManager.game.reset()
 
     def draw(self):
+        self.background.draw()
+        for item in self.banner:
+            item.draw()
         self.backBtn.draw()
         self.roomIDInput.draw()
         self.enterBtn.draw()
@@ -275,6 +288,7 @@ class OnlineMode():
                 data, addr = self.network.client.recvfrom(4096)
                 self.signalRecieve = pickle.loads(data)
             except Exception as e:
+                self.manager.currentScreen
                 print("[ERROR] Lỗi khi nhận dữ liệu:", e)
         
 
@@ -298,7 +312,7 @@ class OnlineMode():
                     self.manager.changeScreen(MyTurnScreen(self.manager, self.manager.window))
                     self.player.canFire = True
                     self.signalSend.type = "WAITING_PL"
-                    self.signalSend.data = len(self.player.listEnemyTorpedo)
+                    self.signalSend.data = self.player.lastPosEnemyFire
                     self.signalSend.anotherData = self.player.lastPosEnemyRadar
                 
                 res = self.player.handleEvent(event)
@@ -322,7 +336,7 @@ class OnlineMode():
                         self.isRecieveResult = True
                         self.player.listMyTorpedo.append(Torpedo(self.manager.window, self.player.lastPosFire, listPathTopedoA, pathImageTorpedo, self.signalRecieve.data, 100))
                         self.signalSend.type = "WAITING_PL"
-                        self.signalSend.data = len(self.player.listEnemyTorpedo)
+                        self.signalSend.data = self.player.lastPosEnemyFire
                         self.signalSend.anotherData = self.player.lastPosEnemyRadar
                         if self.signalRecieve.data == 2:
                             self.player.haveRadar += 1
@@ -330,7 +344,7 @@ class OnlineMode():
                 if self.signalRecieve.type == "FIRE_RADAR_RESULT":
                     self.player.myRadar.append((Radar(self.manager.window, self.player.lastPosFire, listPathRadarA, self.signalRecieve.data, 100), self.player.lastPosFire))
                     self.signalSend.type = "WAITING_PL"
-                    self.signalSend.data = len(self.player.listEnemyTorpedo)
+                    self.signalSend.data = self.player.lastPosEnemyFire
                     self.signalSend.anotherData = self.player.lastPosEnemyRadar
 
             else:

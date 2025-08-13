@@ -103,26 +103,19 @@ class CustomText():
     def setLoc(self, newLoc):
         self.loc = newLoc
 
-class Warning:
-   def __init__(self, window, loc, duration=5000):
+class Warning():
+   def __init__(self, window, loc, text, duration=5000):
         self.window = window
         self.loc = loc
         self.duration = duration
-        self.active = None
-        image_path = os.path.join('assets', 'images', 'ErrorImage', 'error.png')
-        self._image = pygame.image.load(image_path).convert_alpha()
+        self.content = CustomText(window, loc, text, resource_path("fonts/PressStart2P-Regular.ttf"), font_size=40, color=(255, 0, 0))
+        self._startTime = pygame.time.get_ticks()
 
    def draw(self):
-       self._startTime = pygame.time.get_ticks()
-       self.active = True
-
-   def freshPerFrame(self):
-       if self.active:
-          currentTime = pygame.time.get_ticks() 
-          if currentTime - self._startTime <= self.duration:
-              self.window.blit(self._image, self.loc)
-          else:
-              self.active = False
+        if pygame.time.get_ticks() - self._startTime < self.duration:
+            self.content.draw()
+            return True
+        return False
            
 class InputData():
     def __init__(self, window, loc):
