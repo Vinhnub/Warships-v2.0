@@ -171,7 +171,7 @@ class PrepareScreen(Screen):
     def __init__(self, screenManager, window):
         super().__init__(screenManager, window)
         self.field = AnimatedImage(self.window, FIELD_COORD, [resource_path("assets/images/field.png")])
-        self.readyBtn = AnimatedButton(self.window, (500, 700), [resource_path("assets/images/buttons/readyBtn_u.png")], [resource_path("assets/images/buttons/readyBtn_d.png")], [resource_path("assets/images/buttons/readyBtn_dis.png")])
+        self.readyBtn = AnimatedButton(self.window, (600, 700), [resource_path("assets/images/buttons/readyBtn_u.png")], [resource_path("assets/images/buttons/readyBtn_d.png")], [resource_path("assets/images/buttons/readyBtn_dis.png")])
         self.background = AnimatedImage(self.window, (0, 0), [resource_path("assets/images/background/image_2.png")])
         self.warning = None
 
@@ -349,15 +349,15 @@ class OnlineMode():
                 
                 if self.isConnected:
                     res = self.player.handleEvent(event)
-                if res:
-                    self.player.lastPosFire = res
-                    self.signalSend.type = "FIRE_TORPEDO" if self.player.mode == 0 else "FIRE_RADAR"
-                    if self.player.mode == 1: 
-                        self.player.haveRadar -= 1
-                        self.player.mode = 0
-                    self.signalSend.data = res
-                    self.isRecieveResult = False
-                    self.player.coolDown = time.time()
+                    if res:
+                        self.player.lastPosFire = res
+                        self.signalSend.type = "FIRE_TORPEDO" if self.player.mode == 0 else "FIRE_RADAR"
+                        if self.player.mode == 1: 
+                            self.player.haveRadar -= 1
+                            self.player.mode = 0
+                        self.signalSend.data = res
+                        self.isRecieveResult = False
+                        self.player.coolDown = time.time()
 
                 if self.signalRecieve.type == "WAITING_PL":
                     self.manager.currentScreen.timer.setText(str(int(self.signalRecieve.data)))
