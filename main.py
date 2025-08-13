@@ -1,5 +1,6 @@
-from gameandscreen import *
+from screen import *
 from player import *
+from gamemode import *
 
 class Main():
     def __init__(self, window):
@@ -9,6 +10,12 @@ class Main():
 
     def changeScreen(self, newScreen):
         self.currentScreen = newScreen
+
+    def onlineMode(self, ip):
+        self.game = OnlineMode(self, ip)
+
+    def offlineMode(self):
+        pass
 
     def handleEvent(self, event):
         self.currentScreen.handleEvent(event)
