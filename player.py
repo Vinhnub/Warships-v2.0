@@ -21,8 +21,8 @@ class Player():
         self.coolDown = time.time()
         self.listMyTorpedo = []
         self.listEnemyTorpedo = []
-        self.myRadar = None
-        self.enemyRadar = None
+        self.myRadar = []
+        self.enemyRadar = []
         self.haveRadar = 0
         self.canFire = None
         self.lastPosFire = None
@@ -95,6 +95,10 @@ class Player():
                     for oTorpedo in self.listMyTorpedo:
                         if oTorpedo.getHitBox().collidepoint(firePos):
                             return False
+                elif self.mode == 1:
+                    for radar, loc in self.myRadar:
+                        if loc == (int((firePos[0] - FIELD_COORD[0])/CELL_SIZE[0]), int((firePos[1] - FIELD_COORD[1])/CELL_SIZE[1])):
+                            return False
                 return (int((firePos[0] - FIELD_COORD[0])/CELL_SIZE[0]), int((firePos[1] - FIELD_COORD[1])/CELL_SIZE[1]))
         return False
     
@@ -113,16 +117,18 @@ class Player():
             for oTorpedo in self.listMyTorpedo:
                 if not oTorpedo.drawAnimation():
                     oTorpedo.draw()
-            if self.myRadar is not None:
-                self.myRadar.drawAnimation()
+            for radar, loc in self.myRadar:
+                if not radar.drawAnimation():
+                    radar.draw()
         else:
             for ship in self.listShip:
                 ship.draw()
             for oTorpedo in self.listEnemyTorpedo:
                 if not oTorpedo.drawAnimation():
                     oTorpedo.draw()
-            if self.enemyRadar is not None:
-                self.enemyRadar.drawAnimation()
+            for radar, loc in self.enemyRadar:
+                if not radar.drawAnimation():
+                    radar.draw()
         
     def moveShip(self, event):
         if event is None: return
