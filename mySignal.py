@@ -18,4 +18,4 @@ class SignalRecieved():
         self.ping = ping
 
     def __str__(self):
-        return str(self.phase) + " " + str(self.type) + " " +  str(self.turnIP) + " " + str(self.playerIP) + " " + str(self.data) + " " + str(self.coolDown)
+        return str(self.phase) + " " + str(self.type) + " " +  str(self.turnIP) + " " + str(self.playerIP) + " " + str(self.data)
