@@ -10,6 +10,7 @@ import time
 class Player():
     def __init__(self, window, gameMode=True): #True: onl, False: off
         self.window = window
+        self.gameMode = gameMode
         self.mode = 0 # o: torpedo, 1: radar
         self.listShip = [Ship(self.window, path[1], path[0], path[2]) for path in (listPathShipOnl if gameMode else listPathShipOff)] 
         self.listEnemyShip = None
@@ -20,8 +21,8 @@ class Player():
         self.coolDown = time.time()
         self.listMyTorpedo = []
         self.listEnemyTorpedo = []
-        self.myRadar = None
-        self.enemyRadar = None
+        self.myRadar = []
+        self.enemyRadar = []
         self.haveRadar = 0
         self.canFire = None
         self.lastPosFire = None
@@ -56,9 +57,10 @@ class Player():
             for x in range(ship.loc[0], ship.loc[0] + ship.width, CELL_SIZE[0]):
                 for y in range(ship.loc[1], ship.loc[1] + ship.height, CELL_SIZE[0]):
                     self.__listPosShip[int((x - FIELD_COORD[0])/CELL_SIZE[0])][int((y - FIELD_COORD[1])/CELL_SIZE[1])] = 1
-        
-        for i in range(count, len(self.listShip)):
-            self.__listPosShip[int((self.listShip[i].loc[0] - FIELD_COORD[0])/CELL_SIZE[0])][int((self.listShip[i].loc[1] - FIELD_COORD[1])/CELL_SIZE[1])] = 2
+
+        if self.gameMode:
+            for i in range(count, len(self.listShip)):
+                self.__listPosShip[int((self.listShip[i].loc[0] - FIELD_COORD[0])/CELL_SIZE[0])][int((self.listShip[i].loc[1] - FIELD_COORD[1])/CELL_SIZE[1])] = 2
 
         return self.__listPosShip
     
@@ -70,7 +72,7 @@ class Player():
         result = 0
         for x in range(max(0, pos[0] - 1), min(10, pos[0] + 2)):
             for y in range(max(0, pos[1] - 1), min(10, pos[1] + 2)):
-                if self.__listPosShip == 1:
+                if self.__listPosShip[x][y] == 1:
                     result += 1
         return result
     
@@ -93,6 +95,10 @@ class Player():
                     for oTorpedo in self.listMyTorpedo:
                         if oTorpedo.getHitBox().collidepoint(firePos):
                             return False
+                elif self.mode == 1:
+                    for radar, loc in self.myRadar:
+                        if loc == (int((firePos[0] - FIELD_COORD[0])/CELL_SIZE[0]), int((firePos[1] - FIELD_COORD[1])/CELL_SIZE[1])):
+                            return False
                 return (int((firePos[0] - FIELD_COORD[0])/CELL_SIZE[0]), int((firePos[1] - FIELD_COORD[1])/CELL_SIZE[1]))
         return False
     
@@ -111,16 +117,18 @@ class Player():
             for oTorpedo in self.listMyTorpedo:
                 if not oTorpedo.drawAnimation():
                     oTorpedo.draw()
-            if self.myRadar is not None:
-                self.myRadar.drawAnimation()
+            for radar, loc in self.myRadar:
+                if not radar.drawAnimation():
+                    radar.draw()
         else:
             for ship in self.listShip:
                 ship.draw()
             for oTorpedo in self.listEnemyTorpedo:
                 if not oTorpedo.drawAnimation():
                     oTorpedo.draw()
-            if self.enemyRadar is not None:
-                self.enemyRadar.drawAnimation()
+            for radar, loc in self.enemyRadar:
+                if not radar.drawAnimation():
+                    radar.draw()
         
     def moveShip(self, event):
         if event is None: return

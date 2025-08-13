@@ -59,7 +59,6 @@ def handleData(obj, addr):
                                               "ready" : False,
                                               "posShip" : None,
                                               "listShip" : None,
-                                              "listTorpedo" : [],
                                               "lastPosFire" : None,
                                               "lastPosRadar" : None, 
                                               "numCorrect" : 0,
@@ -79,7 +78,6 @@ def handleData(obj, addr):
                 serverData[obj.roomID]["PLAYER"][addr[0]] = {"ready" : False, 
                                                              "posShip" : None, 
                                                              "listShip" : None,
-                                                             "listTorpedo" : [], 
                                                              "lastPosFire" : None,
                                                              "lastPosRadar" : None, 
                                                              "numCorrect" : 0, 
@@ -124,7 +122,7 @@ def handleData(obj, addr):
                                       playerIP=addr[0], 
                                       data=serverData[obj.roomID]["PLAYER"][enemy]["lastPosRadar"])
 
-            if obj.data == len(serverData[obj.roomID]["PLAYER"][enemy]["listTorpedo"]):
+            if obj.data == serverData[obj.roomID]["PLAYER"][enemy]["lastPosFire"]:
 
                 player1 = serverData[obj.roomID]["LISTPLAYER"][0]
                 player2 = serverData[obj.roomID]["LISTPLAYER"][1]
@@ -147,8 +145,6 @@ def handleData(obj, addr):
             
         if obj.type == "FIRE_TORPEDO":
             pos = obj.data
-            if pos != serverData[obj.roomID]["PLAYER"][addr[0]]["lastPosFire"]: 
-                serverData[obj.roomID]["PLAYER"][addr[0]]["listTorpedo"].append(pos)
                 
             if serverData[obj.roomID]["PLAYER"][enemy]["posShip"][pos[0]][pos[1]] > 0:
                 if pos != serverData[obj.roomID]["PLAYER"][addr[0]]["lastPosFire"]:

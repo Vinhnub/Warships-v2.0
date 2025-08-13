@@ -298,7 +298,7 @@ class OnlineMode():
                     self.manager.changeScreen(MyTurnScreen(self.manager, self.manager.window))
                     self.player.canFire = True
                     self.signalSend.type = "WAITING_PL"
-                    self.signalSend.data = len(self.player.listEnemyTorpedo)
+                    self.signalSend.data = self.player.lastPosEnemyFire
                     self.signalSend.anotherData = self.player.lastPosEnemyRadar
                 
                 res = self.player.handleEvent(event)
@@ -322,15 +322,15 @@ class OnlineMode():
                         self.isRecieveResult = True
                         self.player.listMyTorpedo.append(Torpedo(self.manager.window, self.player.lastPosFire, listPathTopedoA, pathImageTorpedo, self.signalRecieve.data, 100))
                         self.signalSend.type = "WAITING_PL"
-                        self.signalSend.data = len(self.player.listEnemyTorpedo)
+                        self.signalSend.data = self.player.lastPosEnemyFire
                         self.signalSend.anotherData = self.player.lastPosEnemyRadar
                         if self.signalRecieve.data == 2:
                             self.player.haveRadar += 1
 
                 if self.signalRecieve.type == "FIRE_RADAR_RESULT":
-                    self.player.myRadar = Radar(self.manager.window, self.player.lastPosFire, listPathRadarA, self.signalRecieve.data, 100)
+                    self.player.myRadar.append((Radar(self.manager.window, self.player.lastPosFire, listPathRadarA, self.signalRecieve.data, 100), self.player.lastPosFire))
                     self.signalSend.type = "WAITING_PL"
-                    self.signalSend.data = len(self.player.listEnemyTorpedo)
+                    self.signalSend.data = self.player.lastPosEnemyFire
                     self.signalSend.anotherData = self.player.lastPosEnemyRadar
 
             else:
@@ -338,7 +338,7 @@ class OnlineMode():
                     self.manager.changeScreen(EnemyTurnScreen(self.manager, self.manager.window))
                     self.signalSend.type = "WAITING_PL"
     
-                self.signalSend.data = len(self.player.listEnemyTorpedo)
+                self.signalSend.data = self.player.lastPosEnemyFire
                 self.signalSend.anotherData = self.player.lastPosEnemyRadar
 
                 if self.signalRecieve.type == "WAITING_PL":
@@ -352,7 +352,7 @@ class OnlineMode():
                 if self.signalRecieve.type == "ENEMY_FIRE_RADAR":
                     if self.player.lastPosEnemyRadar != self.signalRecieve.data:
                         self.player.lastPosEnemyRadar = self.signalRecieve.data
-                        self.player.enemyRadar = Radar(self.manager.window, self.player.lastPosEnemyRadar, listPathRadarA, self.player.numCorrect(self.player.lastPosEnemyRadar), 100)
+                        self.player.enemyRadar.append((Radar(self.manager.window, self.player.lastPosEnemyRadar, listPathRadarA, self.player.numCorrect(self.player.lastPosEnemyRadar), 100), self.player.lastPosEnemyRadar))
 
         if self.signalRecieve.phase == "END":
             if not isinstance(self.manager.currentScreen, EndScreen):
