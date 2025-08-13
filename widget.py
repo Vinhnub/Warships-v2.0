@@ -90,8 +90,11 @@ class CustomText():
         self.window = window
         self.loc = loc
         self.text = text
-        self.font = pygame.font.Font(font_path, font_size)
         self.color = color
+        try: 
+            self.font = pygame.font.Font(font_path, font_size)
+        except:
+            pass
 
     def draw(self):
         text_window = self.font.render(self.text, True, self.color)

@@ -6,7 +6,6 @@ from player import *
 from network import *
 from mySignal import *
 from widget import *
-from gameandscreen import *
 from main import *
 
 
