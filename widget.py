@@ -108,11 +108,13 @@ class Warning():
         self.window = window
         self.loc = loc
         self.duration = duration
-        self.content = CustomText(window, loc, text, resource_path("fonts/PressStart2P-Regular.ttf"), font_size=40, color=(255, 0, 0))
+        self.content = CustomText(window, loc, text, resource_path("fonts/PressStart2P-Regular.ttf"), font_size=50, color=(255, 0, 0))
+        self.background = AnimatedImage(window, (0, 360), [resource_path("assets/images/warning/background.png")])
         self._startTime = pygame.time.get_ticks()
 
    def draw(self):
         if pygame.time.get_ticks() - self._startTime < self.duration:
+            self.background.draw()
             self.content.draw()
             return True
         return False

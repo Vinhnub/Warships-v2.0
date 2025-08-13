@@ -92,6 +92,9 @@ class FindingScreen(Screen):
         self.createBtn.draw()
         self.joinBtn.draw()
         self.backBtn.draw()
+        if self.warning is not None:
+            if not self.warning.draw():
+                self.warning = None
         
     def handleEvent(self, event):
         if self.backBtn.handleEvent(event):
@@ -109,7 +112,6 @@ class FindingScreen(Screen):
             self.screenManager.game.start()
             self.screenManager.changeScreen(JoinRoom(self.screenManager, self.window))
 
-
 class CreateRoom(Screen):
     def __init__(self, screenManager, window, roomID):
         super().__init__(screenManager, window)
@@ -117,6 +119,7 @@ class CreateRoom(Screen):
         self.backBtn = AnimatedButton(self.window, (650, 475), [resource_path("assets/images/buttons/backBtn_u.png")], [resource_path("assets/images/buttons/backBtn_d.png")])
         self.background = AnimatedImage(self.window, (0, 0), [resource_path("assets/images/background/image_4.png")])
         self.banner = [AnimatedImage(self.window, loc, listPath) for loc, listPath in listPathImageBannerCreateRoomScreen]
+        self.warning = None
 
     def handleEvent(self, event):
         if self.backBtn.handleEvent(event):
@@ -129,6 +132,9 @@ class CreateRoom(Screen):
             item.draw()
         self.roomIDText.draw()
         self.backBtn.draw()
+        if self.warning is not None:
+            if not self.warning.draw():
+                self.warning = None
 
 
 class JoinRoom(Screen):
@@ -139,6 +145,7 @@ class JoinRoom(Screen):
         self.enterBtn = AnimatedButton(self.window, (800, 470), [resource_path("assets/images/buttons/enterBtn_u.png")], [resource_path("assets/images/buttons/enterBtn_d.png")])
         self.background = AnimatedImage(self.window, (0, 0), [resource_path("assets/images/background/image_3.png")])
         self.banner = [AnimatedImage(self.window, loc, listPath) for loc, listPath in listPathImageBannerJoinRoomScreen]
+        self.warning = None
 
     def handleEvent(self, event):
         self.roomIDInput.handleEvent(event)
@@ -155,6 +162,9 @@ class JoinRoom(Screen):
         self.backBtn.draw()
         self.roomIDInput.draw()
         self.enterBtn.draw()
+        if self.warning is not None:
+            if not self.warning.draw():
+                self.warning = None
         
 
 class PrepareScreen(Screen):
@@ -163,6 +173,7 @@ class PrepareScreen(Screen):
         self.field = AnimatedImage(self.window, FIELD_COORD, [resource_path("assets/images/field.png")])
         self.readyBtn = AnimatedButton(self.window, (500, 700), [resource_path("assets/images/buttons/readyBtn_u.png")], [resource_path("assets/images/buttons/readyBtn_d.png")], [resource_path("assets/images/buttons/readyBtn_dis.png")])
         self.background = AnimatedImage(self.window, (0, 0), [resource_path("assets/images/background/image_2.png")])
+        self.warning = None
 
     def handleEvent(self, event):
         if self.readyBtn.handleEvent(event):
@@ -174,6 +185,10 @@ class PrepareScreen(Screen):
         self.field.draw()
         self.readyBtn.draw()
         self.screenManager.game.player.draw()
+        if self.warning is not None:
+            if not self.warning.draw():
+                self.warning = None
+        
 
 class MyTurnScreen(Screen):
     def __init__(self, screenManager, window):
@@ -184,6 +199,7 @@ class MyTurnScreen(Screen):
         self.torpedoMode = AnimatedImage(self.window, (0, 600), [resource_path("assets/images/torpedoMode.png")])
         self.radarMode = AnimatedImage(self.window, (0, 600), [resource_path("assets/images/radarMode.png")])
         self.background = AnimatedImage(self.window, (0, 0), [resource_path("assets/images/background/image_2.png")])
+        self.warning = None
 
     def handleEvent(self, event):
         if self.switchModeBtn.handleEvent(event):
@@ -200,6 +216,10 @@ class MyTurnScreen(Screen):
             self.torpedoMode.draw()
         else:
             self.radarMode.draw()
+        if self.warning is not None:
+            if not self.warning.draw():
+                self.warning = None
+        
 
 class EnemyTurnScreen(Screen):
     def __init__(self, screenManager, window):
@@ -207,6 +227,7 @@ class EnemyTurnScreen(Screen):
         self.field = AnimatedImage(self.window, FIELD_COORD, [resource_path("assets/images/field.png")])
         self.timer = CustomText(self.window, (0, 0), "", resource_path("fonts/PressStart2P-Regular.ttf"), 30, (255, 255, 255))
         self.background = AnimatedImage(self.window, (0, 0), [resource_path("assets/images/background/image_2.png")])
+        self.warning = None
 
     def handleEvent(self, event):
         pass
@@ -216,6 +237,10 @@ class EnemyTurnScreen(Screen):
         self.field.draw()
         self.screenManager.game.player.draw(False)
         self.timer.draw()
+        if self.warning is not None:
+            if not self.warning.draw():
+                self.warning = None
+        
 
 class EndScreen(Screen):
     def __init__(self, screenManager, window, isWin): 
@@ -223,6 +248,7 @@ class EndScreen(Screen):
         self.banner = CustomText(self.window, (0, 0), str(isWin), resource_path("fonts/PressStart2P-Regular.ttf"), 30, (255, 255, 255))
         self.field = AnimatedImage(self.window, FIELD_COORD, [resource_path("assets/images/field.png")])
         self.background = AnimatedImage(self.window, (0, 0), [resource_path("assets/images/background/image_2.png")])
+        self.warning = None
 
     def handleEvent(self, event):
         pass
@@ -232,6 +258,10 @@ class EndScreen(Screen):
         self.banner.draw()
         self.field.draw()
         self.screenManager.game.player.drawEnd()
+        if self.warning is not None:
+            if not self.warning.draw():
+                self.warning = None
+        
 
 # ============================================================ MODE ============================================================
 
@@ -251,6 +281,7 @@ class OnlineMode():
         self.isRun = False
         self.sendLock = threading.Lock()
         self.isRecieveResult = False
+        self.isConnected = True
         
     def reset(self):
         self.isRun = False
@@ -287,9 +318,10 @@ class OnlineMode():
             try:
                 data, addr = self.network.client.recvfrom(4096)
                 self.signalRecieve = pickle.loads(data)
+                self.isConnected = True
             except Exception as e:
-                self.manager.currentScreen
-                print("[ERROR] Lỗi khi nhận dữ liệu:", e)
+                self.manager.currentScreen.warning = Warning(self.manager.window, (80, 370), "Lost connection from server", 1000)
+                self.isConnected = False
         
 
     def running(self, event=None):
@@ -315,7 +347,8 @@ class OnlineMode():
                     self.signalSend.data = self.player.lastPosEnemyFire
                     self.signalSend.anotherData = self.player.lastPosEnemyRadar
                 
-                res = self.player.handleEvent(event)
+                if self.isConnected:
+                    res = self.player.handleEvent(event)
                 if res:
                     self.player.lastPosFire = res
                     self.signalSend.type = "FIRE_TORPEDO" if self.player.mode == 0 else "FIRE_RADAR"
