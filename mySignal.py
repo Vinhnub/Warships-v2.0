@@ -9,13 +9,13 @@ class SignalSended():
         return str(self.type) + " " + str(self.roomID) + " " + str(self.data) + " " + str(self.anotherData)
     
 class SignalRecieved():
-    def __init__(self, phase=None, type=None, turnIP=None, playerIP=None, data=None, coolDown=None):
+    def __init__(self, phase=None, type=None, turnIP=None, playerIP=None, data=None, ping=None):
         self.phase = phase
         self.type = type
         self.turnIP = turnIP
         self.playerIP = playerIP
         self.data = data
-        self.coolDown = coolDown
+        self.ping = ping
 
     def __str__(self):
         return str(self.phase) + " " + str(self.type) + " " +  str(self.turnIP) + " " + str(self.playerIP) + " " + str(self.data) + " " + str(self.coolDown)

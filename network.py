@@ -1,5 +1,4 @@
 import socket
-import pickle
 
 class NetWork():
     def __init__(self, serverIp):

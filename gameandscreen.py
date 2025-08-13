@@ -11,6 +11,7 @@ from constants import *
 import time
 import threading
 from radar import *
+import pickle
 
 #============================================================ SCREEN MANAGER ============================================================
 
@@ -148,7 +149,7 @@ class PrepareScreen(Screen):
         super().__init__(screenManager, window)
         self.field = AnimatedImage(self.window, FIELD_COORD, [resource_path("assets/images/field.png")])
         self.readyBtn = AnimatedButton(self.window, (500, 700), [resource_path("assets/images/buttons/readyBtn_u.png")], [resource_path("assets/images/buttons/readyBtn_d.png")], [resource_path("assets/images/buttons/readyBtn_dis.png")])
-        self.background = AnimatedImage(self.window, (0, 0), [resource_path("assets/images/mainscreen/mainscreen_1.png")])
+        self.background = AnimatedImage(self.window, (0, 0), [resource_path("assets/images/background/image_2.png")])
 
     def handleEvent(self, event):
         if self.readyBtn.handleEvent(event):
@@ -169,6 +170,7 @@ class MyTurnScreen(Screen):
         self.switchModeBtn = AnimatedButton(self.window, (0, 700), [resource_path("assets/images/buttons/switchModeBtn_u.png")], [resource_path("assets/images/buttons/switchModeBtn_d.png")])
         self.torpedoMode = AnimatedImage(self.window, (0, 600), [resource_path("assets/images/torpedoMode.png")])
         self.radarMode = AnimatedImage(self.window, (0, 600), [resource_path("assets/images/radarMode.png")])
+        self.background = AnimatedImage(self.window, (0, 0), [resource_path("assets/images/background/image_2.png")])
 
     def handleEvent(self, event):
         if self.switchModeBtn.handleEvent(event):
@@ -176,6 +178,7 @@ class MyTurnScreen(Screen):
                 self.screenManager.game.player.switchMode()
 
     def draw(self):
+        self.background.draw()
         self.field.draw()
         self.screenManager.game.player.draw(True)
         self.timer.draw()
@@ -190,11 +193,13 @@ class EnemyTurnScreen(Screen):
         super().__init__(screenManager, window)
         self.field = AnimatedImage(self.window, FIELD_COORD, [resource_path("assets/images/field.png")])
         self.timer = CustomText(self.window, (0, 0), "", resource_path("fonts/PressStart2P-Regular.ttf"), 30, (255, 255, 255))
+        self.background = AnimatedImage(self.window, (0, 0), [resource_path("assets/images/background/image_2.png")])
 
     def handleEvent(self, event):
         pass
 
     def draw(self):
+        self.background.draw()
         self.field.draw()
         self.screenManager.game.player.draw(False)
         self.timer.draw()
@@ -204,11 +209,13 @@ class EndScreen(Screen):
         super().__init__(screenManager, window)
         self.banner = CustomText(self.window, (0, 0), str(isWin), resource_path("fonts/PressStart2P-Regular.ttf"), 30, (255, 255, 255))
         self.field = AnimatedImage(self.window, FIELD_COORD, [resource_path("assets/images/field.png")])
+        self.background = AnimatedImage(self.window, (0, 0), [resource_path("assets/images/background/image_2.png")])
 
     def handleEvent(self, event):
         pass
     
     def draw(self):
+        self.background.draw()
         self.banner.draw()
         self.field.draw()
         self.screenManager.game.player.drawEnd()
@@ -303,10 +310,11 @@ class OnlineMode():
                         self.player.mode = 0
                     self.signalSend.data = res
                     self.isRecieveResult = False
+                    self.player.coolDown = time.time()
 
                 if self.signalRecieve.type == "WAITING_PL":
                     self.manager.currentScreen.timer.setText(str(int(self.signalRecieve.data)))
-                    if self.signalRecieve.coolDown > COOL_DOWN and self.player.canFire == False:
+                    if time.time() - self.player.coolDown > COOL_DOWN and self.player.canFire == False:
                         self.player.canFire = True
 
                 if self.signalRecieve.type == "FIRE_TORPEDO_RESULT":
@@ -318,7 +326,6 @@ class OnlineMode():
                         self.signalSend.anotherData = self.player.lastPosEnemyRadar
                         if self.signalRecieve.data == 2:
                             self.player.haveRadar += 1
-                            print(self.player.haveRadar)
 
                 if self.signalRecieve.type == "FIRE_RADAR_RESULT":
                     self.player.myRadar = Radar(self.manager.window, self.player.lastPosFire, listPathRadarA, self.signalRecieve.data, 100)
@@ -330,7 +337,6 @@ class OnlineMode():
                 if not isinstance(self.manager.currentScreen, EnemyTurnScreen):
                     self.manager.changeScreen(EnemyTurnScreen(self.manager, self.manager.window))
                     self.signalSend.type = "WAITING_PL"
-                    self.player.canFire = True
     
                 self.signalSend.data = len(self.player.listEnemyTorpedo)
                 self.signalSend.anotherData = self.player.lastPosEnemyRadar
@@ -346,7 +352,7 @@ class OnlineMode():
                 if self.signalRecieve.type == "ENEMY_FIRE_RADAR":
                     if self.player.lastPosEnemyRadar != self.signalRecieve.data:
                         self.player.lastPosEnemyRadar = self.signalRecieve.data
-                        self.player.enemyRadar = Radar(self.manager.window, self.player.lastPosEnemyRadar, listPathRadarA, self.player.numCorrect(self.signalRecieve.data), 100)
+                        self.player.enemyRadar = Radar(self.manager.window, self.player.lastPosEnemyRadar, listPathRadarA, self.player.numCorrect(self.player.lastPosEnemyRadar), 100)
 
         if self.signalRecieve.phase == "END":
             if not isinstance(self.manager.currentScreen, EndScreen):

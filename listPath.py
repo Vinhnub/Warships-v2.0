@@ -9,7 +9,7 @@ def resource_path(relative_path):
         base_path = os.path.dirname(os.path.abspath(__file__))
     return os.path.join(base_path, relative_path).replace("\\","/")
 
-listPathImageMenuScreen = [[resource_path("assets/images/mainscreen/mainscreen_1.png")],
+listPathImageMenuScreen = [[resource_path("assets/images/background/image_1.png")],
                             ]
 
 listPathShipOnl = [(resource_path("assets/images/ship2.png"), (FIELD_COORD[0] + 3, FIELD_COORD[1] + 3), 1),

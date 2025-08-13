@@ -40,8 +40,8 @@ def printdata(serverData):
 | TIME      : {TIME_EACH_TURN - time.time() + serverData[roomID]["TIME"] if serverData[roomID]["TIME"] is not None else None}
 | TURN      : {serverData[roomID]["TURNINDEX"]}
 | LISTPLAYER: {serverData[roomID]["LISTPLAYER"]}
-| PLAYER {serverData[roomID]["LISTPLAYER"][0]} : numCorrect : {serverData[roomID]["PLAYER"][serverData[roomID]["LISTPLAYER"][0]]["numCorrect"]}, lastPosFire : {serverData[roomID]["PLAYER"][serverData[roomID]["LISTPLAYER"][0]]["lastPosFire"]}, coolDown : {time.time() - serverData[roomID]["PLAYER"][serverData[roomID]["LISTPLAYER"][0]]["coolDown"]}                    
-| PLAYER {serverData[roomID]["LISTPLAYER"][1] if len(serverData[roomID]["LISTPLAYER"] ) > 1 else None} : numCorrect :{serverData[roomID]["PLAYER"][serverData[roomID]["LISTPLAYER"][1]]["numCorrect"] if len(serverData[roomID]["LISTPLAYER"]) > 1 else None}, lastPosFire : {serverData[roomID]["PLAYER"][serverData[roomID]["LISTPLAYER"][1]]["lastPosFire"] if len(serverData[roomID]["LISTPLAYER"]) > 1 else None}, coolDown : {time.time() - serverData[roomID]["PLAYER"][serverData[roomID]["LISTPLAYER"][0]]["coolDown"] if len(serverData[roomID]["LISTPLAYER"]) > 1 else None}
+| PLAYER {serverData[roomID]["LISTPLAYER"][0]} : numCorrect : {serverData[roomID]["PLAYER"][serverData[roomID]["LISTPLAYER"][0]]["numCorrect"]}, lastPosFire : {serverData[roomID]["PLAYER"][serverData[roomID]["LISTPLAYER"][0]]["lastPosFire"]}                    
+| PLAYER {serverData[roomID]["LISTPLAYER"][1] if len(serverData[roomID]["LISTPLAYER"] ) > 1 else None} : numCorrect :{serverData[roomID]["PLAYER"][serverData[roomID]["LISTPLAYER"][1]]["numCorrect"] if len(serverData[roomID]["LISTPLAYER"]) > 1 else None}, lastPosFire : {serverData[roomID]["PLAYER"][serverData[roomID]["LISTPLAYER"][1]]["lastPosFire"] if len(serverData[roomID]["LISTPLAYER"]) > 1 else None}
 ===========================
 """)
 
@@ -63,7 +63,6 @@ def handleData(obj, addr):
                                               "lastPosFire" : None,
                                               "lastPosRadar" : None, 
                                               "numCorrect" : 0,
-                                              "coolDown" : 0
                                           }
                                         }
                                       }
@@ -84,7 +83,6 @@ def handleData(obj, addr):
                                                              "lastPosFire" : None,
                                                              "lastPosRadar" : None, 
                                                              "numCorrect" : 0, 
-                                                             "coolDown" : 0
                                                              }
                 serverData[obj.roomID]["LISTPLAYER"].append(addr[0])
                 return SignalRecieved(serverData[obj.roomID]["PHASE"])
@@ -95,7 +93,6 @@ def handleData(obj, addr):
         if obj.type == "READY":
             serverData[obj.roomID]["PLAYER"][addr[0]]["ready"] = True
             serverData[obj.roomID]["PLAYER"][addr[0]]["posShip"] = obj.data
-            serverData[obj.roomID]["PLAYER"][addr[0]]["coolDown"] = time.time() - COOL_DOWN
             enemyIndex = 1 - serverData[obj.roomID]["LISTPLAYER"].index(addr[0])
             enemy = serverData[obj.roomID]["LISTPLAYER"][enemyIndex]
             if serverData[obj.roomID]["PLAYER"][enemy]["ready"]:
@@ -140,8 +137,7 @@ def handleData(obj, addr):
                                       type="WAITING_PL",
                                       turnIP=serverData[obj.roomID]["LISTPLAYER"][serverData[obj.roomID]["TURNINDEX"]], 
                                       playerIP=addr[0],
-                                      data=TIME_EACH_TURN - (time.time() - serverData[obj.roomID]["TIME"]), 
-                                      coolDown=(time.time() - serverData[obj.roomID]["PLAYER"][addr[0]]["coolDown"]))
+                                      data=TIME_EACH_TURN - (time.time() - serverData[obj.roomID]["TIME"]))
             else:
                 return SignalRecieved(serverData[obj.roomID]["PHASE"], 
                                       type="ENEMY_FIRE_TORPEDO", 
@@ -153,7 +149,6 @@ def handleData(obj, addr):
             pos = obj.data
             if pos != serverData[obj.roomID]["PLAYER"][addr[0]]["lastPosFire"]: 
                 serverData[obj.roomID]["PLAYER"][addr[0]]["listTorpedo"].append(pos)
-                serverData[obj.roomID]["PLAYER"][addr[0]]["coolDown"] = time.time()
                 
             if serverData[obj.roomID]["PLAYER"][enemy]["posShip"][pos[0]][pos[1]] > 0:
                 if pos != serverData[obj.roomID]["PLAYER"][addr[0]]["lastPosFire"]:
@@ -176,7 +171,6 @@ def handleData(obj, addr):
         if obj.type == "FIRE_RADAR":
             pos = obj.data
             if pos != serverData[obj.roomID]["PLAYER"][addr[0]]["lastPosFire"]: 
-                serverData[obj.roomID]["PLAYER"][addr[0]]["coolDown"] = time.time()
                 serverData[obj.roomID]["PLAYER"][addr[0]]["lastPosFire"] = pos
                 serverData[obj.roomID]["PLAYER"][addr[0]]["lastPosRadar"] = pos
                 
@@ -196,8 +190,7 @@ def handleData(obj, addr):
                               type="WAITING_PL",
                               turnIP=serverData[obj.roomID]["LISTPLAYER"][serverData[obj.roomID]["TURNINDEX"]], 
                               playerIP=addr[0],
-                              data=TIME_EACH_TURN - (time.time() - serverData[obj.roomID]["TIME"]),
-                              coolDown=(time.time() - serverData[obj.roomID]["PLAYER"][addr[0]]["coolDown"]))
+                              data=TIME_EACH_TURN - (time.time() - serverData[obj.roomID]["TIME"]))
     
     if serverData[obj.roomID]["PHASE"] == "END":
         if obj.type == "MY_SHIP":
@@ -216,10 +209,10 @@ def handleRequest(data, addr):
     try:
         obj = pickle.loads(data)
         result = handleData(obj, addr)
-        logging.info(f"{obj} {addr} {result}")
+        #logging.info(f"{obj} {addr} {result}")
         response = pickle.dumps(result)
         server_socket.sendto(response, addr)
-        #printdata(serverData)
+        printdata(serverData)
     except Exception as e:
         logging.error(f"[SERVER ERROR] Gói tin từ {addr} bị lỗi: {e}")
 

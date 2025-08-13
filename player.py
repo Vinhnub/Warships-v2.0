@@ -5,6 +5,7 @@ from listPath import *
 from ship import *
 from torpedo import *
 from radar import *
+import time
 
 class Player():
     def __init__(self, window, gameMode=True): #True: onl, False: off
@@ -16,6 +17,7 @@ class Player():
         self.__firstPos = None # pos when player click mouse down to move or ronate ship
         self.__shipSelected = None # the ship player select to move
         self.isReady = False
+        self.coolDown = time.time()
         self.listMyTorpedo = []
         self.listEnemyTorpedo = []
         self.myRadar = None
