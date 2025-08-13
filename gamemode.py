@@ -33,6 +33,7 @@ class OnlineMode():
         self.sendLock = threading.Lock()
         self.isRecieveResult = False
         self.isConnected = True
+        self.timer = None
         
     def reset(self):
         self.isRun = False
@@ -111,7 +112,7 @@ class OnlineMode():
                         self.player.coolDown = time.time()
 
                 if self.signalRecieve.type == "WAITING_PL":
-                    self.manager.currentScreen.timer.setText(str(int(self.signalRecieve.data)))
+                    self.timer = self.signalRecieve.data
                     if time.time() - self.player.coolDown > COOL_DOWN and self.player.canFire == False:
                         self.player.canFire = True
 
@@ -140,7 +141,7 @@ class OnlineMode():
                 self.signalSend.anotherData = self.player.lastPosEnemyRadar
 
                 if self.signalRecieve.type == "WAITING_PL":
-                    self.manager.currentScreen.timer.setText(str(int(self.signalRecieve.data)))
+                    self.timer = self.signalRecieve.data
                 
                 if self.signalRecieve.type == "ENEMY_FIRE_TORPEDO":
                     if self.player.lastPosEnemyFire != self.signalRecieve.data:

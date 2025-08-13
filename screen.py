@@ -16,14 +16,18 @@ class Screen():
     def __init__(self, screenManager, window):
         self.screenManager = screenManager
         self.window = window
+        self.warning = None
     
     @abstractmethod
-    def handleEvent(self):
+    def handleEvent(self, event):
         pass
 
     @abstractmethod
     def draw(self):
-        pass
+        if self.warning is not None:
+            if not self.warning.draw():
+                self.warning = None
+
 
 
 class MenuScreen(Screen):
@@ -35,17 +39,6 @@ class MenuScreen(Screen):
         self.background = AnimatedImage(self.window, (0, 0), listPathImageMenuScreen, 1500)
         self.logo = AnimatedImage(self.window, (400, 120), listPathImageLogo, 1500)
         self.inputData = None
-        self.warning = None
-    
-    def draw(self):
-        self.background.draw()
-        self.logo.draw()
-        self.onlBtn.draw()
-        self.offBtn.draw()
-        self.exitBtn.draw()
-        if self.inputData is not None:
-            self.inputData.draw()
-
 
     def handleEvent(self, event):
         if self.exitBtn.handleEvent(event):
@@ -70,6 +63,16 @@ class MenuScreen(Screen):
             elif res[0] == 1:
                 self.screenManager.changeScreen(FindingScreen(self.screenManager, self.window))
                 self.screenManager.onlineMode(res[1])
+                    
+    def draw(self):
+        self.background.draw()
+        self.logo.draw()
+        self.onlBtn.draw()
+        self.offBtn.draw()
+        self.exitBtn.draw()
+        if self.inputData is not None:
+            self.inputData.draw()
+        super().draw()
 
 class FindingScreen(Screen):
     def __init__(self, screenManager, window):
@@ -79,18 +82,6 @@ class FindingScreen(Screen):
         self.backBtn = AnimatedButton(self.window, (650, 500), [resource_path("assets/images/buttons/backBtn_u.png")], [resource_path("assets/images/buttons/backBtn_d.png")])
         self.background = AnimatedImage(self.window, (0, 0), [resource_path("assets/images/background/image_5.png")])
         self.banner = [AnimatedImage(self.window, loc, listPath) for loc, listPath in listPathImageBannerFindingScreen]
-        self.warning = None
-
-    def draw(self):
-        self.background.draw()
-        for item in self.banner:
-            item.draw()
-        self.createBtn.draw()
-        self.joinBtn.draw()
-        self.backBtn.draw()
-        if self.warning is not None:
-            if not self.warning.draw():
-                self.warning = None
         
     def handleEvent(self, event):
         if self.backBtn.handleEvent(event):
@@ -107,6 +98,15 @@ class FindingScreen(Screen):
             self.screenManager.game.isRun = True
             self.screenManager.game.start()
             self.screenManager.changeScreen(JoinRoom(self.screenManager, self.window))
+            
+    def draw(self):
+        self.background.draw()
+        for item in self.banner:
+            item.draw()
+        self.createBtn.draw()
+        self.joinBtn.draw()
+        self.backBtn.draw()
+        super().draw()
 
 class CreateRoom(Screen):
     def __init__(self, screenManager, window, roomID):
@@ -115,7 +115,6 @@ class CreateRoom(Screen):
         self.backBtn = AnimatedButton(self.window, (650, 475), [resource_path("assets/images/buttons/backBtn_u.png")], [resource_path("assets/images/buttons/backBtn_d.png")])
         self.background = AnimatedImage(self.window, (0, 0), [resource_path("assets/images/background/image_4.png")])
         self.banner = [AnimatedImage(self.window, loc, listPath) for loc, listPath in listPathImageBannerCreateRoomScreen]
-        self.warning = None
 
     def handleEvent(self, event):
         if self.backBtn.handleEvent(event):
@@ -128,10 +127,7 @@ class CreateRoom(Screen):
             item.draw()
         self.roomIDText.draw()
         self.backBtn.draw()
-        if self.warning is not None:
-            if not self.warning.draw():
-                self.warning = None
-
+        super().draw()
 
 class JoinRoom(Screen):
     def __init__(self, screenManager, window):
@@ -141,7 +137,6 @@ class JoinRoom(Screen):
         self.enterBtn = AnimatedButton(self.window, (800, 470), [resource_path("assets/images/buttons/enterBtn_u.png")], [resource_path("assets/images/buttons/enterBtn_d.png")])
         self.background = AnimatedImage(self.window, (0, 0), [resource_path("assets/images/background/image_3.png")])
         self.banner = [AnimatedImage(self.window, loc, listPath) for loc, listPath in listPathImageBannerJoinRoomScreen]
-        self.warning = None
 
     def handleEvent(self, event):
         self.roomIDInput.handleEvent(event)
@@ -158,9 +153,7 @@ class JoinRoom(Screen):
         self.backBtn.draw()
         self.roomIDInput.draw()
         self.enterBtn.draw()
-        if self.warning is not None:
-            if not self.warning.draw():
-                self.warning = None
+        super().draw()
         
 
 class PrepareScreen(Screen):
@@ -169,7 +162,6 @@ class PrepareScreen(Screen):
         self.field = AnimatedImage(self.window, FIELD_COORD, [resource_path("assets/images/field.png")])
         self.readyBtn = AnimatedButton(self.window, (600, 700), [resource_path("assets/images/buttons/readyBtn_u.png")], [resource_path("assets/images/buttons/readyBtn_d.png")], [resource_path("assets/images/buttons/readyBtn_dis.png")])
         self.background = AnimatedImage(self.window, (0, 0), [resource_path("assets/images/background/image_2.png")])
-        self.warning = None
 
     def handleEvent(self, event):
         if self.readyBtn.handleEvent(event):
@@ -181,62 +173,65 @@ class PrepareScreen(Screen):
         self.field.draw()
         self.readyBtn.draw()
         self.screenManager.game.player.draw()
-        if self.warning is not None:
-            if not self.warning.draw():
-                self.warning = None
-        
+        super().draw()
+
 
 class MyTurnScreen(Screen):
     def __init__(self, screenManager, window):
         super().__init__(screenManager, window)
         self.field = AnimatedImage(self.window, FIELD_COORD, [resource_path("assets/images/field.png")])
-        self.timer = CustomText(self.window, (0, 0), "", resource_path("fonts/PressStart2P-Regular.ttf"), 30, (255, 255, 255))
         self.switchModeBtn = AnimatedButton(self.window, (0, 700), [resource_path("assets/images/buttons/switchModeBtn_u.png")], [resource_path("assets/images/buttons/switchModeBtn_d.png")])
         self.torpedoMode = AnimatedImage(self.window, (0, 600), [resource_path("assets/images/torpedoMode.png")])
         self.radarMode = AnimatedImage(self.window, (0, 600), [resource_path("assets/images/radarMode.png")])
         self.background = AnimatedImage(self.window, (0, 0), [resource_path("assets/images/background/image_2.png")])
-        self.warning = None
 
     def handleEvent(self, event):
         if self.switchModeBtn.handleEvent(event):
             if self.screenManager.game.player.haveRadar > 0:
                 self.screenManager.game.player.switchMode()
+                
+    def drawTimer(self):
+        for i in range(11):
+            pygame.draw.rect(self.window, WHITE, (FIELD_COORD[0] + i * CELL_SIZE[0], FIELD_COORD[1], 3, int(FIELD_HEIGHT * (1 - (self.screenManager.game.timer/TIME_EACH_TURN)))))
+
+        for i in range(int(10 * (1 - (self.screenManager.game.timer/TIME_EACH_TURN))) + 1):
+            pygame.draw.rect(self.window, WHITE, (FIELD_COORD[0], FIELD_COORD[1] + i * CELL_SIZE[1], FIELD_WIDTH, 3))
 
     def draw(self):
         self.background.draw()
         self.field.draw()
+        self.drawTimer()
         self.screenManager.game.player.draw(True)
-        self.timer.draw()
         self.switchModeBtn.draw()
         if self.screenManager.game.player.mode == 0:
             self.torpedoMode.draw()
         else:
             self.radarMode.draw()
-        if self.warning is not None:
-            if not self.warning.draw():
-                self.warning = None
-        
+        super().draw()
 
 class EnemyTurnScreen(Screen):
     def __init__(self, screenManager, window):
         super().__init__(screenManager, window)
         self.field = AnimatedImage(self.window, FIELD_COORD, [resource_path("assets/images/field.png")])
-        self.timer = CustomText(self.window, (0, 0), "", resource_path("fonts/PressStart2P-Regular.ttf"), 30, (255, 255, 255))
         self.background = AnimatedImage(self.window, (0, 0), [resource_path("assets/images/background/image_2.png")])
-        self.warning = None
 
     def handleEvent(self, event):
         pass
 
+    def drawTimer(self):
+        for i in range(11):
+            pygame.draw.rect(self.window, WHITE, (FIELD_COORD[0] + i * CELL_SIZE[0], FIELD_COORD[1], 3, int(FIELD_HEIGHT * (self.screenManager.game.timer/TIME_EACH_TURN))))
+
+        for i in range(int(10 * (self.screenManager.game.timer/TIME_EACH_TURN)) + 1):
+            pygame.draw.rect(self.window, WHITE, (FIELD_COORD[0], FIELD_COORD[1] + i * CELL_SIZE[1], FIELD_WIDTH, 3))
+
     def draw(self):
         self.background.draw()
         self.field.draw()
+        self.drawTimer()
         self.screenManager.game.player.draw(False)
-        self.timer.draw()
-        if self.warning is not None:
-            if not self.warning.draw():
-                self.warning = None
-        
+        super().draw()
+    
 
 class EndScreen(Screen):
     def __init__(self, screenManager, window, isWin): 
@@ -244,7 +239,6 @@ class EndScreen(Screen):
         self.banner = CustomText(self.window, (0, 0), str(isWin), resource_path("fonts/PressStart2P-Regular.ttf"), 30, (255, 255, 255))
         self.field = AnimatedImage(self.window, FIELD_COORD, [resource_path("assets/images/field.png")])
         self.background = AnimatedImage(self.window, (0, 0), [resource_path("assets/images/background/image_2.png")])
-        self.warning = None
 
     def handleEvent(self, event):
         pass
@@ -254,7 +248,4 @@ class EndScreen(Screen):
         self.banner.draw()
         self.field.draw()
         self.screenManager.game.player.drawEnd()
-        if self.warning is not None:
-            if not self.warning.draw():
-                self.warning = None
- 
+        super().draw()
