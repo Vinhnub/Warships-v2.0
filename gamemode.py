@@ -70,8 +70,6 @@ class OfflineMode:
     def update(self):
         if self.phase != "PLAYING":
             return
-        if isinstance(self.manager.currentScreen, (WINTemporaryEndScreen, LOSETemporaryEndScreen)):
-           return
         now = time.time()
         # Xử lý animation người chơi
         if self.turn == "player" and self.player_pending_hit is not None:
@@ -86,7 +84,7 @@ class OfflineMode:
                     print("Player hit, continues turn")
                     self.countPlayerHitTrue += 1
                     if self.countPlayerHitTrue == 17:
-                        self.manager.changeScreen(LOSETemporaryEndScreen(self.manager, self.manager.window))
+                        self.manager.changeScreen(EndScreen(self.manager, self.manager.window))
                     self.turn = "player"
                     self.waiting_for_bot = False
                 self.player_pending_hit = None
@@ -104,7 +102,7 @@ class OfflineMode:
                     self.turn = "bot"
                     self.countBotHitTrue += 1
                     if self.countBotHitTrue == 17:
-                       self.manager.changeScreen(LOSETemporaryEndScreen(self.manager, self.manager.window))
+                       self.manager.changeScreen(EndScreen(self.manager, self.manager.window))
                     self.waiting_for_bot = True
                     self.delay_start_time = pygame.time.get_ticks()
                 self.bot_pending_hit = None
