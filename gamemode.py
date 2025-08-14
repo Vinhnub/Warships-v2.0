@@ -33,7 +33,7 @@ class OnlineMode():
         self.sendLock = threading.Lock()
         self.isRecieveResult = False
         self.isConnected = True
-        self.timer = TIME_EACH_TURN
+        self.timer = time.time()
         
     def reset(self):
         self.isRun = False
