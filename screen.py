@@ -259,4 +259,5 @@ class EndScreen(Screen):
         self.background.draw()
         self.field.draw()
         self.screenManager.game.player.drawEnd()
+        self.backBtn.draw()
         super().draw()
