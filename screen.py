@@ -248,10 +248,5 @@ class EndScreen(Screen):
         self.banner.draw()
         self.field.draw()
         self.screenManager.game.player.drawEnd()
-<<<<<<< HEAD
-        if self.warning is not None:
-            if not self.warning.draw():
-                self.warning = None
-=======
         super().draw()
->>>>>>> f511e1aabd54c784352b5874164a6284510b9e27
+
