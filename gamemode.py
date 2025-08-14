@@ -12,7 +12,7 @@ import time
 import threading
 from radar import *
 import pickle
-
+from torpedo import *
        
 
 # ============================================================ MODE ============================================================
@@ -63,7 +63,6 @@ class OfflineMode:
                         )
                         torpedo = Torpedo(self.player.window, pixel_loc, listPathTopedoA, pathImageTorpedo, hit, spf=50)
                         self.player.listMyTorpedo.append(torpedo)
-
                         self.animation_end_time = time.time() + 1.2 
                         self.player_pending_hit = hit
 
@@ -118,9 +117,9 @@ class OfflineMode:
                 self.timer = time.time()
     def draw(self):
         if self.turn == "player":
-            self.player.draw(self.manager.window, isMyTurn=True)
+            self.player.draw(isMyTurn=True)
         elif self.turn == "bot":
-            self.bot.draw(self.manager.window, isMyTurn=True)
+            self.bot.draw(isMyTurn=True)
     def ready(self):
         self.player.isReady = True
         self.player.calListPosShip()

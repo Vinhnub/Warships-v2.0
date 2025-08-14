@@ -100,8 +100,7 @@ class PlayerAI():
             return True
         elif not hit:
             return False
-    def draw(self,window, isMyTurn=None):
-        self.window = window
+    def draw(self,isMyTurn=None):
         if isMyTurn:
             for oTorpedo in self.listMyTorpedo:
                 if not oTorpedo.drawAnimation():
