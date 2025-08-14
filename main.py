@@ -15,7 +15,7 @@ class Main():
         self.game = OnlineMode(self, ip)
 
     def offlineMode(self):
-        pass
+        self.game = OfflineMode(self)
 
     def handleEvent(self, event):
         self.currentScreen.handleEvent(event)

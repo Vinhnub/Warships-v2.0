@@ -4,66 +4,30 @@ from constants import *
 from listPath import *
 from ship import *
 from torpedo import *
-from radar import *
-import time
 
 class Player():
-    def __init__(self, window, gameMode=True): #True: onl, False: off
+    def __init__(self, window):
         self.window = window
-        self.gameMode = gameMode
-        self.mode = 0 # o: torpedo, 1: radar
-        self.listShip = [Ship(self.window, path[1], path[0], path[2]) for path in (listPathShipOnl if gameMode else listPathShipOff)] 
+        self.listShip = [Ship(self.window, path[1], path[0], path[2]) for path in listPathShip]
         self.listEnemyShip = None
         self.__isMouseDown = False
         self.__firstPos = None # pos when player click mouse down to move or ronate ship
         self.__shipSelected = None # the ship player select to move
         self.isReady = False
-        self.coolDown = time.time()
         self.listMyTorpedo = []
         self.listEnemyTorpedo = []
-        self.myRadar = []
-        self.enemyRadar = []
-        self.haveRadar = 0
         self.canFire = None
         self.lastPosFire = None
-        self.lastPosEnemyFire = None
-        self.lastPosEnemyRadar = None
-        self.__listPosShip = [[0 for _ in range(10)] for __ in range(10)]
+        self.__listPosShip = [[False for _ in range(10)] for __ in range(10)]
 
-    def getListPosShip(self):
+    # check enermy fire correct or incorrect 
+    def getlistPosShip(self):
         return self.__listPosShip
-
-    def switchMode(self):
-        self.mode = 1 - self.mode
-
-    def getShipDetail(self):
-        listTemp = []
-        for ship in self.listShip:
-            listTemp.append((ship.loc, ship.direction))
-        return listTemp
-
-    def calListEnemyShip(self, data):
-        if self.listEnemyShip is not None or data is None: return
-        count = 0
-        self.listEnemyShip = []
-        for item in data:
-            if count >= 5: return
-            loc, direction = item
-            self.listEnemyShip.append(Ship(self.window, loc, listPathShipOnl[count][0], listPathShipOnl[count][2], direction=direction))
-            count += 1
-
     def calListPosShip(self):
-        count = 0
         for ship in self.listShip:
-            if count >= 5: break
-            count += 1
             for x in range(ship.loc[0], ship.loc[0] + ship.width, CELL_SIZE[0]):
                 for y in range(ship.loc[1], ship.loc[1] + ship.height, CELL_SIZE[0]):
-                    self.__listPosShip[int((x - FIELD_COORD[0])/CELL_SIZE[0])][int((y - FIELD_COORD[1])/CELL_SIZE[1])] = 1
-
-        if self.gameMode:
-            for i in range(count, len(self.listShip)):
-                self.__listPosShip[int((self.listShip[i].loc[0] - FIELD_COORD[0])/CELL_SIZE[0])][int((self.listShip[i].loc[1] - FIELD_COORD[1])/CELL_SIZE[1])] = 2
+                    self.__listPosShip[int((x - FIELD_COORD[0])/CELL_SIZE[0])][int((y - FIELD_COORD[1])/CELL_SIZE[1])] = True
 
         return self.__listPosShip
     
@@ -71,22 +35,12 @@ class Player():
         if pos is None: return False
         return self.__listPosShip[pos[0]][pos[1]]
     
-    def numCorrect(self, pos):
-        result = 0
-        for x in range(max(0, pos[0] - 1), min(10, pos[0] + 2)):
-            for y in range(max(0, pos[1] - 1), min(10, pos[1] + 2)):
-                if self.__listPosShip[x][y] == 1:
-                    result += 1
-        return result
-    
     def handleEvent(self, event):
         if (not self.isReady):
             self.moveShip(event)
         if self.canFire:
-            res = self.fire(event)
-            if res:
-                self.canFire = False
-            return res
+            self.canFire = False
+            return self.fire(event)
         return False
 
     def fire(self, event):
@@ -94,14 +48,9 @@ class Player():
         if event.type == pygame.MOUSEBUTTONDOWN:
             firePos = pygame.mouse.get_pos()
             if FIELD_COORD[0] < firePos[0] and firePos[0] < FIELD_COORD[0] + FIELD_WIDTH and FIELD_COORD[1] < firePos[1] and firePos[1] < FIELD_COORD[1] + FIELD_HEIGHT:
-                if self.mode == 0:
-                    for oTorpedo in self.listMyTorpedo:
-                        if oTorpedo.getHitBox().collidepoint(firePos):
-                            return False
-                elif self.mode == 1:
-                    for radar, loc in self.myRadar:
-                        if loc == (int((firePos[0] - FIELD_COORD[0])/CELL_SIZE[0]), int((firePos[1] - FIELD_COORD[1])/CELL_SIZE[1])):
-                            return False
+                for oTorpedo in self.listMyTorpedo:
+                    if oTorpedo.getHitBox().collidepoint(firePos):
+                        return False
                 return (int((firePos[0] - FIELD_COORD[0])/CELL_SIZE[0]), int((firePos[1] - FIELD_COORD[1])/CELL_SIZE[1]))
         return False
     
@@ -109,10 +58,9 @@ class Player():
         if self.listEnemyShip is not None:
             for ship in self.listEnemyShip:
                 ship.draw()
-        for oTorpedo in self.listMyTorpedo:
-            oTorpedo.draw()
 
-    def draw(self, isMyTurn=None):
+    def draw(self,window, isMyTurn=None):
+        self.window = window
         if isMyTurn is None:
             for ship in self.listShip:
                 ship.draw()
@@ -120,18 +68,12 @@ class Player():
             for oTorpedo in self.listMyTorpedo:
                 if not oTorpedo.drawAnimation():
                     oTorpedo.draw()
-            for radar, loc in self.myRadar:
-                if not radar.drawAnimation():
-                    radar.draw()
         else:
             for ship in self.listShip:
                 ship.draw()
             for oTorpedo in self.listEnemyTorpedo:
                 if not oTorpedo.drawAnimation():
                     oTorpedo.draw()
-            for radar, loc in self.enemyRadar:
-                if not radar.drawAnimation():
-                    radar.draw()
         
     def moveShip(self, event):
         if event is None: return
@@ -164,6 +106,3 @@ class Player():
             if event.type == MOUSEMOTION:
                 mousePos = pygame.mouse.get_pos()
                 self.__shipSelected.updatePos(self.__firstPos, mousePos)
-
-
-            
