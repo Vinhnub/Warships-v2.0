@@ -72,7 +72,7 @@ class OnlineMode():
                 self.signalRecieve = pickle.loads(data)
                 self.isConnected = True
             except Exception as e:
-                self.manager.currentScreen.warning = Warning(self.manager.window, (80, 370), "Lost connection from server", 1000)
+                self.manager.currentScreen.warning = Warning(self.manager.window, (80, 370), "Lost connection from server", 100)
                 self.isConnected = False
         
 
