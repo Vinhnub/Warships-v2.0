@@ -105,6 +105,8 @@ class OnlineMode():
                     if res:
                         self.player.lastPosFire = res
                         self.signalSend.type = "FIRE_TORPEDO" if self.player.mode == 0 else "FIRE_RADAR"
+                        soundEffect = self.manager.fireTorpedoSound if self.player.mode == 0 else self.manager.fireRadarSound
+                        soundEffect.play()
                         if self.player.mode == 1: 
                             self.player.haveRadar -= 1
                             self.player.mode = 0

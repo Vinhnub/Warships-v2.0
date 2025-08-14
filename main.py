@@ -7,6 +7,8 @@ class Main():
         self.window = window
         self.currentScreen = MenuScreen(self, self.window)
         self.game = None
+        self.fireTorpedoSound = None
+        self.fireRadarSound = None
 
     def changeScreen(self, newScreen):
         self.currentScreen = newScreen
