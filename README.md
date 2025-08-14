@@ -1,4 +1,5 @@
 ===========================      Ỉntroduction      ===========================
+
 Warship is a turn-based naval strategy game where two players face off to locate 
 and destroy each other’s entire fleet.
 
@@ -9,6 +10,7 @@ Each shot demands careful prediction and strategy, turning every match into
 an intense battle of wits on the open seas.
 
 ===========================        Gameplay        ===========================
+
 In Warship, each player commands a hidden fleet arranged on a grid-based map. 
 
 Your mission is to use strategy and deduction to locate and destroy all of your opponent’s ships.
@@ -28,6 +30,7 @@ Victory goes to the player who destroys the opponent’s entire fleet first. Eac
 tense battle of wits where every decision can change the tide of war.
 
 ===========================     Game run guide    ===========================
+
 The game requires a computer from the player to run the server with the computer's own IP.
 
 When the player starts an online match, it is required to enter the correct IP of the running server.
@@ -35,6 +38,7 @@ When the player starts an online match, it is required to enter the correct IP o
 requires players to be on the same local network or can use RADMIN instead.
 
 ===========================     Key in game       ===========================
+
 + Left mouse click: fire
 + Right mouse click: rotate ship
 + Left mouse hold and move: move ship
