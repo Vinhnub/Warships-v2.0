@@ -1,32 +1,4 @@
 import random
-def extract_ships_from_boolean_map(boolean_map):
-    rows = len(boolean_map)
-    cols = len(boolean_map[0]) if rows > 0 else 0
-
-    visited = [[False] * cols for _ in range(rows)]
-    ships = []
-
-    def neighbors(x, y):
-        for nx, ny in [(x - 1, y), (x + 1, y), (x, y - 1), (x, y + 1)]:
-            if 0 <= nx < cols and 0 <= ny < rows:
-                yield nx, ny
-
-    for y in range(rows):
-        for x in range(cols):
-            if boolean_map[y][x] and not visited[y][x]:
-                stack = [(x, y)]
-                ship_cells = []
-                while stack:
-                    cx, cy = stack.pop()
-                    if not visited[cy][cx]:
-                        visited[cy][cx] = True
-                        ship_cells.append((cy, cx))  # Lưu theo (y, x)
-                        for nx, ny in neighbors(cx, cy):
-                            if boolean_map[ny][nx] and not visited[ny][nx]:
-                                stack.append((nx, ny))
-                ships.append(ship_cells)
-    return ships
-
 class BotLogic:
     def __init__(self, BOARD_SIZE=10):
         self._BOARD_SIZE = BOARD_SIZE
@@ -43,21 +15,9 @@ class BotLogic:
         self._rootCell = None
         self._ships = []
         self._result = None
-
+        self.enemyListShip = None
     def set_enemy_player(self, enemy_player):
-        boolean_map = enemy_player.getListPosShip()
-
-        if isinstance(boolean_map, list) and isinstance(boolean_map[0], list) and isinstance(boolean_map[0][0], bool):
-            self._ships = extract_ships_from_boolean_map(boolean_map)
-        else:
-            merged_map = [[0] * self._BOARD_SIZE for _ in range(self._BOARD_SIZE)]
-            for ship_map in boolean_map:
-                for y in range(self._BOARD_SIZE):
-                    for x in range(self._BOARD_SIZE):
-                        if ship_map[y][x]:
-                            merged_map[y][x] = 1
-            self._ships = extract_ships_from_boolean_map(merged_map)
-        self._remainShips = [len(ship) for ship in self._ships]
+        self.enemyListShip = enemy_player.getListPosShip()
 
     def secondBoard(self):
         secondBoard = [[0] * self._BOARD_SIZE for _ in range(self._BOARD_SIZE)]

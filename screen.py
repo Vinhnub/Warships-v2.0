@@ -55,6 +55,10 @@ class MenuScreen(Screen):
             self.screenManager.onlineMode('26.253.176.29')
         if self.offBtn.handleEvent(event):
             self.screenManager.offlineMode()
+            self.onlBtn.disable()
+            self.offBtn.disable()
+            self.exitBtn.disable()
+            self.screenManager.changeScreen(PrepareScreen(self.screenManager, self.window))
         if self.inputData is not None:
             res = self.inputData.handleEvent(event) 
             if res[0] == -1:
@@ -196,7 +200,7 @@ class MyTurnScreen(Screen):
 
     def draw(self):
         self.background.draw()
-        self.field.draw()
+        self.field.draw()      
         self.drawTimer()
         self.screenManager.game.player.draw(True)
         if self.screenManager.game.player.mode == 0:

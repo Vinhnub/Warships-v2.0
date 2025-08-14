@@ -35,6 +35,7 @@ class OfflineMode:
         
         self.countBotHitTrue = 0
         self.countPlayerHitTrue = 0
+        self.timer = None
     def running(self, event=None):
         if event:
             self.handle_event(event)
@@ -51,7 +52,6 @@ class OfflineMode:
                 self.player.canFire = True
                 if not isinstance(self.manager.currentScreen, MyTurnScreen):
                     self.manager.changeScreen(MyTurnScreen(self.manager, self.manager.window))
-
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     pos = self.player.handleEvent(event)
                     print(f"player: {pos}")
@@ -115,13 +115,12 @@ class OfflineMode:
                 hit = self.bot.makeHit()
                 self.animation_end_time = time.time() + 1.2
                 self.bot_pending_hit = hit
-
+                self.timer = time.time()
     def draw(self):
         if self.turn == "player":
             self.player.draw(self.manager.window, isMyTurn=True)
         elif self.turn == "bot":
             self.bot.draw(self.manager.window, isMyTurn=True)
-
     def ready(self):
         self.player.isReady = True
         self.player.calListPosShip()
@@ -139,6 +138,9 @@ class OfflineMode:
         self.manager.changeScreen(MyTurnScreen(self.manager, self.manager.window))
         self.countBotHitTrue = 0
         self.countPlayerHitTrue = 0
+        self.timer = time.time()
+
+
 
 
 class OnlineMode():
