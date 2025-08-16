@@ -33,7 +33,10 @@ class PlayerAI():
     def isCorrect(self, pos):
         if pos is None:
             return False
-        return self.__listPosShip[pos[0]][pos[1]]
+        if self.__listPosShip[pos[0]][pos[1]]:
+            return 1
+        else:
+            return 0
 
     def grid_to_pixel(self, cell_x, cell_y):
         pixel_x = FIELD_COORD[0] + cell_x * CELL_SIZE[0]
@@ -81,33 +84,25 @@ class PlayerAI():
                         path = listPathShipOff[0][0]
 
                     ship = Ship(self.window, start_pixel, path, idx)
-                    self.__listShips.append(ship)
                     placed = True
         self.isReady = True
-
+    def getListShip(self):
+        return self.__listShips
     def ready(self):
         return self.isReady
     
     def makeHit(self):
         hit, pos = self.botLogic.takeTurn()
-        if hit is False and pos is None:
+        if pos is None:
             return None
-        pixel_loc = (FIELD_COORD[0] + pos[0] * CELL_SIZE[0] + 3, FIELD_COORD[1] + pos[1] * CELL_SIZE[1] + 3)
-        torpedo = Torpedo(self.window, pixel_loc, listPathTopedoA ,pathImageTorpedo, hit, spf=50)
+        y, x = pos  # BotLogic trả về (y, x)
+        torpedo = Torpedo(self.window, pos, listPathTopedoA, pathImageTorpedo, hit, spf=50)
         self.listMyTorpedo.append(torpedo)
         self.lastPosFire = pos
-        if hit:
-            return True
-        elif not hit:
-            return False
+        return hit
+
     def draw(self,isMyTurn=None):
         if isMyTurn:
             for oTorpedo in self.listMyTorpedo:
-                if not oTorpedo.drawAnimation():
-                    oTorpedo.draw()
-        else:
-            for ship in self.__listShip:
-                ship.draw()
-            for oTorpedo in self.listEnemyTorpedo:
                 if not oTorpedo.drawAnimation():
                     oTorpedo.draw()

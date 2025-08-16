@@ -60,7 +60,7 @@ class BotLogic:
 
     def checkTarget(self, target):
         if target not in self._cells:
-            return False, None
+            return 0, None
 
         print(f"Bot bắn ô: {target}")
         self._cells.remove(target)
@@ -91,9 +91,9 @@ class BotLogic:
                     self._remainShips.remove(sunk_size)
                     self.resetTargeting()
                     return True, (y,x)
-                return True, (y, x)
+                return 1, (y, x)
         self._board[y][x] = -1
-        return False, (y, x)
+        return 0, (y, x)
 
     def huntMode(self):
         if self._direction:

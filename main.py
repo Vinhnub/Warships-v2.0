@@ -24,5 +24,3 @@ class Main():
     
     def draw(self):
         self.currentScreen.draw()
-        if self.game:
-            self.game.draw()

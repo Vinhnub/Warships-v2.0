@@ -8,7 +8,7 @@ from radar import *
 import time
 
 class Player():
-    def __init__(self, window, gameMode=True): #True: onl, False: off
+    def __init__(self, window, gameMode=True, bot=False): #True: onl, False: off
         self.window = window
         self.gameMode = gameMode
         self.mode = 0 # o: torpedo, 1: radar
