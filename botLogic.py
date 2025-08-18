@@ -4,7 +4,6 @@ class BotLogic:
         self._BOARD_SIZE = BOARD_SIZE
         self._board = [[0] * self._BOARD_SIZE for _ in range(self._BOARD_SIZE)]
         self._cells = [(y, x) for y in range(self._BOARD_SIZE) for x in range(self._BOARD_SIZE)]
-        self._GuestShip = None
         self._turnCount = 0
         self._preSuspicious = []
         self._suspicious = []
@@ -98,12 +97,12 @@ class BotLogic:
             
         elif ReCheck:
             target, shipMin = self.pickTargetLeastLikelyShip()
+            if target is None and self._cells:
+                target = random.choice(self._cells)
             return self.checkTarget(target)
 
     def checkTarget(self, target):
-        if target not in self._cells:
-            return 0, None
-        if target is None:
+        if target not in self._cells or target is None:
             return 0, None
         shipSunk = []
         y, x = target
@@ -126,44 +125,19 @@ class BotLogic:
                 if self._streak[0][0] == y:
                     self._direction = (0, 1 if self._streak[1][1] > self._streak[0][1] else -1)
                     self._directionMode = "forward"
-                    self._GuestShip = 0
                 elif self._streak[0][1] == x:
                     self._direction = (1 if self._streak[1][0] > self._streak[0][0] else -1, 0)
                     self._directionMode = "forward"
-                    self._GuestShip = 0
             # Nếu streak dài bằng hoặc lớn hơn tàu còn lại, loại bỏ tàu lớn nhất
             return 1, (y, x)
         else:  # trượt
             self._board[y][x] = -1
-            if self._GuestShip == 1:
-                if len(self._streak) == 5:
-                    shipSunk.append(random.choice([[5],[3,2]]))
-                elif len(self._streak) in self._remainShips:
-                    shipSunk.append([len(self._streak)]) 
-                elif len(self._streak) == 6:
-                     shipSunk.append(random.choice([[4,2], [3,3]]))
-                elif len(self._streak) == 7:
-                    shipSunk.append(random.choice([[4,3],[2,5]]))
-                elif len(self._streak) == 8:
-                    shipSunk.append(random.choice([[3,3,2],[5,3]]))
-                elif len(self._streak) == 9:
-                    shipSunk.append(random.choice([[5,4],[4,2,3]]))
-                elif len(self._streak) == 10:
-                    shipSunk.append([3,3,4])
-                self.resetTargeting()
-            if len(shipSunk) > 1:
-                for ships in shipSunk:
-                    for ship in ships:
-                        self._remainShips.remove(ship)
-
             return 0, (y, x)
 
 
     def huntMode(self):
         if self._direction:
             dy, dx = self._direction
-            if self._GuestShip == 1:
-               pass
             if self._directionMode == "forward":
                 last_y, last_x = self._streak[-1]
                 ny, nx = last_y + dy, last_x + dx
@@ -178,7 +152,9 @@ class BotLogic:
                 if (ny, nx) in self._cells:
                     return self.checkTarget((ny, nx))
                 else:
-                    self._remainShips.remove(len(self._streak))
+                    ship_length = len(self._streak)
+                    if ship_length in self._remainShips:
+                        self._remainShips.remove(ship_length)
                     self.resetTargeting()
                     return self.randomMode()
         else:
@@ -197,7 +173,7 @@ class BotLogic:
 
     def takeTurn(self):
         condition = self._direction or self._preSuspicious or self._streak
-        if self._turnCount >= 15 and len(self._streak) == 0:
+        if self._turnCount >= 25 and len(self._streak) == 0:
             self._result = self.randomMode(True)
         elif condition:
             self._result = self.huntMode()
