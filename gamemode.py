@@ -82,7 +82,9 @@ class OfflineMode:
 
     def update(self):
         if self.phase != "PLAYING":
-            return
+            if self.turn == "player":
+                if time.time() - self.player.coolDown > COOL_DOWN - 2:
+                    self.player.canFire = True
 
         now = time.time()
 
