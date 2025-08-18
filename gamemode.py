@@ -39,6 +39,7 @@ class OfflineMode:
         self.TIME_EACH_TURN = TIME_EACH_TURN
 
         self.timer = time.time()
+
     def running(self, event=None):
         if event:
             self.handle_event(event)
@@ -52,20 +53,23 @@ class OfflineMode:
 
         elif self.phase == "PLAYING":
             if self.turn == "player":
-                self.player.canFire = True
                 if not isinstance(self.manager.currentScreen, MyTurnScreen):
                     self.timer = time.time()
                     self.manager.changeScreen(MyTurnScreen(self.manager, self.manager.window))
                     self.timeEndTurn = time.time() + self.TIME_EACH_TURN
-                if event.type == pygame.MOUSEBUTTONDOWN:
-                    pos = self.player.handleEvent(event)
-                    print(f"player: {pos}")
+                    self.player.canFire = True
+                
+                if time.time() - self.player.coolDown > COOL_DOWN - 2:
+                    self.player.canFire = True
+
+                pos = self.player.handleEvent(event)
+                if pos:
+                    self.player.coolDown = time.time()
                     self.timeEndTurn = time.time() + self.TIME_EACH_TURN
                     if pos:
                         hit = self.bot.isCorrect(pos)
                         if hit == 1:
                            self.countPlayerHitTrue += 1
-                           print(self.countPlayerHitTrue)
                            if self.countPlayerHitTrue == 17:
                               self.phase = "END" 
                               self.manager.changeScreen(EndScreen(self.manager, self.manager.window, True))
@@ -74,7 +78,6 @@ class OfflineMode:
 
                         self.animation_end_time = time.time() + 1.2 
                         self.player_pending_hit = hit
-                        print(hit)
                         self.timeEndTurn = "End"
 
     def update(self):
@@ -85,7 +88,6 @@ class OfflineMode:
 
         if self.turn == "player":
             if self.player_pending_hit is None and self.timeEndTurn is not None and now >= self.timeEndTurn:
-                print("Player didn't shoot, switching to bot's turn")
                 self.turn = "bot"
                 self.waiting_for_bot = True
                 self.delay_start_time = pygame.time.get_ticks()
@@ -94,14 +96,12 @@ class OfflineMode:
             # Xử lý animation torpedo của player
             if self.player_pending_hit is not None and now >= self.animation_end_time:
                 if self.player_pending_hit == 0:
-                    print("Player missed, switching to bot's turn")
                     self.turn = "bot"
                     self.waiting_for_bot = True
                     self.delay_start_time = pygame.time.get_ticks()
                     self.timer = time.time()
                     self.manager.changeScreen(EnemyTurnScreen(self.manager, self.manager.window))
                 else:
-                    print("Player hit, continues turn")
                     self.timeEndTurn = now + self.TIME_EACH_TURN
                     self.waiting_for_bot = False
                 self.player_pending_hit = None
@@ -146,7 +146,6 @@ class OfflineMode:
         self.bot.auto_place_ships()
         self.phase = "PLAYING"
         self.turn = "player"
-        print(f"Phase set to: {self.phase}, Turn set to: {self.turn}")
         self.player_pending_hit = None
         self.bot_pending_hit = None
         self.animation_end_time = 0

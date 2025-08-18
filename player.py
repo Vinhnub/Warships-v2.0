@@ -30,7 +30,6 @@ class Player():
         self.lastPosEnemyFire = None
         self.lastPosEnemyRadar = None
         self.__listPosShip = [[0 for _ in range(10)] for __ in range(10)]
-        
         self.enemy = Enemy
         if isAI:
            self.botLogic = BotLogic(self.enemy.getListPosShip())
@@ -173,7 +172,7 @@ class Player():
                 mousePos = pygame.mouse.get_pos()
                 self.__shipSelected.updatePos(self.__firstPos, mousePos)
 
-#bot
+    #bot
     def auto_place_ships(self):
         ships_config = [2, 3, 3, 4, 5]  # kích thước các tàu
         grid_size = 10
