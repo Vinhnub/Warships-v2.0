@@ -11,23 +11,21 @@ an intense battle of wits on the open seas.
 
 ===========================        Gameplay        ===========================
 
-In Warship, each player commands a hidden fleet arranged on a grid-based map. 
+In Warship, each player commands a hidden fleet arranged on a grid map.
 
-Your mission is to use strategy and deduction to locate and destroy all of your opponent’s ships.
+Your task is to use strategy and deduction to locate and destroy all of your opponent's ships.
 
 The game is played in turns:
 
-  On each turn, you choose a coordinate to attack.
+Each turn, you choose a coordinate to attack.
 
-  The radar assists by scanning nearby waters, providing hint signals if it detects traces of enemy ships.
+If it hits an opponent's ship, the bullet will turn orange and you can attack again on the next turn; if it misses, the turn passes to the opponent.
 
-  If you score a hit, you may attack again on your next turn; if you miss, the turn passes to your opponent.
+If it hits an opponent's radar, the bullet will turn blue and you will have more radar to use.
 
-The UDP server processes all actions in real time — from sending attack coordinates, 
-updating the map state, to transmitting radar signals. This ensures smooth, uninterrupted matches whether playing over a LAN or the internet.
+When using the radar, it scans a 9x9 area and returns the number of ship tiles in that area.
 
-Victory goes to the player who destroys the opponent’s entire fleet first. Each match is a 
-tense battle of wits where every decision can change the tide of war.
+Victory goes to the player who destroys the entire opponent's fleet first. Each match is a tense battle of wits, where every decision can change the outcome of the battle.
 
 ===========================     Game run guide    ===========================
 
@@ -42,5 +40,10 @@ requires players to be on the same local network or can use RADMIN instead.
 + Left mouse click: fire
 + Right mouse click: rotate ship
 + Left mouse hold and move: move ship
-  
++ Click into Torpedo/Radar label to switch mode
+
+===========================        Author         ===========================
+
+  - Nguyễn Văn Vinh (Vinhnub)
+  - Quốc Huy
 
