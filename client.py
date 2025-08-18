@@ -40,3 +40,4 @@ while True:
     pygame.display.set_caption(f"WAR SHIP V2.0 (FPS: {fps})")
 
     
+    pygame.init()
