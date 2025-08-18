@@ -46,8 +46,7 @@ listPathImageBannerEnemyTurnScreen = [((7, 83), [resource_path("assets/images/ba
                                       ((470, 11), [resource_path("assets/images/banner/image_9.png")]),
                                      ]
 
-listPathImageBannerEndScreen = [((540, 11), [resource_path("assets/images/banner/image_10.png")]),
-                                     ]
+listPathImageBannerEndScreen = []
 
 listPathShipOnl = [(resource_path("assets/images/ship2.png"), (FIELD_COORD[0] + 3, FIELD_COORD[1] + 3), 1),
                (resource_path("assets/images/ship3.png"), (FIELD_COORD[0] + 3 + CELL_SIZE[0]*1, FIELD_COORD[1] + 3), 2),

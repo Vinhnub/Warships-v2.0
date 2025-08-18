@@ -3,7 +3,6 @@ from widget import *
 from screen import *
 from player import *
 from network import *
-from bot import *
 import random
 from mySignal import *
 from constants import *
@@ -18,9 +17,8 @@ import pickle
 
 class OfflineMode():
     def __init__(self, manager):
-        self.manager = manager
-        self.player = Player()
-        self.playerAI = Bot()
+        pass
+
 
 class OnlineMode():
     def __init__(self, manager, serverIP):

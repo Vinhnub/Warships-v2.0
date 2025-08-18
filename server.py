@@ -25,6 +25,7 @@ PORT = 5555
 
 server_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 server_socket.bind((HOST, PORT))
+lock = threading.Lock()
 
 serverData = {}
 logging.info(f"[SERVER] Đang lắng nghe tại {HOST}:{PORT}...")
@@ -204,7 +205,8 @@ def handleData(obj, addr):
 def handleRequest(data, addr):
     try:
         obj = pickle.loads(data)
-        result = handleData(obj, addr)
+        with lock:
+            result = handleData(obj, addr)
         logging.info(f"{obj} {addr} {result}")
         response = pickle.dumps(result)
         server_socket.sendto(response, addr)

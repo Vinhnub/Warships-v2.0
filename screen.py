@@ -4,7 +4,6 @@ from abc import abstractmethod
 from player import *
 from network import *
 import pygwidgets
-from bot import *
 from mySignal import *
 from constants import *
 from radar import *
@@ -51,9 +50,9 @@ class MenuScreen(Screen):
             self.onlBtn.disable()
             self.offBtn.disable()
             self.exitBtn.disable()
-            #self.inputData = InputData(self.window, (400, 250))
-            self.screenManager.changeScreen(FindingScreen(self.screenManager, self.window))
-            self.screenManager.onlineMode('26.253.176.29')
+            self.inputData = InputData(self.window, (500, 250), text="Enter server ip", locText=(500 + 30, 250 + 20))
+            #self.screenManager.changeScreen(FindingScreen(self.screenManager, self.window))
+            #self.screenManager.onlineMode('26.253.176.29')
         if self.offBtn.handleEvent(event):
             self.screenManager.offlineMode()
         if self.inputData is not None:
@@ -248,16 +247,18 @@ class EndScreen(Screen):
         self.background = AnimatedImage(self.window, (0, 0), [resource_path("assets/images/background/image_2.png")])
         self.banner = [AnimatedImage(self.window, loc, listPath) for loc, listPath in listPathImageBannerEndScreen]
         self.backBtn = AnimatedButton(self.window, (1183, 700), [resource_path("assets/images/buttons/backBtn_u.png")], [resource_path("assets/images/buttons/backBtn_d.png")])
+        self.result = AnimatedImage(self.window, (585, 11), [resource_path("assets/images/banner/image_10.png")]) if isWin else \
+        AnimatedImage(self.window, (605, 11), [resource_path("assets/images/banner/image_11.png")])
 
     def handleEvent(self, event):
         if self.backBtn.handleEvent(event):
+            self.screenManager.changeScreen(FindingScreen(self.screenManager, self.window))
             self.screenManager.game.reset()
-            self.screenManager.changeScreen(MenuScreen(self.screenManager, self.window))
-            self.screenManager.game = None
     
     def draw(self):
         self.background.draw()
         self.field.draw()
         self.screenManager.game.player.drawEnd()
         self.backBtn.draw()
+        self.result.draw()
         super().draw()
