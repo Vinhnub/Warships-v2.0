@@ -33,7 +33,7 @@ class OnlineMode():
         self.sendLock = threading.Lock()
         self.isRecieveResult = False
         self.isConnected = True
-        self.timer = time.time()
+        self.timer = time.monotonic()
         
     def reset(self):
         self.isRun = False
@@ -94,7 +94,7 @@ class OnlineMode():
             if self.signalRecieve.turnIP == self.signalRecieve.playerIP:
                 if not isinstance(self.manager.currentScreen, MyTurnScreen):
                     self.manager.changeScreen(MyTurnScreen(self.manager, self.manager.window))
-                    self.timer = time.time()
+                    self.timer = time.monotonic()
                     self.player.canFire = True
                     self.signalSend.type = "WAITING_PL"
                     self.signalSend.data = self.player.lastPosEnemyFire
@@ -112,10 +112,10 @@ class OnlineMode():
                             self.player.mode = 0
                         self.signalSend.data = res
                         self.isRecieveResult = False
-                        self.player.coolDown = time.time()
+                        self.player.coolDown = time.monotonic()
 
                 if self.signalRecieve.type == "WAITING_PL":
-                    if time.time() - self.player.coolDown > COOL_DOWN and self.player.canFire == False:
+                    if time.monotonic() - self.player.coolDown > COOL_DOWN and self.player.canFire == False:
                         self.player.canFire = True
 
                 if self.signalRecieve.type == "FIRE_TORPEDO_RESULT":
@@ -137,7 +137,7 @@ class OnlineMode():
             else:
                 if not isinstance(self.manager.currentScreen, EnemyTurnScreen):
                     self.manager.changeScreen(EnemyTurnScreen(self.manager, self.manager.window))
-                    self.timer = time.time()
+                    self.timer = time.monotonic()
                     self.signalSend.type = "WAITING_PL"
     
                 self.signalSend.data = self.player.lastPosEnemyFire

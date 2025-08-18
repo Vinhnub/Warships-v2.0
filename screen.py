@@ -190,9 +190,9 @@ class MyTurnScreen(Screen):
                 
     def drawTimer(self):
         for i in range(11):
-            pygame.draw.rect(self.window, WHITE, (FIELD_COORD[0] + i * CELL_SIZE[0], FIELD_COORD[1], 3, int(FIELD_HEIGHT * (time.time() - self.screenManager.game.timer)/TIME_EACH_TURN)))
+            pygame.draw.rect(self.window, WHITE, (FIELD_COORD[0] + i * CELL_SIZE[0], FIELD_COORD[1], 3, int(FIELD_HEIGHT * (time.monotonic() - self.screenManager.game.timer)/TIME_EACH_TURN)))
 
-        for i in range(int(10 * (time.time() - self.screenManager.game.timer)/TIME_EACH_TURN) + 1):
+        for i in range(int(10 * (time.monotonic() - self.screenManager.game.timer)/TIME_EACH_TURN) + 1):
             pygame.draw.rect(self.window, WHITE, (FIELD_COORD[0], FIELD_COORD[1] + i * CELL_SIZE[1], FIELD_WIDTH, 3))
 
     def draw(self):
@@ -223,9 +223,9 @@ class EnemyTurnScreen(Screen):
 
     def drawTimer(self):
         for i in range(11):
-            pygame.draw.rect(self.window, WHITE, (FIELD_COORD[0] + i * CELL_SIZE[0], FIELD_COORD[1], 3, int(FIELD_HEIGHT * (1 - (time.time() - self.screenManager.game.timer)/TIME_EACH_TURN))))
+            pygame.draw.rect(self.window, WHITE, (FIELD_COORD[0] + i * CELL_SIZE[0], FIELD_COORD[1], 3, int(FIELD_HEIGHT * (1 - (time.monotonic() - self.screenManager.game.timer)/TIME_EACH_TURN))))
 
-        for i in range(int(10 * (1 - (time.time() - self.screenManager.game.timer)/TIME_EACH_TURN)) + 1):
+        for i in range(int(10 * (1 - (time.monotonic() - self.screenManager.game.timer)/TIME_EACH_TURN)) + 1):
             pygame.draw.rect(self.window, WHITE, (FIELD_COORD[0], FIELD_COORD[1] + i * CELL_SIZE[1], FIELD_WIDTH, 3))
 
     def draw(self):
