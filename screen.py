@@ -235,7 +235,6 @@ class EnemyTurnScreen(Screen):
         self.background.draw()
         self.field.draw()
         self.drawTimer()
-        self.screenManager.game.bot.draw(True)
         self.screenManager.game.player.draw(False)
         if self.screenManager.game.player.mode == 0:
             self.torpedoMode.draw()

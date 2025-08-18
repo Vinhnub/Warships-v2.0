@@ -6,11 +6,12 @@ from ship import *
 from torpedo import *
 from radar import *
 import time
-
+from botLogic import *
 class Player():
-    def __init__(self, window, gameMode=True, bot=False): #True: onl, False: off
+    def __init__(self, window, gameMode=True, isAI=False, Enemy=None): #True: onl, False: off
         self.window = window
         self.gameMode = gameMode
+        self.isAI = isAI
         self.mode = 0 # o: torpedo, 1: radar
         self.listShip = [Ship(self.window, path[1], path[0], path[2]) for path in (listPathShipOnl if gameMode else listPathShipOff)] 
         self.listEnemyShip = None
@@ -29,6 +30,13 @@ class Player():
         self.lastPosEnemyFire = None
         self.lastPosEnemyRadar = None
         self.__listPosShip = [[0 for _ in range(10)] for __ in range(10)]
+        
+        self.enemy = Enemy
+        if isAI:
+           self.botLogic = BotLogic(self.enemy.getListPosShip())
+
+    def setEnemy(self, enemy):
+        self.enemy = enemy
 
     def getListPosShip(self):
         return self.__listPosShip
@@ -41,8 +49,8 @@ class Player():
         for ship in self.listShip:
             listTemp.append((ship.loc, ship.direction))
         return listTemp
-
-    def calListEnemyShip(self, data):
+       
+    def calListEnemyShip(self, data ):
         if self.listEnemyShip is not None or data is None: return
         count = 0
         self.listEnemyShip = []
@@ -165,5 +173,62 @@ class Player():
                 mousePos = pygame.mouse.get_pos()
                 self.__shipSelected.updatePos(self.__firstPos, mousePos)
 
+#bot
+    def auto_place_ships(self):
+        ships_config = [2, 3, 3, 4, 5]  # kích thước các tàu
+        grid_size = 10
+        grid = [[0] * grid_size for _ in range(grid_size)]
+        self.listShip = []
 
+        for ship_index, size in enumerate(ships_config):
+            placed = False
+            while not placed:
+                horizontal = random.choice([True, False])
+
+                #tàu không vượt grid
+                x = random.randint(0, grid_size - (size if horizontal else 1))
+                y = random.randint(0, grid_size - (1 if horizontal else size))
+
+
+                can_place = True
+                for i in range(size):
+                    nx = x + (i if horizontal else 0)
+                    ny = y + (0 if horizontal else i)
+                    if grid[ny][nx] == 1:
+                        can_place = False
+                        break
+                if not can_place:
+                    continue
+
+                # đánh dấu các ô đã có tàu
+                for i in range(size):
+                    nx = x + (i if horizontal else 0)
+                    ny = y + (0 if horizontal else i)
+                    grid[ny][nx] = 1
+
+                # tính pixel dựa trên ô đầu tiên
+                pixel_x = FIELD_COORD[0] + y * CELL_SIZE[0] + 3
+                pixel_y = FIELD_COORD[1] + x * CELL_SIZE[1] + 3
+                loc_pixel = (pixel_x, pixel_y)
+
+                path, _, ship_id = listPathShipOff[ship_index]
+                direction = 0 if horizontal else 1
+
+                ship = Ship(self.window, loc_pixel, path, ship_id, direction=direction)
+                self.listShip.append(ship)
+
+                placed = True
+
+        self.__listPosShip = grid
+        return self.listShip
+
+    def makeHit(self):
+        hit, pos = self.botLogic.takeTurn()
+        if pos is None:
+            return None
+        y, x = pos
+        torpedo = Torpedo(self.enemy.window, pos, listPathTopedoA, pathImageTorpedo, hit, spf=50)
+        self.enemy.listEnemyTorpedo.append(torpedo)
+        self.lastPosEnemyFire = pos
+        return hit, pos
             
