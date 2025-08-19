@@ -14,6 +14,8 @@ pygame.mixer.init()
 window = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
 clock = pygame.time.Clock()
 main = Main(window)
+main.fireTorpedoSound = pygame.mixer.Sound(resource_path("assets/musics/fire_torpedo.wav"))
+main.fireRadarSound = pygame.mixer.Sound(resource_path("assets/musics/fire_radar.wav"))
 
 while True:     
 
@@ -38,3 +40,4 @@ while True:
     pygame.display.set_caption(f"WAR SHIP V2.0 (FPS: {fps})")
 
     
+    pygame.init()

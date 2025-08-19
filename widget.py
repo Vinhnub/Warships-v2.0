@@ -123,19 +123,37 @@ class Warning():
         return False
            
 class InputData():
-    def __init__(self, window, loc):
+    def __init__(self, window, loc, text=None, locText=None):
         self.window = window
         self.loc = loc
+        self.text = CustomText(window, locText, text, resource_path("fonts/PressStart2P-Regular.ttf"), font_size=30)
         self.background = AnimatedImage(self.window, loc, [resource_path("assets/images/inputdata/background.png")])
-        self.enterBtn = AnimatedButton(self.window, (self.loc[0] + 500 - 170, self.loc[1] + 285), [resource_path("assets/images/inputdata/enterBtn_u.png")], [resource_path("assets/images/inputdata/enterBtn_d.png")])
-        self.backBtn = AnimatedButton(self.window, (self.loc[0] + 100, self.loc[1] + 285), [resource_path("assets/images/inputdata/backBtn_u.png")], [resource_path("assets/images/inputdata/backBtn_d.png")])
-        self.input = pygwidgets.InputText(self.window, (self.loc[0] + 100, self.loc[1] + 80), fontSize=40, width=300)
+        self.enterBtn = AnimatedButton(self.window, (self.loc[0] + 500 - 180, self.loc[1] + 230), [resource_path("assets/images/inputdata/enterBtn_u.png")], [resource_path("assets/images/inputdata/enterBtn_d.png")])
+        self.backBtn = AnimatedButton(self.window, (self.loc[0] + 30, self.loc[1] + 230), [resource_path("assets/images/inputdata/backBtn_u.png")], [resource_path("assets/images/inputdata/backBtn_d.png")])
+        self.input = pygwidgets.InputText(self.window, (self.loc[0] + 100, self.loc[1] + 130), fontSize=40, width=300)
+        self.warning = None
 
     def draw(self):
         self.background.draw()
         self.input.draw()
         self.enterBtn.draw()
         self.backBtn.draw()
+        self.text.draw()
+        if self.warning is not None:
+            self.warning.draw()
+
+    def isValid(self, value):
+        count = 0
+        for char in value:
+            if char == '.':
+                count += 1
+                continue
+            if not char.isdigit():
+                return False
+        if count == 3:
+            return True
+        else:
+            return False
 
     def handleEvent(self, event):
         self.input.handleEvent(event)
@@ -143,6 +161,8 @@ class InputData():
             return (-1, "")
         if self.enterBtn.handleEvent(event):
             data = self.input.getValue()
-            if data != "": return (1, data)
+            if self.isValid(data): return (1, data)
+            else:
+                self.warning = CustomText(self.window, (self.loc[0] + 115, self.loc[1] + 175), "Ip is invalid", resource_path("fonts/PressStart2P-Regular.ttf"), font_size=20, color=(255, 0, 0))
         return (0, "")
 

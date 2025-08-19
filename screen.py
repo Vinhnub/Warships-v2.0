@@ -4,7 +4,6 @@ from abc import abstractmethod
 from player import *
 from network import *
 import pygwidgets
-from bot import *
 from mySignal import *
 from constants import *
 from radar import *
@@ -51,11 +50,15 @@ class MenuScreen(Screen):
             self.onlBtn.disable()
             self.offBtn.disable()
             self.exitBtn.disable()
-            #self.inputData = InputData(self.window, (400, 250))
-            self.screenManager.changeScreen(FindingScreen(self.screenManager, self.window))
-            self.screenManager.onlineMode('26.253.176.29')
+            self.inputData = InputData(self.window, (500, 250), text="Enter server ip", locText=(500 + 30, 250 + 20))
+            #self.screenManager.changeScreen(FindingScreen(self.screenManager, self.window))
+            #self.screenManager.onlineMode('26.253.176.29')
         if self.offBtn.handleEvent(event):
             self.screenManager.offlineMode()
+            self.onlBtn.disable()
+            self.offBtn.disable()
+            self.exitBtn.disable()
+            self.screenManager.changeScreen(PrepareScreen(self.screenManager, self.window))
         if self.inputData is not None:
             res = self.inputData.handleEvent(event) 
             if res[0] == -1:
@@ -190,14 +193,14 @@ class MyTurnScreen(Screen):
                 
     def drawTimer(self):
         for i in range(11):
-            pygame.draw.rect(self.window, WHITE, (FIELD_COORD[0] + i * CELL_SIZE[0], FIELD_COORD[1], 3, int(FIELD_HEIGHT * (time.time() - self.screenManager.game.timer)/TIME_EACH_TURN)))
+            pygame.draw.rect(self.window, WHITE, (FIELD_COORD[0] + i * CELL_SIZE[0], FIELD_COORD[1], 3, int(FIELD_HEIGHT * (time.monotonic() - self.screenManager.game.timer)/TIME_EACH_TURN)))
 
-        for i in range(int(10 * (time.time() - self.screenManager.game.timer)/TIME_EACH_TURN) + 1):
+        for i in range(int(10 * (time.monotonic() - self.screenManager.game.timer)/TIME_EACH_TURN) + 1):
             pygame.draw.rect(self.window, WHITE, (FIELD_COORD[0], FIELD_COORD[1] + i * CELL_SIZE[1], FIELD_WIDTH, 3))
 
     def draw(self):
         self.background.draw()
-        self.field.draw()
+        self.field.draw()      
         self.drawTimer()
         self.screenManager.game.player.draw(True)
         if self.screenManager.game.player.mode == 0:
@@ -223,9 +226,9 @@ class EnemyTurnScreen(Screen):
 
     def drawTimer(self):
         for i in range(11):
-            pygame.draw.rect(self.window, WHITE, (FIELD_COORD[0] + i * CELL_SIZE[0], FIELD_COORD[1], 3, int(FIELD_HEIGHT * (1 - (time.time() - self.screenManager.game.timer)/TIME_EACH_TURN))))
+            pygame.draw.rect(self.window, WHITE, (FIELD_COORD[0] + i * CELL_SIZE[0], FIELD_COORD[1], 3, int(FIELD_HEIGHT * (1 - (time.monotonic() - self.screenManager.game.timer)/TIME_EACH_TURN))))
 
-        for i in range(int(10 * (1 - (time.time() - self.screenManager.game.timer)/TIME_EACH_TURN)) + 1):
+        for i in range(int(10 * (1 - (time.monotonic() - self.screenManager.game.timer)/TIME_EACH_TURN)) + 1):
             pygame.draw.rect(self.window, WHITE, (FIELD_COORD[0], FIELD_COORD[1] + i * CELL_SIZE[1], FIELD_WIDTH, 3))
 
     def draw(self):
@@ -248,17 +251,23 @@ class EndScreen(Screen):
         self.background = AnimatedImage(self.window, (0, 0), [resource_path("assets/images/background/image_2.png")])
         self.banner = [AnimatedImage(self.window, loc, listPath) for loc, listPath in listPathImageBannerEndScreen]
         self.backBtn = AnimatedButton(self.window, (1183, 700), [resource_path("assets/images/buttons/backBtn_u.png")], [resource_path("assets/images/buttons/backBtn_d.png")])
+        self.result = AnimatedImage(self.window, (585, 11), [resource_path("assets/images/banner/image_10.png")]) if isWin else \
+        AnimatedImage(self.window, (605, 11), [resource_path("assets/images/banner/image_11.png")])
 
     def handleEvent(self, event):
         if self.backBtn.handleEvent(event):
-            self.screenManager.game.reset()
-            self.screenManager.changeScreen(MenuScreen(self.screenManager, self.window))
-            self.screenManager.game = None
+            if self.screenManager.gameMode(): # true: onl, false: off
+                self.screenManager.changeScreen(FindingScreen(self.screenManager, self.window))
+                self.screenManager.game.reset()
+            else:
+                self.screenManager.game = None
+                self.screenManager.changeScreen(MenuScreen(self.screenManager, self.window))
     
     def draw(self):
         self.background.draw()
         self.field.draw()
         self.screenManager.game.player.drawEnd()
         self.backBtn.draw()
+        self.result.draw()
         super().draw()
 

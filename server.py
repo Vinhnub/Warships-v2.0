@@ -25,6 +25,7 @@ PORT = 5555
 
 server_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 server_socket.bind((HOST, PORT))
+lock = threading.Lock()
 
 serverData = {}
 logging.info(f"[SERVER] Đang lắng nghe tại {HOST}:{PORT}...")
@@ -37,13 +38,15 @@ def printdata(serverData):
 ===========================
 | Room ID   : {roomID}
 | Phase     : {serverData[roomID]["PHASE"]}
-| TIME      : {TIME_EACH_TURN - time.time() + serverData[roomID]["TIME"] if serverData[roomID]["TIME"] is not None else None}
+| TIME      : {TIME_EACH_TURN - time.monotonic() + serverData[roomID]["TIME"] if serverData[roomID]["TIME"] is not None else None}
 | TURN      : {serverData[roomID]["TURNINDEX"]}
 | LISTPLAYER: {serverData[roomID]["LISTPLAYER"]}
 | PLAYER {serverData[roomID]["LISTPLAYER"][0]} : numCorrect : {serverData[roomID]["PLAYER"][serverData[roomID]["LISTPLAYER"][0]]["numCorrect"]}, lastPosFire : {serverData[roomID]["PLAYER"][serverData[roomID]["LISTPLAYER"][0]]["lastPosFire"]}                    
 | PLAYER {serverData[roomID]["LISTPLAYER"][1] if len(serverData[roomID]["LISTPLAYER"] ) > 1 else None} : numCorrect :{serverData[roomID]["PLAYER"][serverData[roomID]["LISTPLAYER"][1]]["numCorrect"] if len(serverData[roomID]["LISTPLAYER"]) > 1 else None}, lastPosFire : {serverData[roomID]["PLAYER"][serverData[roomID]["LISTPLAYER"][1]]["lastPosFire"] if len(serverData[roomID]["LISTPLAYER"]) > 1 else None}
 ===========================
 """)
+        
+
 
 def handleData(obj, addr):
     # ======== CREATE AND JOIN ROOM LOGIC ========
@@ -95,7 +98,7 @@ def handleData(obj, addr):
             enemy = serverData[obj.roomID]["LISTPLAYER"][enemyIndex]
             if serverData[obj.roomID]["PLAYER"][enemy]["ready"]:
                 serverData[obj.roomID]["PHASE"] = "PLAYING"
-                serverData[obj.roomID]["TIME"] = time.time()
+                serverData[obj.roomID]["TIME"] = time.monotonic()
                 serverData[obj.roomID]["TURNINDEX"] = random.randint(0, 1)
                 return SignalRecieved(serverData[obj.roomID]["PHASE"], 
                                       turnIP=serverData[obj.roomID]["LISTPLAYER"][serverData[obj.roomID]["TURNINDEX"]], 
@@ -107,9 +110,9 @@ def handleData(obj, addr):
 
     if serverData[obj.roomID]["PHASE"] == "PLAYING":
 
-        if TIME_EACH_TURN - (time.time() - serverData[obj.roomID]["TIME"]) <= 0:
+        if TIME_EACH_TURN - (time.monotonic() - serverData[obj.roomID]["TIME"]) <= 0:
             serverData[obj.roomID]["TURNINDEX"] = 1 - serverData[obj.roomID]["TURNINDEX"]
-            serverData[obj.roomID]["TIME"] = time.time()
+            serverData[obj.roomID]["TIME"] = time.monotonic()
 
         enemyIndex = 1 - serverData[obj.roomID]["LISTPLAYER"].index(addr[0])
         enemy = serverData[obj.roomID]["LISTPLAYER"][enemyIndex]
@@ -156,7 +159,7 @@ def handleData(obj, addr):
                                       data=serverData[obj.roomID]["PLAYER"][enemy]["posShip"][pos[0]][pos[1]])
             else:
                 serverData[obj.roomID]["PLAYER"][addr[0]]["lastPosFire"] = pos
-                serverData[obj.roomID]["TIME"] = time.time() - (TIME_EACH_TURN - 4)
+                serverData[obj.roomID]["TIME"] = time.monotonic() - (TIME_EACH_TURN - 4)
                 return SignalRecieved(serverData[obj.roomID]["PHASE"], 
                                       type="FIRE_TORPEDO_RESULT", 
                                       turnIP=serverData[obj.roomID]["LISTPLAYER"][serverData[obj.roomID]["TURNINDEX"]], 
@@ -184,7 +187,7 @@ def handleData(obj, addr):
                               type="WAITING_PL",
                               turnIP=serverData[obj.roomID]["LISTPLAYER"][serverData[obj.roomID]["TURNINDEX"]], 
                               playerIP=addr[0],
-                              data=TIME_EACH_TURN - (time.time() - serverData[obj.roomID]["TIME"]))
+                              data=TIME_EACH_TURN - (time.monotonic() - serverData[obj.roomID]["TIME"]))
     
     if serverData[obj.roomID]["PHASE"] == "END":
         if obj.type == "MY_SHIP":
@@ -202,7 +205,8 @@ def handleData(obj, addr):
 def handleRequest(data, addr):
     try:
         obj = pickle.loads(data)
-        result = handleData(obj, addr)
+        with lock:
+            result = handleData(obj, addr)
         logging.info(f"{obj} {addr} {result}")
         response = pickle.dumps(result)
         server_socket.sendto(response, addr)
