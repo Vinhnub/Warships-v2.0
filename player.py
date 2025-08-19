@@ -93,7 +93,7 @@ class Player():
             res = self.fire(event)
             if res:
                 self.canFire = False
-            return res
+                return res
         return False
 
     def fire(self, event):

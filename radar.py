@@ -6,8 +6,8 @@ class Radar():
     def __init__(self, window, loc, listRadarA, numCorrect, spf=0): # spf: Time to display 1 image
         self.window = window
         self.loc = (FIELD_COORD[0] + (loc[0] - 1) * CELL_SIZE[0] + 3, FIELD_COORD[1] + (loc[1] - 1) * CELL_SIZE[1] + 3)
-        self.__image = pygame.image.load("assets/images/radar_end.png").convert_alpha()
-        self.__listImageAnimation = [pygame.image.load(path).convert_alpha() for path in listRadarA] + [pygame.image.load("assets/images/radar_frames/result_"+str(numCorrect)+".png").convert_alpha()]*20
+        self.__image = pygame.image.load(resource_path("assets/images/radar_end.png")).convert_alpha()
+        self.__listImageAnimation = [pygame.image.load(path).convert_alpha() for path in listRadarA] + [pygame.image.load(resource_path("assets/images/radar_frames/result_"+str(numCorrect)+".png")).convert_alpha()]*20
         self.__spf = spf # seconds per frame
         self.__startTime = pygame.time.get_ticks()
         self.__index = 0

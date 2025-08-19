@@ -254,7 +254,7 @@ class OnlineMode():
                         self.player.coolDown = time.monotonic()
 
                 if self.signalRecieve.type == "WAITING_PL":
-                    if time.monotonic() - self.player.coolDown > COOL_DOWN and self.player.canFire == False:
+                    if time.monotonic() - self.player.coolDown > COOL_DOWN:
                         self.player.canFire = True
 
                 if self.signalRecieve.type == "FIRE_TORPEDO_RESULT":
