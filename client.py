@@ -15,7 +15,7 @@ window = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
 clock = pygame.time.Clock()
 main = Main(window)
 
-while True:
+while True:     
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:           
