@@ -21,7 +21,9 @@ logging.basicConfig(
     ]
 )
 
-HOST = '26.253.176.29'  
+ipInput = input("Enter your ip to host server:")
+
+HOST = ipInput  
 PORT = 5555    
 
 server_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
