@@ -1,0 +1,168 @@
+import pygame
+from pygame.locals import *
+import pygwidgets
+from constants import *
+
+import pygwidgets
+import os
+from listPath import *
+
+class AnimatedImage():
+    def __init__(self, window, loc, lstPath, fps=0):
+        self.window = window
+        self.loc = loc
+        self.__indexFrame = 0
+        self.__image = [pygame.image.load(path).convert_alpha() for path in lstPath]
+        self.fps = fps
+        self.totalFrame = len(self.__image)
+        self._startTime = pygame.time.get_ticks()
+
+    def draw(self):
+        self.window.blit(self.__image[self.__indexFrame], self.loc)
+        if pygame.time.get_ticks() - self._startTime >= self.fps and self.fps != 0:
+            self._startTime = pygame.time.get_ticks()
+            self.__indexFrame = (self.__indexFrame + 1) % self.totalFrame
+
+class AnimatedButton():
+    def __init__(self, window, loc, lstImageUp, lstImageDown, listImageDisable=None, fps=0):
+        self.window = window
+        self.loc = loc
+        self.lstImageUp = [pygame.image.load(path).convert_alpha() for path in lstImageUp]
+        self.lstImageDown = [pygame.image.load(path).convert_alpha() for path in lstImageDown]
+        self.lstImageDisable = self.lstImageUp if listImageDisable is None else [pygame.image.load(path).convert_alpha() for path in listImageDisable]
+        self.state = 0 # 0: up, 1: down, -1: disarmed, 2: disable
+        self.indexImage = 0
+        self.__hitBox = self.lstImageUp[self.indexImage].get_rect(topleft=self.loc)
+        self._startTime = pygame.time.get_ticks()
+        self.fps = fps
+
+    def disable(self):
+        self.state = 2
+
+    def enable(self):
+        self.state = 0
+
+    def handleEvent(self, eventObj):
+        if self.state == 2:
+            return False
+
+        if eventObj.type not in (pygame.MOUSEMOTION, pygame.MOUSEBUTTONUP, pygame.MOUSEBUTTONDOWN):
+            return False
+
+        eventPointInButtonRect = self.__hitBox.collidepoint(eventObj.pos)
+
+        if self.state == 0:
+            if (eventObj.type == pygame.MOUSEBUTTONDOWN) and eventPointInButtonRect:
+                self.state = 1
+        elif self.state == 1:
+            if (eventObj.type == pygame.MOUSEBUTTONUP) and eventPointInButtonRect:
+                self.state = 0
+                return True  # clicked!
+            if (eventObj.type == pygame.MOUSEMOTION) and (not eventPointInButtonRect):
+                self.state = -1
+        elif self.state == -1:
+            if eventPointInButtonRect:
+                self.state = 1
+            elif eventObj.type == pygame.MOUSEBUTTONUP:
+                self.state = 0
+
+        return False
+
+    def draw(self):
+        if self.state == 0:
+            self.window.blit(self.lstImageUp[self.indexImage], self.loc)
+            if pygame.time.get_ticks() - self._startTime >= self.fps and self.fps != 0:
+                self._startTime = pygame.time.get_ticks()
+                self.indexImage = (self.indexImage + 1) % len(self.lstImageUp)
+        elif self.state == 1 or self.state == -1: 
+            self.window.blit(self.lstImageDown[self.indexImage], self.loc)
+            if pygame.time.get_ticks() - self._startTime >= self.fps and self.fps != 0:
+                self._startTime = pygame.time.get_ticks()
+                self.indexImage = (self.indexImage + 1) % len(self.lstImageDown)
+        else:
+            self.window.blit(self.lstImageDisable[self.indexImage], self.loc)
+            if pygame.time.get_ticks() - self._startTime >= self.fps and self.fps != 0:
+                self._startTime = pygame.time.get_ticks()
+                self.indexImage = (self.indexImage + 1) % len(self.lstImageDisable)
+
+class CustomText():
+    def __init__(self, window, loc, text, font_path, font_size, color=(0, 0, 0)):
+        self.window = window
+        self.loc = loc
+        self.text = text
+        self.color = color
+        try: 
+            self.font = pygame.font.Font(font_path, font_size)
+        except:
+            pass
+
+    def draw(self):
+        text_window = self.font.render(self.text, True, self.color)
+        self.window.blit(text_window, self.loc)
+
+    def setText(self, newText):
+        self.text = newText
+
+    def setLoc(self, newLoc):
+        self.loc = newLoc
+
+class Warning():
+   def __init__(self, window, loc, text, duration=5000):
+        self.window = window
+        self.loc = loc
+        self.duration = duration
+        self.content = CustomText(window, loc, text, resource_path("fonts/PressStart2P-Regular.ttf"), font_size=50, color=(255, 0, 0))
+        self.background = AnimatedImage(window, (0, 360), [resource_path("assets/images/warning/background.png")])
+        self._startTime = pygame.time.get_ticks()
+
+   def draw(self):
+        if pygame.time.get_ticks() - self._startTime < self.duration:
+            self.background.draw()
+            self.content.draw()
+            return True
+        return False
+           
+class InputData():
+    def __init__(self, window, loc, text=None, locText=None):
+        self.window = window
+        self.loc = loc
+        self.text = CustomText(window, locText, text, resource_path("fonts/PressStart2P-Regular.ttf"), font_size=30)
+        self.background = AnimatedImage(self.window, loc, [resource_path("assets/images/inputdata/background.png")])
+        self.enterBtn = AnimatedButton(self.window, (self.loc[0] + 500 - 180, self.loc[1] + 230), [resource_path("assets/images/inputdata/enterBtn_u.png")], [resource_path("assets/images/inputdata/enterBtn_d.png")])
+        self.backBtn = AnimatedButton(self.window, (self.loc[0] + 30, self.loc[1] + 230), [resource_path("assets/images/inputdata/backBtn_u.png")], [resource_path("assets/images/inputdata/backBtn_d.png")])
+        self.input = pygwidgets.InputText(self.window, (self.loc[0] + 100, self.loc[1] + 130), fontSize=40, width=300)
+        self.warning = None
+
+    def draw(self):
+        self.background.draw()
+        self.input.draw()
+        self.enterBtn.draw()
+        self.backBtn.draw()
+        self.text.draw()
+        if self.warning is not None:
+            self.warning.draw()
+
+    def isValid(self, value):
+        count = 0
+        for char in value:
+            if char == '.':
+                count += 1
+                continue
+            if not char.isdigit():
+                return False
+        if count == 3:
+            return True
+        else:
+            return False
+
+    def handleEvent(self, event):
+        self.input.handleEvent(event)
+        if self.backBtn.handleEvent(event):
+            return (-1, "")
+        if self.enterBtn.handleEvent(event):
+            data = self.input.getValue()
+            if self.isValid(data): return (1, data)
+            else:
+                self.warning = CustomText(self.window, (self.loc[0] + 115, self.loc[1] + 175), "Ip is invalid", resource_path("fonts/PressStart2P-Regular.ttf"), font_size=20, color=(255, 0, 0))
+        return (0, "")
+

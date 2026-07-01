@@ -1,7 +1,9 @@
 import pygame
 from pygame.locals import *
-from constants import *
 import sys
+import os
+sys.path.append(os.path.join(os.path.dirname(__file__), 'src'))
+from constants import *
 from player import *
 from network import *
 from mySignal import *
